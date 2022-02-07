@@ -393,7 +393,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 InitializeAllServices();
             }
-            else
+            else if(!ActiveProfile.InitialiseOnPlay)
             {
                 UnityEditor.EditorApplication.delayCall += InitializeAllServices;
             }
