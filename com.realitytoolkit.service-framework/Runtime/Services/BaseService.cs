@@ -27,6 +27,8 @@ namespace RealityToolkit.ServiceFramework.Services
 
         /// <inheritdoc />
         public virtual void Initialize() { }
+        
+        public virtual void Start() {}
 
         /// <inheritdoc />
         public virtual void Reset() { }

@@ -383,9 +383,9 @@ namespace RealityToolkit.ServiceFramework.Services
             var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
             activeServices.Clear();
 
-            foreach (var system in orderedCoreSystems)
+            foreach (var service in orderedCoreSystems)
             {
-                TryRegisterService(system.Key, system.Value);
+                TryRegisterService(service.Key, service.Value);
             }
 
 #if UNITY_EDITOR
@@ -448,6 +448,14 @@ namespace RealityToolkit.ServiceFramework.Services
             if (Application.isPlaying)
             {
                 EnableAllServices();
+            }
+        }
+
+        private void Start()
+        {
+            if (Application.isPlaying)
+            {
+                StartAllServices();
             }
         }
 
@@ -926,12 +934,31 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Initialize all systems
-            foreach (var system in activeServices)
+            // Initialize all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Initialize();
+                    service.Value.Initialize();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        private void StartAllServices()
+        {
+            // If the Service Manager is not configured, stop.
+            if (activeProfile == null) { return; }
+
+            // Start all service
+            foreach (var service in activeServices)
+            {
+                try
+                {
+                    service.Value.Start();
                 }
                 catch (Exception e)
                 {
@@ -945,12 +972,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Reset all systems
-            foreach (var system in activeServices)
+            // Reset all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Reset();
+                    service.Value.Reset();
                 }
                 catch (Exception e)
                 {
@@ -964,12 +991,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Enable all systems
-            foreach (var system in activeServices)
+            // Enable all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Enable();
+                    service.Value.Enable();
                 }
                 catch (Exception e)
                 {
@@ -983,12 +1010,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Update all systems
-            foreach (var system in activeServices)
+            // Update all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Update();
+                    service.Value.Update();
                 }
                 catch (Exception e)
                 {
@@ -1002,12 +1029,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Update all systems
-            foreach (var system in activeServices)
+            // Late update all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.LateUpdate();
+                    service.Value.LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1021,12 +1048,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Update all systems
-            foreach (var system in activeServices)
+            // Fix update all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.FixedUpdate();
+                    service.Value.FixedUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1040,12 +1067,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Disable all systems
-            foreach (var system in activeServices)
+            // Disable all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Disable();
+                    service.Value.Disable();
                 }
                 catch (Exception e)
                 {
@@ -1059,12 +1086,12 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            // Destroy all systems
-            foreach (var system in activeServices)
+            // Destroy all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Destroy();
+                    service.Value.Destroy();
                 }
                 catch (Exception e)
                 {
@@ -1072,12 +1099,12 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
             }
 
-            // Dispose all systems
-            foreach (var system in activeServices)
+            // Dispose all service
+            foreach (var service in activeServices)
             {
                 try
                 {
-                    system.Value.Dispose();
+                    service.Value.Dispose();
                 }
                 catch (Exception e)
                 {

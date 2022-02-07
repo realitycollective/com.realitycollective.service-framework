@@ -27,6 +27,12 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         void Initialize();
 
         /// <summary>
+        /// The start function is used to for running on the first frame.
+        /// This method is called once all services have been registered in the ServiceManager and the application is in play mode.
+        /// </summary>
+        void Start();
+
+        /// <summary>
         /// Optional Reset function to perform that will Reset the service, for example, whenever there is a profile change.
         /// </summary>
         void Reset();
