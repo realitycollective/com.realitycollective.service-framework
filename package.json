@@ -1,27 +1,30 @@
 {
     "name": "com.realitytoolkit.service-framework",
     "displayName": "RealityToolkit.Service-Framework",
-    "description": "The Service Framework component for the Reality Toolkit.",
+    "description": "The Service Framework component for the Reality Toolkit by the Reality Collective.",
     "keywords": [
-    "vr",
-    "ar",
-    "xr",
-    "mixed",
-    "reality"
+      "vr",
+      "ar",
+      "xr",
+      "mixed",
+      "reality",
+      "immersive",
+      "unity"
     ],
-    "version": "0.1.0-preview.1",
-    "unity": "2020.3",
+    "version": "1.0.0-preview.1",
+    "unity": "2020.2",  
+    "homepage": "https://github.com/realitycollective",
+    "bugs": {
+      "url": "https://github.com/realitycollective/realitytoolkit.dev/issues"
+    },
     "license": "MIT",
     "repository": {
-    "type": "git",
-    "url": "git+https://github.com/realitycollective/com.realitytoolkit.service-framework.git"
+      "type": "git",
+      "url": "https://github.com/realitycollective/com.realitytoolkit.service-framework.git"
     },
-    "author": "Reality Collective (https://github.com/realitycollective)",
-    "dependencies": {},
-    "profiles": [
-    {
-    "displayName": "Default Profiles",
-    "path": "Profiles~/"
+    "author": {
+      "name": "Reality Collective",
+      "email": "realitycollectivedev@gmail.com",
+      "url": "https://github.com/realitycollective"
     }
-    ]
-    }
+  }

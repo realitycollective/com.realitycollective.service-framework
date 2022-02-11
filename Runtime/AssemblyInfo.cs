@@ -5,7 +5,7 @@
 
 using System.Reflection;
 
-[assembly: AssemblyVersion("0.1.0")]
+[assembly: AssemblyVersion("1.0.0")]
 [assembly: AssemblyTitle("com.realitytoolkit.service-framework")]
-[assembly: AssemblyCompany("RealityCollective")]
-[assembly: AssemblyCopyright("Copyright (c) RealityCollective. All rights reserved.")]
+[assembly: AssemblyCompany("Reality Collective")]
+[assembly: AssemblyCopyright("Copyright (c) Reality Collective. All rights reserved.")]
