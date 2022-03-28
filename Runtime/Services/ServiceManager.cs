@@ -357,7 +357,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
 #endif
                 serviceConfigurations = ActiveProfile.ServiceConfigurations;
-                serviceProviderConfigurations = ActiveProfile.ServiceProvidersProfile.ServiceConfigurations;
+                serviceProviderConfigurations = ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations;
             }
             
             Debug.Assert(ActiveServices.Count == 0);
