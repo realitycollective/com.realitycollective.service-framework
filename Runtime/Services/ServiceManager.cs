@@ -40,6 +40,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
+        public static bool InitialiseOnPlay = false;
         /// <summary>
         /// The active profile of the Service Manager which controls which services are active and their initial settings.
         /// *Note a profile is used on project initialization or replacement, changes to properties while it is running has no effect.
@@ -113,7 +114,6 @@ namespace RealityToolkit.ServiceFramework.Services
                 DestroyAllServices();
             }
 
-            EnsureServiceManagerRequirements();
             InitializeServiceLocator();
 
             isResetting = false;
@@ -218,6 +218,11 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private static readonly object InitializedLock = new object();
 
+        public void InitializeServiceManager(IServiceConfiguration<IService>[] serviceConfigurations = null, IServiceConfiguration<IService>[] serviceProviderConfigurations = null)
+        {
+            InitializeServiceLocator(serviceConfigurations,serviceProviderConfigurations);
+        }
+
         private void InitializeInstance()
         {
             lock (InitializedLock)
@@ -278,9 +283,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
                 }
 #endif // UNITY_EDITOR
-
-                EnsureServiceManagerRequirements();
-
+                
                 if (HasActiveProfile)
                 {
                     InitializeServiceLocator();
@@ -328,7 +331,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
         /// </summary>
-        private void InitializeServiceLocator()
+        private void InitializeServiceLocator(IServiceConfiguration<IService>[] serviceConfigurations = null, IServiceConfiguration<IService>[] serviceProviderConfigurations = null)
         {
             if (isInitializing)
             {
@@ -337,47 +340,53 @@ namespace RealityToolkit.ServiceFramework.Services
             }
 
             isInitializing = true;
-
-            // If the Service Manager is not configured, stop.
-            if (ActiveProfile == null)
+            if (serviceConfigurations == null && serviceProviderConfigurations == null)
             {
-                Debug.LogError($"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
-                isInitializing = false;
-                return;
-            }
+                // If the Service Manager is not configured, stop.
+                if (ActiveProfile == null)
+                {
+                    Debug.LogError($"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
+                    isInitializing = false;
+                    return;
+                }
 
 #if UNITY_EDITOR
-            if (ActiveServices.Count > 0)
-            {
-                activeServices.Clear();
-            }
+                if (ActiveServices.Count > 0)
+                {
+                    activeServices.Clear();
+                }
 #endif
-
+                serviceConfigurations = ActiveProfile.ServiceConfigurations;
+                serviceProviderConfigurations = ActiveProfile.ServiceProvidersProfile.ServiceConfigurations;
+            }
+            
             Debug.Assert(ActiveServices.Count == 0);
 
             ClearSystemCache();
-
-            foreach (var configuration in ActiveProfile.ServiceConfigurations)
+            if (serviceConfigurations != null)
             {
-                if (configuration.Enabled)
+                foreach (var configuration in serviceConfigurations)
                 {
-                    if (TryCreateAndRegisterService(configuration, out var service) && service != null)
+                    if (configuration.Enabled)
                     {
-                        if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile)
+                        if (TryCreateAndRegisterService(configuration, out var service) && service != null)
                         {
-                            TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, service);
+                            if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile)
+                            {
+                                TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, service);
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogError($"Failed to start {configuration.Name}!");
                         }
                     }
-                    else
-                    {
-                        Debug.LogError($"Failed to start {configuration.Name}!");
-                    }
-                }
+                }  
             }
 
-            if (!ActiveProfile.ServiceProvidersProfile.IsNull())
+            if (serviceProviderConfigurations != null)
             {
-                TryRegisterServiceConfigurations(ActiveProfile.ServiceProvidersProfile.ServiceConfigurations);
+                TryRegisterServiceConfigurations(serviceProviderConfigurations);
             }
 
             var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
@@ -403,11 +412,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             isInitializing = false;
         }
-
-        private static void EnsureServiceManagerRequirements()
-        {
-
-        }
+        
         #endregion
 
         #region MonoBehaviour Implementation
@@ -437,7 +442,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 gameObject.Destroy();
                 Debug.LogWarning($"Trying to instantiate a second instance of the {nameof(ServiceManager)}. Additional Instance was destroyed");
             }
-            else if (!IsInitialized)
+            else if (!IsInitialized && !InitialiseOnPlay)
             {
                 InitializeInstance();
             }
@@ -695,7 +700,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">The interface type for the <see cref="IService"/> to be registered.</param>
         /// <param name="serviceInstance">Instance of the <see cref="IService"/> to register.</param>
         /// <returns>True if registration is successful, false otherwise.</returns>
-        private static bool TryRegisterService(Type interfaceType, IService serviceInstance)
+        public static bool TryRegisterService(Type interfaceType, IService serviceInstance)
         {
             if (serviceInstance == null)
             {
@@ -1062,7 +1067,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void DisableAllServices()
+        public void DisableAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -1081,7 +1086,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void DestroyAllServices()
+        public void DestroyAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -1199,7 +1204,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        private static IService GetService(Type interfaceType, string serviceName, bool showLogs = true)
+        public static IService GetService(Type interfaceType, string serviceName, bool showLogs = true)
         {
             if (!GetService(interfaceType, serviceName, out var serviceInstance) && showLogs)
             {

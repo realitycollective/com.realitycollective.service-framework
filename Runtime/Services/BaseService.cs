@@ -20,7 +20,7 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void UnRegisterDataProvider(IServiceDataProvider dataProvider) { }
 
         /// <inheritdoc />
-        public string Name { get; protected set; }
+        public virtual string Name { get; protected set; }
 
         /// <inheritdoc />
         public virtual uint Priority { get; protected set; }
