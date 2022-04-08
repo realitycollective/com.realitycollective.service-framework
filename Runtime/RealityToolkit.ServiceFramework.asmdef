@@ -1,9 +1,7 @@
 {
-    "name": "RealityToolkit.ServiceFramework.Editor",
+    "name": "RealityToolkit.ServiceFramework",
     "rootNamespace": "",
-    "references": [
-        "GUID:13703f41b24bb904cb2305abe6317e3d"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
