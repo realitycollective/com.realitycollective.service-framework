@@ -764,7 +764,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <summary>
         /// Remove all services from the Service Manager active service registry for a given type
         /// </summary>
-        public static bool TryUnregisterServices<T>() where T : IService
+        public static bool TryUnregisterServicesOfType<T>() where T : IService
         {
             return TryUnregisterService<T>(typeof(T), string.Empty);
         }

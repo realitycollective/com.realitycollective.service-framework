@@ -132,9 +132,9 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.IsTrue(activeSystemCount + 2 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
 
             // Unregister
-            var successService = ServiceManager.TryUnregisterServices<ITestService>();
+            var successService = ServiceManager.TryUnregisterServicesOfType<ITestService>();
 
-            var successDataProvider = ServiceManager.TryUnregisterServices<ITestDataProvider1>();
+            var successDataProvider = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider1>();
             LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
 
             // Validate non-existent service
@@ -213,11 +213,11 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.IsNotNull(extensionService2, "Extension service 2 not found");
 
             // Unregister
-            var successService = ServiceManager.TryUnregisterServices<ITestService>();
-            var successDataProvider1 = ServiceManager.TryUnregisterServices<ITestDataProvider1>();
+            var successService = ServiceManager.TryUnregisterServicesOfType<ITestService>();
+            var successDataProvider1 = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider1>();
             LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
 
-            var successDataProvider2 = ServiceManager.TryUnregisterServices<ITestDataProvider2>();
+            var successDataProvider2 = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider2>();
             LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider2)} service.");
 
 
