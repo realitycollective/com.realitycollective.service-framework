@@ -16,16 +16,6 @@ namespace RealityToolkit.ServiceFramework.Tests
 {
     public class TestServiceManager
     {
-        [Test]
-        public void TestCreatingTestData()
-        {
-            IService testService1 = new TestService1();
-            //ITestDataProvider1 dataProvider = new TestDataProvider1(testService1);
-            //serviceInstance.Name == serviceName (instance name = interfacetype.name)
-            Assert.IsTrue(testService1.Name == nameof(ITestService), $"Name was {testService1.Name} but was expected to be {nameof(ITestService)}");
-            //Assert.IsTrue(dataProvider.Name == nameof(ITestDataProvider1), $"Name was {dataProvider.Name} but was expected to be {nameof(ITestDataProvider1)}");
-        }
-
         #region Service Locater
 
         [Test]
@@ -43,10 +33,10 @@ namespace RealityToolkit.ServiceFramework.Tests
         {
             // Setup
             TestUtilities.CleanupScene();
-            Assert.IsFalse(ServiceManager.IsInitialized, "Service Manager initialised when it should not be");
+            Assert.IsFalse(ServiceManager.IsInitialized, "Service Manager initialized when it should not be");
             ServiceManager.ConfirmInitialized();
             Assert.IsNotNull(ServiceManager.Instance, "Service Manager instance not found");
-            Assert.IsTrue(ServiceManager.IsInitialized, "Service Manager was not initialised");
+            Assert.IsTrue(ServiceManager.IsInitialized, "Service Manager was not initialized");
 
             ServiceManager.Instance.ActiveProfile = null;
 
@@ -109,16 +99,15 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Register
             var testService2 = ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            LogAssert.Expect(LogType.Error, $"There's already a {nameof(ITestService)}.{nameof(ITestService)} registered!");
-           
+            LogAssert.Expect(LogType.Error, "There is already a [ITestService.Test Service 1] registered!");
+
             // Tests
             Assert.IsNotNull(testService1, "Test service was not found");
             Assert.IsTrue(activeServiceCount + 1 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
-
         }
         
         [Test]
-        public void Test_04_02_01_UnregisterServiceAndServiceDataProvider()
+        public void Test_04_03_UnregisterServiceAndServiceDataProvider()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -163,7 +152,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
         
         [Test]
-        public void Test_04_03_RegisterServiceDataProviders()
+        public void Test_04_04_RegisterServiceDataProviders()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -183,12 +172,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             var dataProviders = ServiceManager.GetServices<IServiceDataProvider>();
 
             // Tests
-            Assert.IsNotEmpty(dataProviders, "Data Providers were not reigstered");
+            Assert.IsNotEmpty(dataProviders, "Data Providers were not registered");
             Assert.IsTrue(activeSystemCount + 3 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
         
         [Test]
-        public void Test_04_04_UnregisterServiceDataProviders()
+        public void Test_04_05_UnregisterServiceDataProviders()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -254,7 +243,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
         
         [Test]
-        public void Test_04_05_ServiceDataProviderDoesNotExist()
+        public void Test_04_06_ServiceDataProviderDoesNotExist()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 

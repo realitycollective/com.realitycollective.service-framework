@@ -716,11 +716,9 @@ namespace RealityToolkit.ServiceFramework.Services
                 return false;
             }
 
-            if (!CanGetService(interfaceType, serviceInstance.Name)) { return false; }
-
-            if (GetService(interfaceType, serviceInstance.Name, out var preExistingService))
+            if (TryGetService(interfaceType, serviceInstance.Name, out var preExistingService))
             {
-                Debug.LogError($"There's already a {interfaceType.Name}.{preExistingService.Name} registered!");
+                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
                 return false;
             }
 
@@ -731,7 +729,7 @@ namespace RealityToolkit.ServiceFramework.Services
             catch (ArgumentException)
             {
                 preExistingService = GetService(interfaceType, false);
-                Debug.LogError($"There's already a {interfaceType.Name}.{preExistingService.Name} registered!");
+                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
                 return false;
             }
 
@@ -773,15 +771,6 @@ namespace RealityToolkit.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Removes a specific service with the provided name.
-        /// </summary>
-        /// <param name="serviceName">The name of the service to be removed. (Only for runtime services) </param>
-        public static bool TryUnregisterService<T>(string serviceName) where T : IService
-        {
-            return TryUnregisterService<T>(typeof(T), serviceName);
-        }
-
-        /// <summary>
         /// Remove services from the Service Manager active service registry for a given type and name
         /// </summary>
         /// <param name="interfaceType">The interface type for the system to be removed.  E.G. InputSystem, BoundarySystem</param>
@@ -808,7 +797,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 return result;
             }
 
-            if (GetServiceByName(interfaceType, serviceName, out var serviceInstance))
+            if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance))
             {
                 var activeDataProviders = GetServices<IServiceDataProvider>();
 
@@ -918,7 +907,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 foreach (var service in activeServices)
                 {
-                    if (CheckServiceMatch(interfaceType, serviceName, service.Key, service.Value))
+                    if (CheckServiceMatch(interfaceType, service.Key, service.Value))
                     {
                         services.Add((T)service.Value);
                     }
@@ -1200,7 +1189,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public static IService GetService(Type interfaceType, string serviceName, bool showLogs = true)
         {
-            if (!GetService(interfaceType, serviceName, out var serviceInstance) && showLogs)
+            if (!TryGetService(interfaceType, serviceName, out var serviceInstance) && showLogs)
             {
                 Debug.LogError($"Unable to find {(string.IsNullOrWhiteSpace(serviceName) ? interfaceType.Name : serviceName)} service.");
             }
@@ -1214,7 +1203,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">Interface type of the service being requested.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool GetService(Type interfaceType, string serviceName, out IService serviceInstance)
+        private static bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
         {
             serviceInstance = null;
 
@@ -1224,7 +1213,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 serviceInstance = service;
 
-                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+                if (CheckServiceMatch(interfaceType, interfaceType, service))
                 {
                     return true;
                 }
@@ -1241,7 +1230,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">Interface type of the service being requested.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool GetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
+        private static bool TryGetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
         {
             serviceInstance = null;
 
@@ -1266,16 +1255,12 @@ namespace RealityToolkit.ServiceFramework.Services
         /// Check if the interface type and name matches the registered interface type and service instance found.
         /// </summary>
         /// <param name="interfaceType">The interface type of the service to check.</param>
-        /// <param name="serviceName">The name of the service to check.</param>
         /// <param name="registeredInterfaceType">The registered interface type.</param>
         /// <param name="serviceInstance">The instance of the registered service.</param>
         /// <returns>True, if the registered service contains the interface type and name.</returns>
-        private static bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
+        private static bool CheckServiceMatch(Type interfaceType, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || serviceInstance.Name == serviceName;
-            bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
-            return isNameValid && isInstanceValid;
-            //return isInstanceValid;
+            return interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
         }
 
         private static bool CanGetService(Type interfaceType, string serviceName)
