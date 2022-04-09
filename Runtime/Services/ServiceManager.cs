@@ -218,11 +218,6 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private static readonly object InitializedLock = new object();
 
-        public void InitializeServiceManager(IServiceConfiguration<IService>[] serviceConfigurations = null, IServiceConfiguration<IService>[] serviceProviderConfigurations = null)
-        {
-            InitializeServiceLocator(serviceConfigurations,serviceProviderConfigurations);
-        }
-
         private void InitializeInstance()
         {
             lock (InitializedLock)
@@ -328,10 +323,15 @@ namespace RealityToolkit.ServiceFramework.Services
         }
 
         /// <summary>
+        /// Initialize the Service Framework configured services.
+        /// </summary>
+        public void InitializeServiceManager() => InitializeServiceLocator();
+
+        /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
         /// </summary>
-        private void InitializeServiceLocator(IServiceConfiguration<IService>[] serviceConfigurations = null, IServiceConfiguration<IService>[] serviceProviderConfigurations = null)
+        private void InitializeServiceLocator()
         {
             if (isInitializing)
             {
@@ -340,53 +340,47 @@ namespace RealityToolkit.ServiceFramework.Services
             }
 
             isInitializing = true;
-            if (serviceConfigurations == null && serviceProviderConfigurations == null)
+
+            // If the Service Manager is not configured, stop.
+            if (ActiveProfile == null)
             {
-                // If the Service Manager is not configured, stop.
-                if (ActiveProfile == null)
-                {
-                    Debug.LogError($"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
-                    isInitializing = false;
-                    return;
-                }
+                Debug.LogError($"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
+                isInitializing = false;
+                return;
+            }
 
 #if UNITY_EDITOR
-                if (ActiveServices.Count > 0)
-                {
-                    activeServices.Clear();
-                }
-#endif
-                serviceConfigurations = ActiveProfile.ServiceConfigurations;
-                serviceProviderConfigurations = ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations;
+            if (ActiveServices.Count > 0)
+            {
+                activeServices.Clear();
             }
+#endif
             
             Debug.Assert(ActiveServices.Count == 0);
 
             ClearSystemCache();
-            if (serviceConfigurations != null)
+
+            foreach (var configuration in ActiveProfile.ServiceConfigurations)
             {
-                foreach (var configuration in serviceConfigurations)
+                if (configuration.Enabled)
                 {
-                    if (configuration.Enabled)
+                    if (TryCreateAndRegisterService(configuration, out var service) && service != null)
                     {
-                        if (TryCreateAndRegisterService(configuration, out var service) && service != null)
+                        if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile)
                         {
-                            if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile)
-                            {
-                                TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, service);
-                            }
-                        }
-                        else
-                        {
-                            Debug.LogError($"Failed to start {configuration.Name}!");
+                            TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, service);
                         }
                     }
-                }  
-            }
+                    else
+                    {
+                        Debug.LogError($"Failed to start {configuration.Name}!");
+                    }
+                }
+            }  
 
-            if (serviceProviderConfigurations != null)
+            if (ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations != null)
             {
-                TryRegisterServiceConfigurations(serviceProviderConfigurations);
+                TryRegisterServiceConfigurations(ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations);
             }
 
             var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
