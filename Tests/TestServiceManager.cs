@@ -16,8 +16,18 @@ namespace RealityToolkit.ServiceFramework.Tests
 {
     public class TestServiceManager
     {
-        #region Service Locator
-        
+        [Test]
+        public void TestCreatingTestData()
+        {
+            IService testService1 = new TestService1();
+            //ITestDataProvider1 dataProvider = new TestDataProvider1(testService1);
+            //serviceInstance.Name == serviceName (instance name = interfacetype.name)
+            Assert.IsTrue(testService1.Name == nameof(ITestService), $"Name was {testService1.Name} but was expected to be {nameof(ITestService)}");
+            //Assert.IsTrue(dataProvider.Name == nameof(ITestDataProvider1), $"Name was {dataProvider.Name} but was expected to be {nameof(ITestDataProvider1)}");
+        }
+
+        #region Service Locater
+
         [Test]
         public void Test_01_InitializeServiceManager()
         {

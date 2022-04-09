@@ -8,7 +8,7 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
 {
     internal class TestDataProvider1 : BaseServiceDataProvider, ITestDataProvider1
     {
-        public TestDataProvider1(ITestService parentService, string name = "TestDataProvider1", uint priority = 1, BaseProfile profile = null)
+        public TestDataProvider1(ITestService parentService, string name = "Test Data Provider 1", uint priority = 1, BaseProfile profile = null)
             : base(name, priority, profile, parentService)
         { }
 

@@ -7,10 +7,9 @@ namespace RealityToolkit.ServiceFramework.Tests.Services
 {
     public class TestService1 : BaseServiceWithConstructor, ITestService
     {
-        public TestService1(string name = "ITestService", uint priority = 0)
+        public TestService1(string name = "Test Service 1", uint priority = 0)
             : base(name, priority)
-        {
-        }
+        { }
 
         /// <inheritdoc />
         public bool IsEnabled { get; private set; }
