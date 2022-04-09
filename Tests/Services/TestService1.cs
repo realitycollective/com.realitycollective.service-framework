@@ -7,7 +7,9 @@ namespace RealityToolkit.ServiceFramework.Tests.Services
 {
     public class TestService1 : BaseServiceWithConstructor, ITestService
     {
-        public TestService1(string name = "Test Service 1", uint priority = 0)
+        public const string TestName = "Test Service 1";
+
+        public TestService1(string name = TestName, uint priority = 0)
             : base(name, priority)
         { }
 

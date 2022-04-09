@@ -99,7 +99,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Register
             var testService2 = ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            LogAssert.Expect(LogType.Error, "There is already a [ITestService.Test Service 1] registered!");
+            LogAssert.Expect(LogType.Error, $"There is already a [{nameof(ITestService)}.{TestService1.TestName}] registered!");
 
             // Tests
             Assert.IsNotNull(testService1, "Test service was not found");
@@ -317,12 +317,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
 
             // Retrieve
-            var resultTrue = ServiceManager.TryGetService<ITestDataProvider1>("TestDataProvider1", out var extensionService1);
-            var resultFalse = ServiceManager.TryGetService<ITestDataProvider2>("TestDataProvider2", out var extensionService2);
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(TestDataProvider2)} service.");
-            
+            var resultTrue = ServiceManager.TryGetService<ITestDataProvider1>(TestDataProvider1.TestName, out var extensionService1);
+            var resultFalse = ServiceManager.TryGetService<ITestDataProvider2>(TestDataProvider2.TestName, out var extensionService2);
+            LogAssert.Expect(LogType.Error, $"Unable to find {TestDataProvider2.TestName} service.");
+
             // Tests
-            Assert.IsTrue(initialSystemCount + expectedServicesToRegister == ServiceManager.ActiveServices.Count, $"Active systems count missmatch, expected {initialSystemCount + expectedServicesToRegister} but found {ServiceManager.ActiveServices.Count}" );
+            Assert.IsTrue(initialSystemCount + expectedServicesToRegister == ServiceManager.ActiveServices.Count, $"Active systems count mismatch, expected {initialSystemCount + expectedServicesToRegister} but found {ServiceManager.ActiveServices.Count}" );
             Assert.IsTrue(resultTrue, "Test Data Provider 1 found");
             Assert.IsFalse(resultFalse, "Test Data Provider 2 not found");
             Assert.IsNotNull(extensionService1, "Test Data Provider 1 service found");
@@ -344,11 +344,11 @@ namespace RealityToolkit.ServiceFramework.Tests
             ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
 
             // Retrieve
-            var resultTrue1 = ServiceManager.TryGetService<ITestDataProvider1>("TestDataProvider1", out var extensionService1);
-            var resultTrue2 = ServiceManager.TryGetService<ITestDataProvider2>("TestDataProvider2", out var extensionService2);
+            var resultTrue1 = ServiceManager.TryGetService<ITestDataProvider1>(TestDataProvider1.TestName, out var extensionService1);
+            var resultTrue2 = ServiceManager.TryGetService<ITestDataProvider2>(TestDataProvider2.TestName, out var extensionService2);
 
             // Tests
-            Assert.IsTrue(initialSystemCount + expectedServicesToRegister == ServiceManager.ActiveServices.Count, $"Active systems count missmatch, expected {initialSystemCount + expectedServicesToRegister} but found {ServiceManager.ActiveServices.Count}" );
+            Assert.IsTrue(initialSystemCount + expectedServicesToRegister == ServiceManager.ActiveServices.Count, $"Active systems count mismatch, expected {initialSystemCount + expectedServicesToRegister} but found {ServiceManager.ActiveServices.Count}" );
             Assert.IsTrue(resultTrue1, "Test Data Provider 1 found");
             Assert.IsTrue(resultTrue2, "Test Data Provider 2 found");
             Assert.IsNotNull(extensionService1, "Test Data Provider 1 service found");
