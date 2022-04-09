@@ -787,7 +787,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 bool result = true;
 
-                if (!TryGetService<T>(interfaceType.Name, out var activeService))
+                if (!TryGetService<T>(out var activeService))
                 {
                     Debug.LogWarning($"No {nameof(IService)} registered that implement {typeof(T).Name}.");
                     return false;
@@ -907,7 +907,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 foreach (var service in activeServices)
                 {
-                    if (CheckServiceMatch(interfaceType, service.Key, service.Value))
+                    if (CheckServiceMatch(interfaceType, serviceName, service.Key, service.Value))
                     {
                         services.Add((T)service.Value);
                     }
@@ -1213,7 +1213,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 serviceInstance = service;
 
-                if (CheckServiceMatch(interfaceType, interfaceType, service))
+                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
                 {
                     return true;
                 }
@@ -1258,9 +1258,11 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="registeredInterfaceType">The registered interface type.</param>
         /// <param name="serviceInstance">The instance of the registered service.</param>
         /// <returns>True, if the registered service contains the interface type and name.</returns>
-        private static bool CheckServiceMatch(Type interfaceType, Type registeredInterfaceType, IService serviceInstance)
+        private static bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            return interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || serviceInstance.Name == serviceName;
+            bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
+            return isNameValid && isInstanceValid;
         }
 
         private static bool CanGetService(Type interfaceType, string serviceName)

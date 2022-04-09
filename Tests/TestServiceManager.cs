@@ -145,7 +145,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Tests
             Assert.IsTrue(successService, "Service was not unregistered successfully");
-            Assert.IsFalse(successDataProvider,"Data provider was not unregisered successfully");
+            Assert.IsFalse(successDataProvider,"Data provider was not unregistered successfully");
             Assert.IsFalse(isServiceRegistered, "Service was found when it was meant to be unregistered");
             Assert.IsFalse(isDataProviderRegistered, "Data Provider was found when it was meant to be unregistered");
             Assert.IsTrue(activeSystemCount == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
