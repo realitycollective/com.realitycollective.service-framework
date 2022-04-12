@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Providers;
 using RealityToolkit.ServiceFramework.Tests.Interfaces;
 
@@ -10,7 +11,7 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
     {
         public const string TestName = "Test Data Provider 2";
 
-        public TestDataProvider2(ITestService parentService, string name = TestName, uint priority = 2, BaseProfile profile = null)
+        public TestDataProvider2(IService parentService, string name = TestName, uint priority = 2, BaseProfile profile = null)
             : base(name, priority, profile, parentService)
         { }
 

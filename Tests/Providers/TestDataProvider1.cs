@@ -6,6 +6,7 @@ using RealityToolkit.ServiceFramework.Tests.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Providers
 {
+    [System.Runtime.InteropServices.Guid("407D379E-3351-4B2D-9C88-1B54C42B5554")]
     internal class TestDataProvider1 : BaseServiceDataProvider, ITestDataProvider1
     {
         public const string TestName = "Test Data Provider 1";

@@ -11,6 +11,11 @@ namespace RealityToolkit.ServiceFramework.Interfaces
     public interface IService : IDisposable
     {
         /// <summary>
+        /// Cached <see cref="Guid"/> Reference for the Service / Data Provider
+        /// </summary>
+        Guid ServiceGuid { get; }
+
+        /// <summary>
         /// The service display name.
         /// </summary>
         string Name { get; }
@@ -79,10 +84,22 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         /// <param name="isPaused"></param>
         void OnApplicationPause(bool isPaused);
 
-        IReadOnlyDictionary<Guid, IServiceDataProvider> DataProviders { get; }
+        /// <summary>
+        /// List of Data Providers to be managed by a Service Implementation.
+        /// Not to be used for Data Providers themselves.
+        /// </summary>
+        IReadOnlyCollection<IServiceDataProvider> DataProviders { get; }
 
-        Guid RegisterDataProvider(IServiceDataProvider serviceDataProvider);
+        /// <summary>
+        /// Register a Data Provider with its parent service
+        /// </summary>
+        /// <param name="serviceDataProvider"></param>
+        void RegisterDataProvider(IServiceDataProvider serviceDataProvider);
 
+        /// <summary>
+        /// UnRegister a Data Provider with its parent service
+        /// </summary>
+        /// <param name="serviceDataProvider"></param>
         void UnRegisterDataProvider(IServiceDataProvider serviceDataProvider);
     }
 }

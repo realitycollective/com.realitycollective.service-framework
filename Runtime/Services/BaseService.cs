@@ -6,15 +6,28 @@ using RealityToolkit.ServiceFramework.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Services
 {
+    /// <summary>
+    /// Base <see cref="IService"/> Implementation.
+    /// </summary>
     public class BaseService : IService
     {
+        private readonly HashSet<IServiceDataProvider> dataProviders = new HashSet<IServiceDataProvider>();
+
+        private Guid guid;
+
         #region IService Implementation
 
         /// <inheritdoc />
-        public virtual IReadOnlyDictionary<Guid, IServiceDataProvider> DataProviders { get; }
+        public Guid ServiceGuid => guid;
 
         /// <inheritdoc />
-        public virtual Guid RegisterDataProvider(IServiceDataProvider dataProvider) { return Guid.Empty; }
+        public virtual IReadOnlyCollection<IServiceDataProvider> DataProviders => dataProviders;
+
+        /// <inheritdoc />
+        public virtual void RegisterDataProvider(IServiceDataProvider dataProvider) 
+        {
+            dataProviders.Add(dataProvider);
+        }
 
         /// <inheritdoc />
         public virtual void UnRegisterDataProvider(IServiceDataProvider dataProvider) { }
@@ -58,6 +71,14 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void OnApplicationPause(bool isPaused) { }
 
         #endregion IService Implementation
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        protected BaseService()
+        {
+            this.guid = GetType().GUID;
+        }
 
         #region IDisposable Implementation
 

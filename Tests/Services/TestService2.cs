@@ -5,12 +5,11 @@ using RealityToolkit.ServiceFramework.Tests.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Services
 {
-    [System.Runtime.InteropServices.Guid("80B2B43B-F18B-4E68-A9AB-505290D31110")]
-    public class TestService1 : BaseServiceWithConstructor, ITestService
+    public class TestService2 : BaseServiceWithConstructor, ITestService2
     {
-        public const string TestName = "Test Service 1";
+        public const string TestName = "Test Service 2";
 
-        public TestService1(string name = TestName, uint priority = 0)
+        public TestService2(string name = TestName, uint priority = 0)
             : base(name, priority)
         { }
 
