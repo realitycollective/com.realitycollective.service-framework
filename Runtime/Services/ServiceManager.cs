@@ -751,7 +751,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
         #endregion Registration
 
-        #region Unregistration
+        #region Unregister
 
         /// <summary>
         /// Remove all services from the Service Manager active service registry for a given type
@@ -852,7 +852,7 @@ namespace RealityToolkit.ServiceFramework.Services
             return false;
         }
 
-        #endregion Unregistration
+        #endregion Unregister
 
         #region Service Management
         /// <summary>
@@ -1107,13 +1107,38 @@ namespace RealityToolkit.ServiceFramework.Services
 
         #region Service Utilities
 
+        private static string[] ignoredNamespaces = { "System.IDisposable", 
+                                                      "RealityToolkit.ServiceFramework.Interfaces.IService",
+                                                      "RealityToolkit.ServiceFramework.Interfaces.IServiceDataProvider"};
+
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
         /// </summary>
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <returns>Returns true, if there is a <see cref="IService"/> registered, otherwise false.</returns>
         public static bool IsServiceRegistered<T>() where T : IService
-            => GetService(typeof(T)) != null;
+        {
+            return activeServices.TryGetValue(typeof(T), out _);
+        }
+
+        /// <summary>
+        /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
+        /// <returns>Returns true, if there is a <see cref="IService"/> registered, otherwise false.</returns>
+        public static bool IsServiceRegistered(object concreteType)
+        {
+            var interfaces = GetInterfacesFromType(concreteType);
+            var interfaceCount = interfaces.Length;
+            for (int i = 0; i < interfaceCount; i++)
+            {
+                if (activeServices.TryGetValue(interfaces[i], out _))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
@@ -1324,6 +1349,21 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             SystemCache.Clear();
             SearchedSystemTypes.Clear();
+        }
+
+        private static Type[] GetInterfacesFromType(object concreteObject)
+        {
+            var interfaces = concreteObject.GetType().GetInterfaces();
+            var interfaceCount = interfaces.Length;
+            List<Type> detectedInterfaces = new List<Type>();
+
+            for (int i = 0; i < interfaceCount; i++)
+            {
+                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
+
+                detectedInterfaces.Add(interfaces[i]);
+            }
+            return detectedInterfaces.ToArray();
         }
         #endregion Service Utilities
 

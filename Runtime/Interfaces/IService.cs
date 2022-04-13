@@ -101,5 +101,11 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         /// </summary>
         /// <param name="serviceDataProvider"></param>
         void UnRegisterDataProvider(IServiceDataProvider serviceDataProvider);
+
+        /// <summary>
+        /// Is this service currently registered with the Service Manager?
+        /// </summary>
+        /// <returns></returns>
+        bool IsServiceRegistered { get; }
     }
 }

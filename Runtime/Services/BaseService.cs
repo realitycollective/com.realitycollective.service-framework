@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using RealityToolkit.ServiceFramework.Interfaces;
+using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Services
 {
@@ -12,6 +13,8 @@ namespace RealityToolkit.ServiceFramework.Services
     public class BaseService : IService
     {
         private readonly HashSet<IServiceDataProvider> dataProviders = new HashSet<IServiceDataProvider>();
+
+        private static bool isDestroying = false;
 
         private Guid guid;
 
@@ -24,13 +27,25 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual IReadOnlyCollection<IServiceDataProvider> DataProviders => dataProviders;
 
         /// <inheritdoc />
-        public virtual void RegisterDataProvider(IServiceDataProvider dataProvider) 
+        public virtual void RegisterDataProvider(IServiceDataProvider dataProvider)
         {
+            if (!dataProvider.ParentService.IsServiceRegistered)
+            {
+                Debug.LogError($"Cannot register {nameof(dataProvider)} as its Parent Service [{dataProvider.ParentService.Name}] is not registered");
+                return;
+            }
             dataProviders.Add(dataProvider);
         }
 
         /// <inheritdoc />
-        public virtual void UnRegisterDataProvider(IServiceDataProvider dataProvider) { }
+        public virtual void UnRegisterDataProvider(IServiceDataProvider dataProvider)
+        {
+            if (!isDestroying && dataProvider.IsServiceRegistered)
+            {
+                ServiceManager.TryUnregisterService(dataProvider);
+            }
+            dataProviders.Remove(dataProvider);
+        }
 
         /// <inheritdoc />
         public virtual string Name { get; protected set; }
@@ -40,8 +55,9 @@ namespace RealityToolkit.ServiceFramework.Services
 
         /// <inheritdoc />
         public virtual void Initialize() { }
-        
-        public virtual void Start() {}
+
+        /// <inheritdoc />
+        public virtual void Start() { }
 
         /// <inheritdoc />
         public virtual void Reset() { }
@@ -62,13 +78,19 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void Disable() { }
 
         /// <inheritdoc />
-        public virtual void Destroy() { }
+        public virtual void Destroy()
+        {
+            isDestroying = true;
+        }
 
         /// <inheritdoc />
         public virtual void OnApplicationFocus(bool isFocused) { }
 
         /// <inheritdoc />
         public virtual void OnApplicationPause(bool isPaused) { }
+
+        /// <inheritdoc />
+        public virtual bool IsServiceRegistered => ServiceManager.IsServiceRegistered(this);
 
         #endregion IService Implementation
 
@@ -78,6 +100,7 @@ namespace RealityToolkit.ServiceFramework.Services
         protected BaseService()
         {
             this.guid = GetType().GUID;
+            isDestroying = false;
         }
 
         #region IDisposable Implementation
@@ -96,6 +119,7 @@ namespace RealityToolkit.ServiceFramework.Services
             disposed = true;
             GC.SuppressFinalize(this);
             OnDispose(false);
+            isDestroying = true;
         }
 
         protected virtual void OnDispose(bool finalizing) { }
