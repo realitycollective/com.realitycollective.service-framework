@@ -140,28 +140,29 @@ namespace RealityToolkit.ServiceFramework.Extensions
             }
 
             var returnType = interfaceType;
-
-            if (!ServiceInterfaceCache.TryGetValue(serviceType, out returnType))
+            if (interfaceType == null)
             {
-                var types = serviceType.GetInterfaces();
-
-                for (int i = 0; i < types.Length; i++)
+                if (!ServiceInterfaceCache.TryGetValue(serviceType, out returnType))
                 {
-                    if (!typeof(IService).IsAssignableFrom(types[i]))
+                    var types = serviceType.GetInterfaces();
+
+                    for (int i = 0; i < types.Length; i++)
                     {
-                        continue;
+                        if (!typeof(IService).IsAssignableFrom(types[i]))
+                        {
+                            continue;
+                        }
+
+                        if (types[i] != typeof(IService) &&
+                            types[i] != typeof(IServiceDataProvider))
+                        {
+                            returnType = types[i];
+                            break;
+                        }
                     }
 
-                    if (types[i] != typeof(IService) &&
-                        types[i] != typeof(IServiceDataProvider)
-                    )
-                    {
-                        returnType = types[i];
-                        break;
-                    }
+                    ServiceInterfaceCache.Add(serviceType, returnType);
                 }
-
-                ServiceInterfaceCache.Add(serviceType, returnType);
             }
 
             return returnType;
