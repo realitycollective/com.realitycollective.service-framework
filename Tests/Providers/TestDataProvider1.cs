@@ -15,17 +15,5 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
         public TestDataProvider1(IService parentService, string name = TestName, uint priority = 1, BaseProfile profile = null)
             : base(name, priority, profile, parentService)
         { }
-
-        public bool IsEnabled { get; private set; }
-
-        public override void Enable()
-        {
-            IsEnabled = true;
-        }
-
-        public override void Disable()
-        {
-            IsEnabled = false;
-        }
     }
 }

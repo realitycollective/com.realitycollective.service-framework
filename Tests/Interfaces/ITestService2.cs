@@ -4,8 +4,5 @@ using RealityToolkit.ServiceFramework.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Interfaces
 {
-    internal interface ITestService2 : IService
-    {
-        bool IsEnabled { get; }
-    }
+    internal interface ITestService2 : IService { }
 }

@@ -26,6 +26,11 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         uint Priority { get; }
 
         /// <summary>
+        /// Base property to denote whether a service is currently active and being updated by the Service Manager
+        /// </summary>
+        bool IsEnabled { get; }
+
+        /// <summary>
         /// The initialize function is used to setup the service once created.
         /// This method is called once all services have been registered in the ServiceManager.
         /// </summary>

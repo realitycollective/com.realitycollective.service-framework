@@ -737,8 +737,11 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    serviceInstance.Initialize();
-                    serviceInstance.Enable();
+                    if (serviceInstance.IsEnabled)
+                    {
+                        serviceInstance.Initialize();
+                        serviceInstance.Enable();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -917,7 +920,7 @@ namespace RealityToolkit.ServiceFramework.Services
             return services;
         }
 
-        private void InitializeAllServices()
+        internal void InitializeAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -927,7 +930,10 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    service.Value.Initialize();
+                    if (service.Value.IsEnabled)
+                    {
+                        service.Value.Initialize();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -936,7 +942,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void StartAllServices()
+        internal void StartAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -946,7 +952,10 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    service.Value.Start();
+                    if (service.Value.IsEnabled)
+                    {
+                        service.Value.Start();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -955,7 +964,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void ResetAllServices()
+        internal void ResetAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -974,7 +983,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void EnableAllServices()
+        internal void EnableAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -993,7 +1002,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void UpdateAllServices()
+        internal void UpdateAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -1003,7 +1012,10 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    service.Value.Update();
+                    if (service.Value.IsEnabled)
+                    {
+                        service.Value.Update();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -1012,7 +1024,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void LateUpdateAllServices()
+        internal void LateUpdateAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -1022,7 +1034,10 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    service.Value.LateUpdate();
+                    if (service.Value.IsEnabled)
+                    {
+                        service.Value.LateUpdate();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -1031,7 +1046,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
         }
 
-        private void FixedUpdateAllServices()
+        internal void FixedUpdateAllServices()
         {
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
@@ -1041,7 +1056,10 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 try
                 {
-                    service.Value.FixedUpdate();
+                    if (service.Value.IsEnabled)
+                    {
+                        service.Value.FixedUpdate();
+                    }
                 }
                 catch (Exception e)
                 {

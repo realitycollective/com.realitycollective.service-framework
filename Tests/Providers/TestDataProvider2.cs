@@ -15,18 +15,15 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
             : base(name, priority, profile, parentService)
         { }
 
-        public bool IsEnabled { get; private set; }
 
         public override void Enable()
         {
             base.Enable();
-            IsEnabled = true;
         }
 
         public override void Disable()
         {
             base.Disable();
-            IsEnabled = false;
         }
     }
 }

@@ -450,12 +450,6 @@ namespace RealityToolkit.ServiceFramework.Tests
 
         #endregion 05 Data Provider Retrieval
 
-        // Test to validate ALL data providers are not destroyed when a service is destroyed
-        // Test to check a services data providers are accurate when a provider is destroyed independently 
-
-        // Test Service Removal
-        // Test Data Provider Removal
-
         #region 06 Service unRegistration
 
         [Test]
@@ -682,237 +676,285 @@ namespace RealityToolkit.ServiceFramework.Tests
 
         #region 08 Disable Running Services
 
+        [Test]
+        public void Test_08_01_ServiceDisable()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+
+            testService1.Disable();
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+            Assert.IsFalse(testService1Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_08_02_DisableAllServices()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            var testService2 = new TestService2();
+            ServiceManager.TryRegisterService<ITestService>(testService2);
+
+            ServiceManager.Instance.DisableAllServices();
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+            var testService2Retrieval = ServiceManager.GetService<ITestService2>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+            Assert.IsFalse(testService2.IsEnabled, "Test service was in a enabled state when it was disabled");
+            Assert.IsFalse(testService1Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+            Assert.IsFalse(testService2Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_08_03_ServiceDisablePriorToRegistration()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Create disabled
+            var testService1 = new TestService1();
+            testService1.Disable();
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state, but was registered disabled");
+
+            // Register
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state, but was registered disabled after registration");
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+            Assert.IsFalse(testService1Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+        }
+
         #endregion 08 Disable Running Services
 
         #region 09 Disable Running Data Provider
 
+        [Test]
+        public void Test_09_01_DataProviderDisable()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was started");
+
+            dataProvider1.Disable();
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_09_02_DataProviderDisabledWithServices()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register service 1 and data provider
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+
+            // Register service 2 and data provider
+            var testService2 = new TestService2();
+            ServiceManager.TryRegisterService<ITestService>(testService2);
+            ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+
+            ServiceManager.Instance.DisableAllServices();
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+            var dataProvidertest2Retrieval = ServiceManager.GetService<ITestDataProvider2>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service 1 was in a enabled state when it was disabled");
+            Assert.IsFalse(testService2.IsEnabled, "Test service 2 was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
+            Assert.IsFalse(dataProvidertest2Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
+        }
+
+
+        [Test]
+        public void Test_09_03_DataProviderDisablePriorToRegistration()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Create Serivce
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            // Create disabled data provider
+            var dataProvider1 = new TestDataProvider1(testService1);
+            dataProvider1.Disable();
+
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was started disabled");
+
+            // Register data provider
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was started disabled after registration");
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was started disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was started disabled after retrieval.");
+        }
+
         #endregion 09 Disable Running Data Provider
 
-        #region 10 Enable previously disabled registered Service
+        #region 10 Enable Service
 
-        #endregion 10 Enable previously disabled registered Service
-
-        #region 11 Enable previously disabled Data Provider
-
-        #endregion 11 Enable previously disabled Data Provider
-
-        #region Destruction
-
-        #endregion
-
-
-
-
-
-
-
-
-
-
-        public void Test_04_03_UnregisterServiceAndServiceDataProvider()
+        [Test]
+        public void Test_10_01_ServiceEnable()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
-            var activeSystemCount = ServiceManager.ActiveServices.Count;
+            var activeServiceCount = ServiceManager.ActiveServices.Count;
 
             // Register
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            testService1.Enable();
 
             // Retrieve
-            var testService1 = ServiceManager.GetService<ITestService>();
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was enabled");
+            Assert.IsTrue(testService1Retrieval.IsEnabled, "Test service was in a disabled state when it was enabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_10_02_EnableAllServices()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            var activeServiceCount = ServiceManager.ActiveServices.Count;
 
             // Register
-            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            var testService2 = new TestService2();
+            ServiceManager.TryRegisterService<ITestService>(testService2);
+
+            ServiceManager.Instance.DisableAllServices();
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+            Assert.IsFalse(testService2.IsEnabled, "Test service was in a enabled state when it was disabled");
+
+            ServiceManager.Instance.EnableAllServices();
 
             // Retrieve
-            var dataProvider1 = ServiceManager.GetService<ITestDataProvider1>();
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+            var testService2Retrieval = ServiceManager.GetService<ITestService2>();
 
             // Tests
-            Assert.IsNotNull(testService1, "Test service was not found");
-            Assert.IsNotNull(dataProvider1, "Test data provider not found");
-            Assert.IsTrue(activeSystemCount + 2 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
-
-            // Unregister
-            var successService = ServiceManager.TryUnregisterServicesOfType<ITestService>();
-
-            var successDataProvider = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
-
-            // Validate non-existent service
-            var isServiceRegistered = ServiceManager.IsServiceRegistered<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
-
-            var isDataProviderRegistered = ServiceManager.IsServiceRegistered<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
-
-            // Tests
-            Assert.IsTrue(successService, "Service was not unregistered successfully");
-            Assert.IsFalse(successDataProvider,"Data provider was not unregistered successfully");
-            Assert.IsFalse(isServiceRegistered, "Service was found when it was meant to be unregistered");
-            Assert.IsFalse(isDataProviderRegistered, "Data Provider was found when it was meant to be unregistered");
-            Assert.IsTrue(activeSystemCount == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was enabled");
+            Assert.IsTrue(testService2.IsEnabled, "Test service was in a disabled state when it was enabled");
+            Assert.IsTrue(testService1Retrieval.IsEnabled, "Test service was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(testService2Retrieval.IsEnabled, "Test service was in a disabled state when it was enabled after retrieval.");
         }
-        
 
-        
-        public void Test_04_05_UnregisterServiceDataProviders()
+        #endregion 10 Enable Service
+
+        #region 11 Enable Data Provider
+
+        [Test]
+        public void Test_11_01_DataProviderEnable()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
-            var activeSystemCount = ServiceManager.ActiveServices.Count;
-
             // Register
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+            dataProvider1.Disable();
+
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
 
             // Retrieve
-            var testService1 = ServiceManager.GetService<ITestService>();
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
 
-            // Validate
-            Assert.IsNotNull(testService1, "Test service was not found service was not found");
-
-            // Register
-            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
-
-            // Retrieve all data providers
-            var dataProviders = ServiceManager.GetServices<IServiceDataProvider>();
+            dataProvidertest1Retrieval.Enable();
 
             // Tests
-            Assert.IsTrue(dataProviders.Count == 2, "More or less data providers found than was expected");
-            Assert.IsTrue(activeSystemCount + 3 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
-
-            // Retrieve services
-            var extensionService1 = ServiceManager.GetService<ITestDataProvider1>();
-            var extensionService2 = ServiceManager.GetService<ITestDataProvider2>();
-
-            // Validate
-            Assert.IsNotNull(extensionService1, "Extension service 1 not found");
-            Assert.IsNotNull(extensionService2, "Extension service 2 not found");
-
-            // Unregister
-            var successService = ServiceManager.TryUnregisterServicesOfType<ITestService>();
-            var successDataProvider1 = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
-
-            var successDataProvider2 = ServiceManager.TryUnregisterServicesOfType<ITestDataProvider2>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider2)} service.");
-
-
-            // Tests
-            Assert.IsTrue(successService, "Service was not unregistered successfully");
-            Assert.IsFalse(successDataProvider1, "Data Provider 1 was not unregistered successfully");
-            Assert.IsFalse(successDataProvider2, "Data Provider 2 was not unregistered successfully");
-
-            // Validate non-existent service
-            var isServiceRegistered = ServiceManager.IsServiceRegistered<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
-
-            var isService1Registered = ServiceManager.IsServiceRegistered<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
-            
-            var isService2Registered = ServiceManager.IsServiceRegistered<ITestDataProvider2>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider2)} service.");
-
-            // Tests
-            Assert.IsFalse(isServiceRegistered, "Service was found when it was meant to be unregistered");
-            Assert.IsFalse(isService1Registered, "Data Provider 1 was found when it was meant to be unregistered");
-            Assert.IsFalse(isService2Registered, "Data Provider 2 was found when it was meant to be unregistered");
-            Assert.IsTrue(activeSystemCount == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
         }
-        
 
-
-        #region Service Retrieval Tests
-
-
-        public void Test_06_01_TryGetDataProvider()
+        [Test]
+        public void Test_11_02_DataProviderEnabledWithServices()
         {
             TestUtilities.InitializeServiceManagerScene(false);
-            var activeSystemCount = ServiceManager.ActiveServices.Count;
 
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            var testService1 = ServiceManager.GetService<ITestService>();
-
-            // Register
+            // Register service 1 and data provider
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
             ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+
+            // Register service 2 and data provider
+            var testService2 = new TestService2();
+            ServiceManager.TryRegisterService<ITestService>(testService2);
+            ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+
+            ServiceManager.Instance.DisableAllServices();
 
             // Retrieve
-            var result = ServiceManager.TryGetService<ITestDataProvider1>(out var extensionService1);
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+            var dataProvidertest2Retrieval = ServiceManager.GetService<ITestDataProvider2>();
+
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+
+            ServiceManager.Instance.EnableAllServices();
 
             // Tests
-            Assert.IsTrue(result, "Registered Service not found");
-            Assert.IsNotNull(extensionService1, "Extension Service not found");
-            Assert.IsTrue(activeSystemCount + 2 == ServiceManager.ActiveServices.Count, "More or less services found than was expected");
+            Assert.IsTrue(testService1.IsEnabled, "Test service 1 was in a disabled state when it was enabled");
+            Assert.IsTrue(testService2.IsEnabled, "Test service 2 was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(dataProvidertest2Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
         }
 
+            #endregion 11 Enable Data Provider
 
-        public void Test_06_04_TryRetrieveMultipleDataProviders()
-        {
-            TestUtilities.InitializeServiceManagerScene(false);
-            var initialSystemCount = ServiceManager.ActiveServices.Count;
-            var expectedServicesToRegister = 3; // Registering a Service and two Data Providers
+            #region Destruction
 
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            var testService1 = ServiceManager.GetService<ITestService>();
-
-            // Register
-            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
-
-            // Retrieve
-            var resultTrue1 = ServiceManager.TryGetService<ITestDataProvider1>(TestDataProvider1.TestName, out var extensionService1);
-            var resultTrue2 = ServiceManager.TryGetService<ITestDataProvider2>(TestDataProvider2.TestName, out var extensionService2);
-
-            // Tests
-            Assert.IsTrue(initialSystemCount + expectedServicesToRegister == ServiceManager.ActiveServices.Count, $"Active systems count mismatch, expected {initialSystemCount + expectedServicesToRegister} but found {ServiceManager.ActiveServices.Count}");
-            Assert.IsTrue(resultTrue1, "Test Data Provider 1 found");
-            Assert.IsTrue(resultTrue2, "Test Data Provider 2 found");
-            Assert.IsNotNull(extensionService1, "Test Data Provider 1 service found");
-            Assert.IsNotNull(extensionService2, "Test Data Provider 2 service found");
-        }
-        #endregion Service Retrieval Tests
-
-        #region Service Enable/Disable Tests
-
-        public void Test_07_01_EnableServices()
-        {
-            TestUtilities.InitializeServiceManagerScene(false);
-
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            var testService1 = ServiceManager.GetService<ITestService>();
-            
-            // Add test 1 services
-            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            var provider1 = ServiceManager.GetService<ITestDataProvider1>();
-            // Add test 2 services
-            ServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
-            var provider2 = ServiceManager.GetService<ITestDataProvider2>();
-            
-            Assert.IsNotNull(testService1, "Test service was not reigstered");
-            Assert.IsTrue(testService1.IsEnabled, "Test service found but was not enabled");
-            Assert.IsNotNull(provider1, "Test provider 1 was not reigstered");
-            Assert.IsNotNull(provider2, "Test provider 2 was not reigstered");
-        }
-
-        public void Test_07_02_DisableServices()
-        {
-            TestUtilities.InitializeServiceManagerScene(false);
-
-            ServiceManager.TryRegisterService<ITestService>(new TestService1());
-            var testService1 = ServiceManager.GetService<ITestService>();
-            
-            // Add test 1 services
-            ServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            var provider1 = ServiceManager.GetService<ITestDataProvider1>();
-            
-            // Disable registered services
-            testService1.Disable();
-
-            Assert.IsNotNull(testService1, "Test service was not reigstered");
-            Assert.IsFalse(testService1.IsEnabled, "Test service found but enabled after being disabled");
-            Assert.IsNotNull(provider1, "Test provider 1 was not reigstered");
-        }
-
-        #endregion Service Enable/Disable Tests
+            #endregion
     }
 }

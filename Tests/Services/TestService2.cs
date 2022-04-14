@@ -13,17 +13,14 @@ namespace RealityToolkit.ServiceFramework.Tests.Services
             : base(name, priority)
         { }
 
-        /// <inheritdoc />
-        public bool IsEnabled { get; private set; }
-
         public override void Enable()
         {
-            IsEnabled = true;
+            base.Enable();
         }
 
         public override void Disable()
         {
-            IsEnabled = false;
+            base.Disable();
         }
     }
 }

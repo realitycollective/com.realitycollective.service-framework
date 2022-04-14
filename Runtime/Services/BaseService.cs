@@ -54,6 +54,9 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual uint Priority { get; protected set; }
 
         /// <inheritdoc />
+        public virtual bool IsEnabled { get; protected set; } = true;
+
+        /// <inheritdoc />
         public virtual void Initialize() { }
 
         /// <inheritdoc />
@@ -63,7 +66,7 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void Reset() { }
 
         /// <inheritdoc />
-        public virtual void Enable() { }
+        public virtual void Enable() => IsEnabled = true;
 
         /// <inheritdoc />
         public virtual void Update() { }
@@ -75,12 +78,13 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void FixedUpdate() { }
 
         /// <inheritdoc />
-        public virtual void Disable() { }
+        public virtual void Disable() => IsEnabled = false;
 
         /// <inheritdoc />
         public virtual void Destroy()
         {
             isDestroying = true;
+            IsEnabled = false;
         }
 
         /// <inheritdoc />
