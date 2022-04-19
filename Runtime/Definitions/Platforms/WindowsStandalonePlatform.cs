@@ -1,0 +1,35 @@
+// Copyright (c) Reality Collective. All rights reserved.
+
+namespace RealityToolkit.ServiceFramework.Definitions.Platforms
+{
+    /// <summary>
+    /// Used by the XRTK to signal that the feature is available on the Windows Standalone platform.
+    /// </summary>
+    [System.Runtime.InteropServices.Guid("5B39043A-BF08-4ECE-81C4-57F945760382")]
+    public class WindowsStandalonePlatform : BasePlatform
+    {
+        /// <inheritdoc />
+        public override bool IsAvailable
+        {
+            get
+            {
+#if UNITY_STANDALONE_WIN
+                return !UnityEngine.Application.isEditor;
+#else
+                return false;
+#endif
+            }
+        }
+
+#if UNITY_EDITOR
+
+        /// <inheritdoc />
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
+        {
+            UnityEditor.BuildTarget.StandaloneWindows64,
+            UnityEditor.BuildTarget.StandaloneWindows
+        };
+
+#endif // UNITY_EDITOR
+    }
+}

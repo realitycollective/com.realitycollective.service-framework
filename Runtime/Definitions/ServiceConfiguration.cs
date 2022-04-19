@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
-using System;
 using RealityToolkit.ServiceFramework.Attributes;
 using RealityToolkit.ServiceFramework.Interfaces;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Definitions
@@ -93,6 +94,52 @@ namespace RealityToolkit.ServiceFramework.Definitions
         {
             get => profile;
             internal set => profile = value;
+        }
+
+        [SerializeField]
+        private RuntimePlatformEntry platformEntries = new RuntimePlatformEntry();
+
+        [NonSerialized]
+        private List<IPlatform> runtimePlatforms = null;
+
+        /// <inheritdoc />
+        public IReadOnlyList<IPlatform> RuntimePlatforms
+        {
+            get
+            {
+                if (runtimePlatforms == null ||
+                    runtimePlatforms.Count == 0 ||
+                    runtimePlatforms.Count != platformEntries?.RuntimePlatforms?.Length)
+                {
+                    runtimePlatforms = new List<IPlatform>();
+
+                    for (int i = 0; i < platformEntries?.RuntimePlatforms?.Length; i++)
+                    {
+                        var platformType = platformEntries.RuntimePlatforms[i]?.Type;
+
+                        if (platformType == null)
+                        {
+                            continue;
+                        }
+
+                        IPlatform platformInstance;
+
+                        try
+                        {
+                            platformInstance = Activator.CreateInstance(platformType) as IPlatform;
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                            continue;
+                        }
+
+                        runtimePlatforms.Add(platformInstance);
+                    }
+                }
+
+                return runtimePlatforms;
+            }
         }
     }
 }

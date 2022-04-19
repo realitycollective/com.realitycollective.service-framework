@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Utilities;
@@ -136,6 +137,26 @@ namespace RealityToolkit.ServiceFramework.Services
         public static IReadOnlyDictionary<Type, IService> ActiveServices => activeServices;
 
         #endregion Service Manager runtime service registry
+
+        #region Service Manager runtime platform registry
+
+        // ReSharper disable once InconsistentNaming
+        private static readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
+
+        /// <summary>
+        /// The list of active platforms detected by the <see cref="MixedRealityToolkit"/>.
+        /// </summary>
+        public static IReadOnlyList<IPlatform> AvailablePlatforms => availablePlatforms;
+
+        // ReSharper disable once InconsistentNaming
+        private static readonly List<IPlatform> activePlatforms = new List<IPlatform>();
+
+        /// <summary>
+        /// The list of active platforms detected by the <see cref="MixedRealityToolkit"/>.
+        /// </summary>
+        public static IReadOnlyList<IPlatform> ActivePlatforms => activePlatforms;
+
+        #endregion Service Manager runtime platform registry
 
         #region Instance Management
 
@@ -281,6 +302,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 
                 if (HasActiveProfile)
                 {
+                    CheckPlatforms();
                     InitializeServiceLocator();
                 }
             }
@@ -525,7 +547,9 @@ namespace RealityToolkit.ServiceFramework.Services
 
         #endregion MonoBehaviour Implementation
 
-        #region Registration
+        #region Service Management
+
+        #region Service Registration
 
         /// <summary>
         /// Registers all the <see cref="IService"/>s defined in the provided configuration collection.
@@ -604,8 +628,9 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <returns>True, if the service was successfully created and registered.</returns>
         public static bool TryCreateAndRegisterService<T>(IServiceConfiguration<T> configuration, out T service) where T : IService
         {
-            return TryCreateAndRegisterService(
+            return TryCreateAndRegisterServiceInternal(
                 configuration.InstancedType,
+                configuration.RuntimePlatforms,
                 out service,
                 configuration.Name,
                 configuration.Priority,
@@ -621,13 +646,41 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <returns>True, if the service was successfully created and registered.</returns>
         public static bool TryCreateAndRegisterDataProvider<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceDataProvider
         {
-            return TryCreateAndRegisterService<T>(
+            return TryCreateAndRegisterServiceInternal<T>(
                 configuration.InstancedType,
+                configuration.RuntimePlatforms,
                 out _,
                 configuration.Name,
                 configuration.Priority,
                 configuration.Profile,
                 serviceParent);
+        }
+
+        /// <summary>
+        /// Creates a new instance of a service and registers it to the Reality Toolkit service registry for all platforms.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
+        /// <param name="concreteType">The concrete class type to instantiate.</param>
+        /// <param name="service">If successful, then the new <see cref="IService"/> instance will be passed back out.</param>
+        /// <param name="args">Optional arguments used when instantiating the concrete type.</param>
+        /// <returns>True, if the service was successfully created and registered.</returns>
+        public static bool TryCreateAndRegisterService<T>(Type concreteType, out T service, params object[] args) where T : IService
+        {
+            return TryCreateAndRegisterServiceInternal(concreteType, AllPlatforms.Platforms, out service, args);
+        }
+
+        /// <summary>
+        /// Creates a new instance of a service and registers it to the Reality Toolkit service registry for the specified platform(s).
+        /// </summary>
+        /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
+        /// <param name="concreteType">The concrete class type to instantiate.</param>
+        /// <param name="runtimePlatforms">The runtime <see cref="IPlatform"/>s to check against when registering.</param>
+        /// <param name="service">If successful, then the new <see cref="IService"/> instance will be passed back out.</param>
+        /// <param name="args">Optional arguments used when instantiating the concrete type.</param>
+        /// <returns>True, if the service was successfully created and registered.</returns>
+        public static bool TryCreateAndRegisterService<T>(Type concreteType, IReadOnlyList<IPlatform> runtimePlatforms, out T service, params object[] args) where T : IService
+        {
+            return TryCreateAndRegisterServiceInternal(concreteType, runtimePlatforms, out service, args);
         }
 
         /// <summary>
@@ -638,13 +691,22 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="service">If successful, then the new <see cref="IService"/> instance will be passed back out.</param>
         /// <param name="args">Optional arguments used when instantiating the concrete type.</param>
         /// <returns>True, if the service was successfully created and registered.</returns>
-        private static bool TryCreateAndRegisterService<T>(Type concreteType, out T service, params object[] args) where T : IService
+        private static bool TryCreateAndRegisterServiceInternal <T>(Type concreteType, IReadOnlyList<IPlatform> runtimePlatforms, out T service, params object[] args) where T : IService
         {
             service = default;
 
             if (IsApplicationQuitting)
             {
                 return false;
+            }
+
+            if(!PlatformMatch(concreteType, runtimePlatforms))
+            {
+                // We return true so we don't raise en error.
+                // Even though we did not register the service,
+                // it's expected that this is the intended behavior
+                // when there isn't a valid platform to run the service on.
+                return true;
             }
 
             if (concreteType == null)
@@ -752,9 +814,9 @@ namespace RealityToolkit.ServiceFramework.Services
             return true;
         }
 
-        #endregion Registration
+        #endregion Service Registration
 
-        #region Unregister
+        #region Unregister Services
 
         /// <summary>
         /// Remove all services from the Service Manager active service registry for a given type
@@ -855,9 +917,7 @@ namespace RealityToolkit.ServiceFramework.Services
             return false;
         }
 
-        #endregion Unregister
-
-        #region Service Management
+        #endregion Unregister Services
 
         #region Get Services
 
@@ -885,7 +945,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
         /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        private static IService GetService(Type interfaceType, bool showLogs = true)
+        public static IService GetService(Type interfaceType, bool showLogs = true)
             => GetServiceByName(interfaceType, string.Empty, showLogs);
 
         /// <summary>
@@ -937,7 +997,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">Interface type of the service being requested.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
+        public static bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
         {
             serviceInstance = null;
 
@@ -978,7 +1038,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">Interface type of the service being requested.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool TryGetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
+        public static bool TryGetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
         {
             serviceInstance = null;
 
@@ -1014,7 +1074,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         /// <param name="interfaceType">The interface type for the system to be retrieved.  E.G. Storage Service.</param>
         /// <returns>An array of services that meet the search criteria</returns>
-        private static List<T> GetServices<T>(Type interfaceType) where T : IService
+        public static List<T> GetServices<T>(Type interfaceType) where T : IService
         {
             return GetServices<T>(interfaceType, string.Empty);
         }
@@ -1025,15 +1085,35 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="interfaceType">The interface type for the system to be retrieved.  Storage Service.</param>
         /// <param name="serviceName">Name of the specific service</param>
         /// <returns>An array of services that meet the search criteria</returns>
-        private static List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
+        public static List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
         {
             var services = new List<T>();
 
+            TryGetServices<T>(interfaceType, serviceName, ref services);
+
+            return services;
+        }
+
+        /// <summary>
+        /// Retrieve all services from the active service registry for a given type and name
+        /// </summary>
+        /// <param name="interfaceType">The interface type for the system to be retrieved.  Storage Service.</param>
+        /// <param name="serviceName">Name of the specific service</param>
+        /// <returns>An array of services that meet the search criteria</returns>
+        public static bool TryGetServices<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
+        {
             if (interfaceType == null)
             {
                 Debug.LogWarning("Unable to get services with a type of null.");
-                return services;
+                return false;
             }
+
+            if (services == null)
+            {
+                services = new List<T>();
+            }
+            
+            if (!CanGetService(interfaceType, serviceName)) { return false; }
 
             //Get Service by interface as we do not have its name
             if (string.IsNullOrWhiteSpace(serviceName))
@@ -1058,6 +1138,18 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
             }
 
+            return serviceCache.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets all <see cref="IService"/>s by type.
+        /// </summary>
+        /// <param name="interfaceType">The interface type to search for.</param>
+        /// <param name="services">Memory reference value of the service list to update.</param>
+        public static List<IService> GetAllServices()
+        {
+            List<IService> services = new List<IService>();
+            TryGetServices(typeof(IService), string.Empty, ref services);
             return services;
         }
 
@@ -1066,28 +1158,9 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         /// <param name="interfaceType">The interface type to search for.</param>
         /// <param name="services">Memory reference value of the service list to update.</param>
-        private static void GetAllServices<T>(Type interfaceType, ref List<T> services) where T : IService
+        public static void GetAllServices(ref List<IService> services)
         {
-            TryGetAllServicesByName(interfaceType, string.Empty, ref services);
-        }
-
-        /// <summary>
-        /// Gets all <see cref="IService"/>s by type and name.
-        /// </summary>
-        /// <param name="interfaceType">The interface type to search for.</param>
-        /// <param name="serviceName">The name of the service to search for. If the string is empty than any matching <see cref="interfaceType"/> will be added to the <see cref="services"/> list.</param>
-        /// <param name="services">Memory reference value of the service list to update.</param>
-        /// <returns>Returns true of any services can be found</returns>
-        public static bool TryGetAllServicesByName<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
-        {
-            if (!CanGetService(interfaceType, serviceName)) { return false; }
-
-            if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance) &&
-                CheckServiceMatch(interfaceType, serviceName, interfaceType, serviceInstance))
-            {
-                services.Add((T)serviceInstance);
-            }
-            return services != null && services.Count > 0;
+            TryGetServices(typeof(IService), string.Empty, ref services);
         }
 
         /// <summary>
@@ -1190,7 +1263,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
 
             var services = new List<IService>();
-            TryGetAllServicesByName(interfaceType, serviceName, ref services);
+            TryGetServices(interfaceType, serviceName, ref services);
 
             for (int i = 0; i < services?.Count; i++)
             {
@@ -1241,7 +1314,7 @@ namespace RealityToolkit.ServiceFramework.Services
             }
 
             var services = new List<IService>();
-            TryGetAllServicesByName(interfaceType, serviceName, ref services);
+            TryGetServices(interfaceType, serviceName, ref services);
 
             for (int i = 0; i < services?.Count; i++)
             {
@@ -1620,6 +1693,119 @@ namespace RealityToolkit.ServiceFramework.Services
             }
             return detectedInterfaces.ToArray();
         }
+
+        /// <summary>
+        /// Check which platforms are active and available.
+        /// </summary>
+        internal static void CheckPlatforms()
+        {
+            activePlatforms.Clear();
+            availablePlatforms.Clear();
+
+            var platformTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+                .OrderBy(type => type.Name);
+
+            var platformOverrides = new List<Type>();
+
+            foreach (var platformType in platformTypes)
+            {
+                IPlatform platform = null;
+
+                try
+                {
+                    platform = Activator.CreateInstance(platformType) as IPlatform;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+
+                if (platform == null) { continue; }
+
+                availablePlatforms.Add(platform);
+
+                if (platform.IsAvailable
+#if UNITY_EDITOR
+                    || platform.IsBuildTargetAvailable &&
+                    TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    resolvedPlatform == platformType
+#endif
+                )
+                {
+                    foreach (var platformOverride in platform.PlatformOverrides)
+                    {
+                        platformOverrides.Add(platformOverride.GetType());
+                    }
+                }
+            }
+
+            foreach (var platform in availablePlatforms)
+            {
+                if (Application.isPlaying &&
+                    platformOverrides.Contains(platform.GetType()))
+                {
+                    continue;
+                }
+
+                if (platform.IsAvailable
+#if UNITY_EDITOR
+                    || platform.IsBuildTargetAvailable
+#endif
+                )
+                {
+                    activePlatforms.Add(platform);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Check if any of the provided runtime platforms are currently available in the running environment
+        /// </summary>
+        /// <param name="runtimePlatforms">The set of runtime platforms to test against</param>
+        /// <returns>Returns false if there are no matching platforms, platform not running.</returns>
+        internal static bool PlatformMatch(Type concreteType, IReadOnlyList<IPlatform> runtimePlatforms)
+        {
+            if (runtimePlatforms == null || runtimePlatforms.Count == 0)
+            {
+                Debug.LogWarning($"No runtime platforms defined for the {concreteType?.Name} service.");
+                return false;
+            }
+
+            var platforms = new List<IPlatform>();
+
+            Debug.Assert(ActivePlatforms.Count > 0);
+
+            for (var i = 0; i < ActivePlatforms.Count; i++)
+            {
+                var activePlatform = ActivePlatforms[i].GetType();
+
+                for (var j = 0; j < runtimePlatforms?.Count; j++)
+                {
+                    var runtimePlatform = runtimePlatforms[j].GetType();
+
+                    if (activePlatform == runtimePlatform)
+                    {
+                        platforms.Add(runtimePlatforms[j]);
+                        break;
+                    }
+                }
+            }
+
+            if (platforms.Count == 0
+#if UNITY_EDITOR
+                    || !CurrentBuildTargetPlatform.IsBuildTargetActive(platforms)
+#endif
+                    )
+            {
+                // No matching platforms found
+                return false;
+            }
+            return true;
+        }
+
         #endregion Service Utilities
 
         #region IDisposable Implementation
@@ -1657,9 +1843,6 @@ namespace RealityToolkit.ServiceFramework.Services
 
 // Notes
 
-// - Missing Enable Service<T> - done
-// - Missing Disable Service<T> - done
-// - Missing GetActiveServices?
 // - Register Service with Platform
 // Platforms
 // Check Register Data Provider endpoints

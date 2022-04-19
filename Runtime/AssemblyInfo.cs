@@ -14,3 +14,4 @@ using System.Runtime.CompilerServices;
 // Note: these are the names of the assembly definitions themselves, not necessarily the actual namespace the class is in.
 [assembly: InternalsVisibleTo("RealityToolkit.ServiceFramework.Editor")]
 [assembly: InternalsVisibleTo("RealityToolkit.ServiceFramework.Tests")]
+[assembly: InternalsVisibleTo("RealityToolkit.Editor")]

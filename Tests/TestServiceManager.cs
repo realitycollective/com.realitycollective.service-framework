@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
-using System;
 using NUnit.Framework;
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Interfaces;
@@ -306,6 +305,31 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Tests
             Assert.IsNull(testService2, "Test service was not found");
             Assert.AreEqual(activeServiceCount + 1, ServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_04_07_GetAllServices()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            var activeServiceCount = ServiceManager.ActiveServices.Count;
+
+            // Register Service 1
+            ServiceManager.TryRegisterService<ITestService>(new TestService1());
+
+            // Register Service 2
+            var testService2 = new TestService2();
+            ServiceManager.TryRegisterService<ITestService2>(testService2);
+
+            // Retrieve
+            var allServices = ServiceManager.GetAllServices();
+            var registeredServicesList = ServiceManager.GetServices<IService>();
+            var registeredTestService1 = ServiceManager.GetServices<ITestService>();
+
+            // Tests
+            Assert.AreEqual(2, allServices.Count, "More or less services found than was expected from full query");
+            Assert.AreEqual(2, registeredServicesList.Count, "More or less services found than was expected from IService query");
+            Assert.AreEqual(1, registeredTestService1.Count, "More or less services found than was expected from specific Interface query");
         }
 
         #endregion  04 Service Retrieval
@@ -845,6 +869,48 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
 
+            ServiceManager.DisableService<ITestService>();
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled via interface call");
+            Assert.IsFalse(testService1Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_08_02_ServiceDisableByName()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+
+            ServiceManager.DisableService<ITestService>(TestService1.TestName);
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled via interface call");
+            Assert.IsFalse(testService1Retrieval.IsEnabled, "Test service was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_08_03_ServiceDisableDirect()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+
             testService1.Disable();
 
             // Retrieve
@@ -856,7 +922,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_08_02_DisableAllServices()
+        public void Test_08_04_DisableAllServices()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -880,7 +946,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_08_03_ServiceDisablePriorToRegistration()
+        public void Test_08_05_ServiceDisablePriorToRegistration()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -921,6 +987,56 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
             Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was started");
 
+            ServiceManager.DisableService<ITestDataProvider1>();
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_09_02_DataProviderDisableByName()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was started");
+
+            ServiceManager.DisableService<ITestDataProvider1>(TestDataProvider1.TestName);
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_09_03_DataProviderDisableDirect()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was started");
+
             dataProvider1.Disable();
 
             // Retrieve
@@ -933,7 +1049,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_09_02_DataProviderDisabledWithServices()
+        public void Test_09_04_DataProviderDisabledWithServices()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -960,9 +1076,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.IsFalse(dataProvidertest2Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled after retrieval.");
         }
 
-
         [Test]
-        public void Test_09_03_DataProviderDisablePriorToRegistration()
+        public void Test_09_05_DataProviderDisablePriorToRegistration()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -1003,7 +1118,58 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Register
             var testService1 = new TestService1();
+            testService1.Disable();
             ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+
+            ServiceManager.EnableService<ITestService>();
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was enabled");
+            Assert.IsTrue(testService1Retrieval.IsEnabled, "Test service was in a disabled state when it was enabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_10_02_ServiceEnableByName()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            var activeServiceCount = ServiceManager.ActiveServices.Count;
+
+            // Register
+            var testService1 = new TestService1();
+            testService1.Disable();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
+
+            ServiceManager.EnableService<ITestService>(TestService1.TestName);
+
+            // Retrieve
+            var testService1Retrieval = ServiceManager.GetService<ITestService>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was enabled");
+            Assert.IsTrue(testService1Retrieval.IsEnabled, "Test service was in a disabled state when it was enabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_10_03_ServiceEnableDirect()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            var activeServiceCount = ServiceManager.ActiveServices.Count;
+
+            // Register
+            var testService1 = new TestService1();
+            testService1.Disable();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            Assert.IsFalse(testService1.IsEnabled, "Test service was in a enabled state when it was disabled");
 
             testService1.Enable();
 
@@ -1016,7 +1182,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_10_02_EnableAllServices()
+        public void Test_10_04_EnableAllServices()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -1068,6 +1234,58 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Retrieve
             var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
 
+            ServiceManager.EnableService<ITestDataProvider1>();
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_11_02_DataProviderEnableByName()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+            dataProvider1.Disable();
+
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
+            ServiceManager.EnableService<ITestDataProvider1>(TestDataProvider1.TestName);
+
+            // Tests
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+        }
+
+        [Test]
+        public void Test_11_03_DataProviderEnableDirect()
+        {
+            TestUtilities.InitializeServiceManagerScene(false);
+
+            // Register
+            var testService1 = new TestService1();
+            ServiceManager.TryRegisterService<ITestService>(testService1);
+
+            var dataProvider1 = new TestDataProvider1(testService1);
+            ServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
+            dataProvider1.Disable();
+
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+
+            // Retrieve
+            var dataProvidertest1Retrieval = ServiceManager.GetService<ITestDataProvider1>();
+
             dataProvidertest1Retrieval.Enable();
 
             // Tests
@@ -1077,7 +1295,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_11_02_DataProviderEnabledWithServices()
+        public void Test_11_04_DataProviderEnabledWithServices()
         {
             TestUtilities.InitializeServiceManagerScene(false);
 
@@ -1110,9 +1328,5 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
             #endregion 11 Enable Data Provider
-
-            #region Destruction
-
-            #endregion
     }
 }

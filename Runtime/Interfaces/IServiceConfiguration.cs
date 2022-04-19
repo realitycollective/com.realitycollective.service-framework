@@ -2,6 +2,7 @@
 
 
 using RealityToolkit.ServiceFramework.Definitions;
+using System.Collections.Generic;
 
 namespace RealityToolkit.ServiceFramework.Interfaces
 {
@@ -42,5 +43,10 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         /// The <see cref="BaseProfile"/> for <see cref="IService"/>.
         /// </summary>
         BaseProfile Profile { get; }
+
+        /// <summary>
+        /// The runtime <see cref="IPlatform"/>(s) to run this <see cref="IService"/> to run on.
+        /// </summary>
+        IReadOnlyList<IPlatform> RuntimePlatforms { get; }
     }
 }
