@@ -858,10 +858,151 @@ namespace RealityToolkit.ServiceFramework.Services
         #endregion Unregister
 
         #region Service Management
+
+        #region Get Services
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// </summary>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        public static T GetService<T>(bool showLogs = true) where T : IService
+            => (T)GetService(typeof(T), showLogs);
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// </summary>
+        /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
+        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        public static async Task<T> GetServiceAsync<T>(int timeout = 10) where T : IService
+            => await GetService<T>().WaitUntil(system => system != null, timeout);
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by type.
+        /// </summary>
+        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        private static IService GetService(Type interfaceType, bool showLogs = true)
+            => GetServiceByName(interfaceType, string.Empty, showLogs);
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// </summary>
+        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="serviceName">Name of the specific service.</param>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        public static IService GetServiceByName<T>(string serviceName, bool showLogs = true) where T : IService
+        {
+            TryGetServiceByName<T>(serviceName, out var serviceInstance, showLogs);
+            return serviceInstance;
+        }
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// </summary>
+        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="serviceName">Name of the specific service.</param>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        public static IService GetServiceByName(Type interfaceType, string serviceName, bool showLogs = true)
+        {
+            if (!TryGetService(interfaceType, serviceName, out var serviceInstance) && showLogs)
+            {
+                Debug.LogError($"Unable to find {(string.IsNullOrWhiteSpace(serviceName) ? interfaceType.Name : serviceName)} service.");
+            }
+
+            return serviceInstance;
+        }
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
+        /// <param name="service">The instance of the service class that is registered.</param>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
+        public static bool TryGetService<T>(out T service, bool showLogs = true) where T : IService
+        {
+            service = GetService<T>(showLogs);
+            return service != null;
+        }
+
+        /// <summary>
+        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
+        /// </summary>
+        /// <param name="interfaceType">Interface type of the service being requested.</param>
+        /// <param name="serviceName">Name of the specific service.</param>
+        /// <param name="serviceInstance">return parameter of the function.</param>
+        private static bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
+        {
+            serviceInstance = null;
+
+            if (!CanGetService(interfaceType, serviceName)) { return false; }
+
+            if (activeServices.TryGetValue(interfaceType, out var service))
+            {
+                serviceInstance = service;
+
+                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+                {
+                    return true;
+                }
+
+                serviceInstance = null;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by name.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
+        /// <param name="serviceName">Name of the specific service to search for.</param>
+        /// <param name="service">The instance of the service class that is registered.</param>
+        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
+        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
+        public static bool TryGetServiceByName<T>(string serviceName, out T service, bool showLogs = true) where T : IService
+        {
+            service = (T)GetServiceByName(typeof(T), serviceName, showLogs);
+            return service != null;
+        }
+
+        /// <summary>
+        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
+        /// </summary>
+        /// <param name="interfaceType">Interface type of the service being requested.</param>
+        /// <param name="serviceName">Name of the specific service.</param>
+        /// <param name="serviceInstance">return parameter of the function.</param>
+        private static bool TryGetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
+        {
+            serviceInstance = null;
+
+            if (!CanGetService(interfaceType, serviceName)) { return false; }
+
+            var foundServices = GetServices<IService>(interfaceType, serviceName);
+
+            switch (foundServices.Count)
+            {
+                case 0:
+                    return false;
+                case 1:
+                    serviceInstance = foundServices[0];
+                    return true;
+                default:
+                    Debug.LogError($"Found multiple instances of {interfaceType.Name}! For better results, pass the name of the service or use GetActiveServices<T>()");
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Retrieve all services from the active service registry for a given type and an optional name
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be retrieved.  E.G. Storage Service.</typeparam>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be retrieved.  E.G. IStorageService.</typeparam>
         /// <returns>An array of services that meet the search criteria</returns>
         public static List<T> GetServices<T>() where T : IService
         {
@@ -920,6 +1061,203 @@ namespace RealityToolkit.ServiceFramework.Services
             return services;
         }
 
+        /// <summary>
+        /// Gets all <see cref="IService"/>s by type.
+        /// </summary>
+        /// <param name="interfaceType">The interface type to search for.</param>
+        /// <param name="services">Memory reference value of the service list to update.</param>
+        private static void GetAllServices<T>(Type interfaceType, ref List<T> services) where T : IService
+        {
+            TryGetAllServicesByName(interfaceType, string.Empty, ref services);
+        }
+
+        /// <summary>
+        /// Gets all <see cref="IService"/>s by type and name.
+        /// </summary>
+        /// <param name="interfaceType">The interface type to search for.</param>
+        /// <param name="serviceName">The name of the service to search for. If the string is empty than any matching <see cref="interfaceType"/> will be added to the <see cref="services"/> list.</param>
+        /// <param name="services">Memory reference value of the service list to update.</param>
+        /// <returns>Returns true of any services can be found</returns>
+        public static bool TryGetAllServicesByName<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
+        {
+            if (!CanGetService(interfaceType, serviceName)) { return false; }
+
+            if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance) &&
+                CheckServiceMatch(interfaceType, serviceName, interfaceType, serviceInstance))
+            {
+                services.Add((T)serviceInstance);
+            }
+            return services != null && services.Count > 0;
+        }
+
+        /// <summary>
+        /// Retrieve a cached refernece of an <see cref="IService"/> from the <see cref="ActiveSystems"/>.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        /// <remarks>
+        /// Internal function used for high performant systems or components, not to be overused.
+        /// </remarks>
+        public static T GetServiceCached<T>() where T : IService
+        {
+            if (!IsInitialized ||
+                IsApplicationQuitting ||
+                instance.ActiveProfile.IsNull())
+            {
+                return default;
+            }
+
+            T service = default;
+
+            if (!serviceCache.TryGetValue(typeof(T), out var cachedSystem))
+            {
+                if (IsServiceRegistered<T>())
+                {
+                    if (TryGetService(out service, false))
+                    {
+                        serviceCache.Add(typeof(T), service);
+                    }
+
+                    if (!searchedServiceTypes.Contains(typeof(T)))
+                    {
+                        searchedServiceTypes.Add(typeof(T));
+                    }
+                }
+            }
+            else
+            {
+                service = (T)cachedSystem;
+            }
+
+            return service;
+        }
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
+        /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
+        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
+        public static async Task<T> GetSystemCachedAsync<T>(int timeout = 10) where T : IService
+            => await GetServiceCached<T>().WaitUntil(service => service != null, timeout);
+
+        /// <summary>
+        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
+        /// <param name="service">The instance of the system class that is registered.</param>
+        /// <returns>Returns true if the <see cref="IMiIServiceedRealitySystem"/> was found, otherwise false.</returns>
+        public static bool TryGetServiceCached<T>(out T service) where T : IService
+        {
+            service = GetServiceCached<T>();
+            return service != null;
+        }
+
+        #endregion Get Services
+
+        #region Enable Services
+
+        /// <summary>
+        /// Enables a services in the active service registry for a given name.
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <param name="serviceName"></param>
+        public static void EnableService<T>(string serviceName) where T : IService
+        {
+            EnableAllServicesByTypeAndName(typeof(T), serviceName);
+        }
+
+        /// <summary>
+        /// Enable services in the active service registry for a given type
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        public static void EnableService<T>() where T : IService
+        {
+            EnableAllServicesByTypeAndName(typeof(T), string.Empty);
+        }
+
+        /// <summary>
+        /// Enable all services in the active service registry for a given type and name
+        /// </summary>
+        /// <param name="interfaceType">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</param>
+        /// <param name="serviceName">Name of the specific service</param>
+        private static void EnableAllServicesByTypeAndName(Type interfaceType, string serviceName)
+        {
+            if (interfaceType == null)
+            {
+                Debug.LogError("Unable to enable null service type.");
+                return;
+            }
+
+            var services = new List<IService>();
+            TryGetAllServicesByName(interfaceType, serviceName, ref services);
+
+            for (int i = 0; i < services?.Count; i++)
+            {
+                try
+                {
+                    services[i].Enable();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+        #endregion Enable Services
+
+        #region Disable Services
+
+        /// <summary>
+        /// Disable services in the active service registry for a given type
+        /// </summary>
+        /// <typeparam name="T">The interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        public static void DisableService<T>() where T : IService
+        {
+            DisableAllServicesByTypeAndName(typeof(T), string.Empty);
+        }
+
+        /// <summary>
+        /// DDisable services in the active service registry for a given name.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <param name="serviceName">Name of the specific service</param>
+        public static void DisableService<T>(string serviceName) where T : IService
+        {
+            DisableAllServicesByTypeAndName(typeof(T), serviceName);
+        }
+
+        /// <summary>
+        /// Disable all services in the Mixed Reality Toolkit active service registry for a given type and name
+        /// </summary>
+        /// <param name="interfaceType">The interface type for the system to be disabled.  E.G. InputSystem, BoundarySystem</param>
+        /// <param name="serviceName">Name of the specific service</param>
+        private static void DisableAllServicesByTypeAndName(Type interfaceType, string serviceName)
+        {
+            if (interfaceType == null)
+            {
+                Debug.LogError("Unable to disable null service type.");
+                return;
+            }
+
+            var services = new List<IService>();
+            TryGetAllServicesByName(interfaceType, serviceName, ref services);
+
+            for (int i = 0; i < services?.Count; i++)
+            {
+                try
+                {
+                    services[i].Disable();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+        #endregion Disable Services
+
+        #region Service Initialization
         internal void InitializeAllServices()
         {
             // If the Service Manager is not configured, stop.
@@ -941,7 +1279,9 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
             }
         }
+        #endregion Service Initialization
 
+        #region MonoBehaviour Replicators
         internal void StartAllServices()
         {
             // If the Service Manager is not configured, stop.
@@ -1120,6 +1460,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             activeServices.Clear();
         }
+        #endregion MonoBehaviour Replicators
 
         #endregion Service Management
 
@@ -1158,140 +1499,35 @@ namespace RealityToolkit.ServiceFramework.Services
             return false;
         }
 
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
-        /// </summary>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
-        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        public static T GetService<T>(bool showLogs = true) where T : IService
-            => (T)GetService(typeof(T), showLogs);
-
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
-        /// </summary>
-        /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
-        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
-        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        public static async Task<T> GetServiceAsync<T>(int timeout = 10) where T : IService
-            => await GetService<T>().WaitUntil(system => system != null, timeout);
-
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
-        /// </summary>
-        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
-        /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public static bool TryGetService<T>(out T service, bool showLogs = true) where T : IService
+        public static bool IsServiceEnabled<T>() where T : IService
         {
-            service = GetService<T>(showLogs);
-            return service != null;
-        }
-
-        /*
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="RegisteredServices"/> by name.
-        /// </summary>
-        /// <param name="serviceName">Name of the specific service to search for.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        public static T GetService<T>(string serviceName, bool showLogs = true) where T : IService
-            => (T)GetService(typeof(T), serviceName, showLogs);
-            */
-
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by name.
-        /// </summary>
-        /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
-        /// <param name="serviceName">Name of the specific service to search for.</param>
-        /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public static bool TryGetService<T>(string serviceName, out T service, bool showLogs = true) where T : IService
-        {
-            service = (T)GetService(typeof(T), serviceName, showLogs);
-            return service != null;
-        }
-
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by type.
-        /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        private static IService GetService(Type interfaceType, bool showLogs = true)
-            => GetService(interfaceType, string.Empty, showLogs);
-
-        /// <summary>
-        /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
-        /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
-        /// <param name="serviceName">Name of the specific service.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
-        /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
-        public static IService GetService(Type interfaceType, string serviceName, bool showLogs = true)
-        {
-            if (!TryGetService(interfaceType, serviceName, out var serviceInstance) && showLogs)
+            if (TryGetService<T>(out var service))
             {
-                Debug.LogError($"Unable to find {(string.IsNullOrWhiteSpace(serviceName) ? interfaceType.Name : serviceName)} service.");
+                return service.IsEnabled;
             }
-
-            return serviceInstance;
-        }
-
-        /// <summary>
-        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
-        /// </summary>
-        /// <param name="interfaceType">Interface type of the service being requested.</param>
-        /// <param name="serviceName">Name of the specific service.</param>
-        /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
-        {
-            serviceInstance = null;
-
-            if (!CanGetService(interfaceType, serviceName)) { return false; }
-
-            if (activeServices.TryGetValue(interfaceType, out var service))
-            {
-                serviceInstance = service;
-
-                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
-                {
-                    return true;
-                }
-
-                serviceInstance = null;
-            }
-
             return false;
         }
 
-        /// <summary>
-        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
-        /// </summary>
-        /// <param name="interfaceType">Interface type of the service being requested.</param>
-        /// <param name="serviceName">Name of the specific service.</param>
-        /// <param name="serviceInstance">return parameter of the function.</param>
-        private static bool TryGetServiceByName(Type interfaceType, string serviceName, out IService serviceInstance)
+        public static bool IsServiceEnabledInProfile<T>(ServiceManagerRootProfile rootProfile = null)
         {
-            serviceInstance = null;
-
-            if (!CanGetService(interfaceType, serviceName)) { return false; }
-
-            var foundServices = GetServices<IService>(interfaceType, serviceName);
-
-            switch (foundServices.Count)
+            if (rootProfile.IsNull())
             {
-                case 0:
-                    return false;
-                case 1:
-                    serviceInstance = foundServices[0];
-                    return true;
-                default:
-                    Debug.LogError($"Found multiple instances of {interfaceType.Name}! For better results, pass the name of the service or use GetActiveServices<T>()");
-                    return false;
+                rootProfile = instance.ActiveProfile;
             }
+
+            if (!rootProfile.IsNull() && rootProfile.ServiceConfigurations != null)
+            {
+                foreach (var configuration in rootProfile.ServiceConfigurations)
+                {
+                    if (typeof(T).IsAssignableFrom(configuration.InstancedType.Type.FindServiceInterfaceType(typeof(T))) &&
+                        configuration.Enabled)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1361,12 +1597,13 @@ namespace RealityToolkit.ServiceFramework.Services
             return false;
         }
 
-        private static readonly Dictionary<Type, IService> SystemCache = new Dictionary<Type, IService>();
-        private static readonly HashSet<Type> SearchedSystemTypes = new HashSet<Type>();
+        private static readonly Dictionary<Type, IService> serviceCache = new Dictionary<Type, IService>();
+        private static readonly HashSet<Type> searchedServiceTypes = new HashSet<Type>();
+
         private static void ClearSystemCache()
         {
-            SystemCache.Clear();
-            SearchedSystemTypes.Clear();
+            serviceCache.Clear();
+            searchedServiceTypes.Clear();
         }
 
         private static Type[] GetInterfacesFromType(object concreteObject)
@@ -1417,3 +1654,12 @@ namespace RealityToolkit.ServiceFramework.Services
         #endregion IDisposable Implementation
     }
 }
+
+// Notes
+
+// - Missing Enable Service<T> - done
+// - Missing Disable Service<T> - done
+// - Missing GetActiveServices?
+// - Register Service with Platform
+// Platforms
+// Check Register Data Provider endpoints
