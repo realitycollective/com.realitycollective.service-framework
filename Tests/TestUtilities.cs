@@ -14,9 +14,14 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
 {
     public static class TestUtilities
     {
-       public static void InitializeServiceManager()
+       public static void InitializeServiceManager(ref ServiceManager serviceManager)
         {
-            ServiceManager.ConfirmInitialized();
+            if (serviceManager == null)
+            {
+                serviceManager = new ServiceManager();
+                serviceManager.Initialize();
+            }
+            serviceManager.ConfirmInitialized();
         }
 
         public static void CleanupScene()
@@ -24,18 +29,17 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
         }
 
-        public static void InitializeServiceManagerScene(bool useDefaultProfile)
+        public static void InitializeServiceManagerScene(ServiceManager serviceManager = null, bool useDefaultProfile = false)
         {
             // Setup
             CleanupScene();
-            Assert.IsTrue(!ServiceManager.IsInitialized);
-            Assert.AreEqual(0, ServiceManager.ActiveServices.Count);
-            InitializeServiceManager();
+            InitializeServiceManager(ref serviceManager);
+            Assert.AreEqual(0, serviceManager.ActiveServices.Count);
 
             // Tests
-            Assert.IsTrue(ServiceManager.IsInitialized);
-            Assert.IsNotNull(ServiceManager.Instance);
-            Assert.IsFalse(ServiceManager.HasActiveProfile);
+            Assert.IsTrue(serviceManager.IsInitialized);
+            Assert.IsNotNull(serviceManager);
+            Assert.IsFalse(serviceManager.HasActiveProfile);
 
             ServiceManagerRootProfile configuration;
 
@@ -49,9 +53,9 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
             }
 
             Assert.IsTrue(configuration != null, "Failed to find the Service Manager Profile");
-            ServiceManager.Instance.ResetProfile(configuration);
-            Assert.IsTrue(ServiceManager.Instance.ActiveProfile != null);
-            Assert.IsTrue(ServiceManager.IsInitialized);
+            serviceManager.ResetProfile(configuration);
+            Assert.IsTrue(serviceManager.ActiveProfile != null);
+            Assert.IsTrue(serviceManager.IsInitialized);
         }
         
         public static T RunAsyncMethodSync<T>(Func<Task<T>> asyncFunc) {

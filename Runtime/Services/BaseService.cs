@@ -42,7 +42,7 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             if (!isDestroying && dataProvider.IsServiceRegistered)
             {
-                ServiceManager.TryUnregisterService(dataProvider);
+                ServiceManager.Instance?.TryUnregisterService(dataProvider);
             }
             dataProviders.Remove(dataProvider);
         }
@@ -94,7 +94,17 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void OnApplicationPause(bool isPaused) { }
 
         /// <inheritdoc />
-        public virtual bool IsServiceRegistered => ServiceManager.IsServiceRegistered(this);
+        public virtual bool IsServiceRegistered
+        {
+            get
+            {
+                if (ServiceManager.Instance == null)
+                {
+                    return false;
+                }
+                return ServiceManager.Instance.IsServiceRegistered(this);
+            }
+        }
 
         #endregion IService Implementation
 
