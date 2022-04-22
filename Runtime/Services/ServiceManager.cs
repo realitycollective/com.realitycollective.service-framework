@@ -18,7 +18,7 @@ namespace RealityToolkit.ServiceFramework.Services
     [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
-        private ServiceManagerInstance serviceManagerInstanceGameObject;
+        private GameObject serviceManagerInstanceGameObject;
 
         #region Service Manager Profile properties
 
@@ -139,7 +139,7 @@ namespace RealityToolkit.ServiceFramework.Services
         private readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
 
         /// <summary>
-        /// The list of active platforms detected by the <see cref="MixedRealityToolkit"/>.
+        /// The list of active platforms detected by the <see cref="ServiceManager"/>.
         /// </summary>
         public IReadOnlyList<IPlatform> AvailablePlatforms => availablePlatforms;
 
@@ -147,7 +147,7 @@ namespace RealityToolkit.ServiceFramework.Services
         private readonly List<IPlatform> activePlatforms = new List<IPlatform>();
 
         /// <summary>
-        /// The list of active platforms detected by the <see cref="MixedRealityToolkit"/>.
+        /// The list of active platforms detected by the <see cref="ServiceManager"/>.
         /// </summary>
         public IReadOnlyList<IPlatform> ActivePlatforms => activePlatforms;
 
@@ -169,28 +169,27 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private readonly object InitializedLock = new object();
 
-        public void Initialize(ServiceManagerInstance instanceGameObject = null)
+        public void Initialize(GameObject instanceGameObject = null)
         {
             instance = null;
+            ServiceManagerInstance serviceManagerInstance;
+
             if (instanceGameObject.IsNull())
             {
-                var foundExistingInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
-                if (foundExistingInstance.IsNotNull())
-                {
-                    serviceManagerInstanceGameObject = foundExistingInstance;
-                }
-                else
+                serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+                if (serviceManagerInstance.IsNull())
                 {
                     var go = new GameObject("ServiceManagerRelay");
-                    var serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
-                    serviceManagerInstanceGameObject = serviceManagerInstance;
+                    serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
+                    serviceManagerInstanceGameObject = serviceManagerInstance.gameObject;
                 }
+                serviceManagerInstance.SubscribetoUnityEvents(this);
             }
             else
             {
                 serviceManagerInstanceGameObject = instanceGameObject;
             }
-            serviceManagerInstanceGameObject.SubscribetoUnityEvents(this);
+
             InitializeInstance();
         }
 

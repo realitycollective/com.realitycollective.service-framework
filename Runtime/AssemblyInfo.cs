@@ -15,3 +15,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("RealityToolkit.ServiceFramework.Editor")]
 [assembly: InternalsVisibleTo("RealityToolkit.ServiceFramework.Tests")]
 [assembly: InternalsVisibleTo("RealityToolkit.Editor")]
+[assembly: InternalsVisibleTo("RealityToolkit")]

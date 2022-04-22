@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RealityToolkit.ServiceFramework.Definitions
 {
     [CreateAssetMenu(menuName = "RealityToolkit/Service Manager/ Root Profile", fileName = "ServiceManagerRootProfile", order = (int)CreateProfileMenuItemIndices.Configuration - 1)]
-    public sealed class ServiceManagerRootProfile : BaseServiceProfile<IService>
+    public class ServiceManagerRootProfile : BaseServiceProfile<IService>
     {
         [SerializeField] 
         [Tooltip("The service manager will do the initialisation of services on play")]

@@ -9,37 +9,37 @@ namespace RealityToolkit.ServiceFramework
     [DisallowMultipleComponent]
     public class ServiceManagerInstance : MonoBehaviour
     {
-        private ServiceManager serviceManagerInstace;
+        private ServiceManager serviceManagerInstance;
 
         public void SubscribetoUnityEvents(ServiceManager serviceManager)
         {
-            serviceManagerInstace = serviceManager;
+            serviceManagerInstance = serviceManager;
         }
 
         #region MonoBehaviour Implementation
 #if UNITY_EDITOR
-        private void OnValidate() => serviceManagerInstace?.OnValidate();
+        private void OnValidate() => serviceManagerInstance?.OnValidate();
 #endif // UNITY_EDITOR
 
-        private void Awake() =>serviceManagerInstace?.Awake();
+        private void Awake() =>serviceManagerInstance?.Awake();
 
-        private void OnEnable() => serviceManagerInstace?.OnEnable();
+        private void OnEnable() => serviceManagerInstance?.OnEnable();
 
-        private void Start() => serviceManagerInstace?.Start();
+        private void Start() => serviceManagerInstance?.Start();
 
-        private void Update() =>serviceManagerInstace?.Update();
+        private void Update() =>serviceManagerInstance?.Update();
 
-        private void LateUpdate() => serviceManagerInstace?.LateUpdate();
+        private void LateUpdate() => serviceManagerInstance?.LateUpdate();
 
-        private void FixedUpdate() => serviceManagerInstace?.FixedUpdate();
+        private void FixedUpdate() => serviceManagerInstance?.FixedUpdate();
 
-        private void OnDisable() => serviceManagerInstace?.OnDisable();
+        private void OnDisable() => serviceManagerInstance?.OnDisable();
 
-        internal void OnDestroy() => serviceManagerInstace?.OnDestroy();
+        internal void OnDestroy() => serviceManagerInstance?.OnDestroy();
 
-        private void OnApplicationFocus(bool focus) => serviceManagerInstace?.OnApplicationFocus(focus);
+        private void OnApplicationFocus(bool focus) => serviceManagerInstance?.OnApplicationFocus(focus);
 
-        private void OnApplicationPause(bool pause) => serviceManagerInstace?.OnApplicationPause(pause);
+        private void OnApplicationPause(bool pause) => serviceManagerInstance?.OnApplicationPause(pause);
 
         #endregion MonoBehaviour Implementation
     }
