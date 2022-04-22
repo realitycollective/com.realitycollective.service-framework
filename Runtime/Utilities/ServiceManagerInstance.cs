@@ -7,7 +7,7 @@ namespace RealityToolkit.ServiceFramework
 {
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class MonoBehaviourRelay : MonoBehaviour
+    public class ServiceManagerInstance : MonoBehaviour
     {
         private ServiceManager serviceManagerInstace;
 

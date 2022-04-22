@@ -18,7 +18,7 @@ namespace RealityToolkit.ServiceFramework.Services
     [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
-        private MonoBehaviourRelay monoBehaviourGameObject;
+        private ServiceManagerInstance serviceManagerInstanceGameObject;
 
         #region Service Manager Profile properties
 
@@ -169,28 +169,28 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private readonly object InitializedLock = new object();
 
-        public void Initialize(MonoBehaviourRelay monoBase = null)
+        public void Initialize(ServiceManagerInstance instanceGameObject = null)
         {
             instance = null;
-            if (monoBase.IsNull())
+            if (instanceGameObject.IsNull())
             {
-                var foundExistingRelay = GameObject.FindObjectOfType<MonoBehaviourRelay>();
-                if (foundExistingRelay.IsNotNull())
+                var foundExistingInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+                if (foundExistingInstance.IsNotNull())
                 {
-                    monoBehaviourGameObject = foundExistingRelay;
+                    serviceManagerInstanceGameObject = foundExistingInstance;
                 }
                 else
                 {
                     var go = new GameObject("ServiceManagerRelay");
-                    var monoBehaviourInstance = go.AddComponent<MonoBehaviourRelay>();
-                    monoBehaviourGameObject = monoBehaviourInstance;
+                    var serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
+                    serviceManagerInstanceGameObject = serviceManagerInstance;
                 }
             }
             else
             {
-                monoBehaviourGameObject = monoBase;
+                serviceManagerInstanceGameObject = instanceGameObject;
             }
-            monoBehaviourGameObject.SubscribetoUnityEvents(this);
+            serviceManagerInstanceGameObject.SubscribetoUnityEvents(this);
             InitializeInstance();
         }
 
@@ -263,7 +263,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <summary>
         /// Returns whether the instance has been initialized or not.
         /// </summary>
-        public bool IsInitialized => instance != null && monoBehaviourGameObject.IsNotNull();
+        public bool IsInitialized => instance != null && serviceManagerInstanceGameObject.IsNotNull();
 
         /// <summary>
         /// function to determine if the <see cref="ServiceManager"/> class has been initialized or not.
