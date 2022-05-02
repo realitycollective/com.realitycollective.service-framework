@@ -53,12 +53,12 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         [SerializeField]
         [Tooltip("The current active settings for the Service Manager project")]
-        private ServiceManagerRootProfile activeProfile = null;
+        private ServiceProvidersProfile activeProfile = null;
 
         /// <summary>
         /// The public property of the Active Profile, ensuring events are raised on the change of the reference
         /// </summary>
-        public ServiceManagerRootProfile ActiveProfile
+        public ServiceProvidersProfile ActiveProfile
         {
             get
             {
@@ -74,7 +74,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// When a profile is replaced with a new one, force all services to reset and read the new values
         /// </summary>
         /// <param name="profile"></param>
-        public void ResetProfile(ServiceManagerRootProfile profile)
+        public void ResetProfile(ServiceProvidersProfile profile)
         {
             if (Application.isEditor && Application.isPlaying)
             {
@@ -171,6 +171,14 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private readonly object InitializedLock = new object();
 
+        public ServiceManager(GameObject instanceGameObject = null)
+        {
+            if (instanceGameObject.IsNotNull())
+            {
+                Initialize(instanceGameObject);
+            }
+        }
+
         public void Initialize(GameObject instanceGameObject = null)
         {
             instance = null;
@@ -238,9 +246,10 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
 #endif // UNITY_EDITOR
 
+                CheckPlatforms();
+
                 if (HasActiveProfile)
                 {
-                    CheckPlatforms();
                     InitializeServiceLocator();
                 }
             }
@@ -303,7 +312,7 @@ namespace RealityToolkit.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (ActiveProfile == null)
             {
-                Debug.LogError($"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
+                Debug.LogError($"No {nameof(ServiceProvidersProfile)} found, cannot initialize the {nameof(ServiceManager)}");
                 isInitializing = false;
                 return;
             }
@@ -337,9 +346,9 @@ namespace RealityToolkit.ServiceFramework.Services
                 }
             }
 
-            if (ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations != null)
+            if (ActiveProfile?.ServiceConfigurations != null)
             {
-                TryRegisterServiceConfigurations(ActiveProfile.ServiceProvidersProfile?.ServiceConfigurations);
+                TryRegisterServiceConfigurations(ActiveProfile?.ServiceConfigurations);
             }
 
             var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
@@ -1514,7 +1523,7 @@ namespace RealityToolkit.ServiceFramework.Services
             return false;
         }
 
-        public bool IsServiceEnabledInProfile<T>(ServiceManagerRootProfile rootProfile = null)
+        public bool IsServiceEnabledInProfile<T>(ServiceProvidersProfile rootProfile = null)
         {
             if (rootProfile.IsNull())
             {
@@ -1578,7 +1587,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="profile">The profile instance.</param>
         /// <param name="rootProfile">Optional root profile reference.</param>
         /// <returns>True if a <see cref="TSystem"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
-        public bool TryGetSystemProfile<TService, TProfile>(out TProfile profile, ServiceManagerRootProfile rootProfile = null)
+        public bool TryGetSystemProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
             where TService : IService
             where TProfile : BaseProfile
         {

@@ -50,7 +50,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.AreEqual(0, ServiceManager.Instance.ActiveServices.Count, "Service Manager services were found where none should exist");
             Assert.IsFalse(ServiceManager.Instance.HasActiveProfile, "Profile found for the Service Manager where none should exist");
             Assert.IsNull(ServiceManager.Instance.ActiveProfile, "Profile found for the Service Manager where none should exist for instance");
-            LogAssert.Expect(LogType.Error, $"No {nameof(ServiceManagerRootProfile)} found, cannot initialize the {nameof(ServiceManager)}");
+            LogAssert.Expect(LogType.Error, $"No {nameof(ServiceProvidersProfile)} found, cannot initialize the {nameof(ServiceManager)}");
         }
         
         [Test]

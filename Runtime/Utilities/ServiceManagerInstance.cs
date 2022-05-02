@@ -1,6 +1,7 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Services;
 using UnityEngine;
 
@@ -12,6 +13,19 @@ namespace RealityToolkit.ServiceFramework
     {
         private ServiceManager serviceManagerInstance;
 
+        [SerializeField]
+        [Tooltip("All the additional non-required services registered with the Service Manager.")]
+        private ServiceProvidersProfile serviceProvidersProfile = null;
+
+        /// <summary>
+        /// All the additional non-required systems, features, and managers registered with the Service Manager.
+        /// </summary>
+        public ServiceProvidersProfile ServiceProvidersProfile
+        {
+            get => serviceManagerInstance.ActiveProfile;
+            internal set => serviceManagerInstance.ResetProfile(value);
+        }
+
         public void SubscribetoUnityEvents(ServiceManager serviceManager)
         {
             serviceManagerInstance = serviceManager;
@@ -19,10 +33,26 @@ namespace RealityToolkit.ServiceFramework
 
         #region MonoBehaviour Implementation
 #if UNITY_EDITOR
-        private void OnValidate() => serviceManagerInstance?.OnValidate();
+        private void OnValidate()
+        {
+            if (serviceProvidersProfile != null && 
+                (serviceManagerInstance?.ActiveProfile == null || 
+                serviceManagerInstance?.ActiveProfile != serviceProvidersProfile))
+            {
+                serviceManagerInstance.ResetProfile(serviceProvidersProfile);
+            }
+            serviceManagerInstance?.OnValidate();
+        }
 #endif // UNITY_EDITOR
 
-        private void Awake() =>serviceManagerInstance?.Awake();
+        private void Awake()
+        {
+            if (serviceManagerInstance == null)
+            {
+                serviceManagerInstance = new ServiceManager(this.gameObject);
+            }
+            serviceManagerInstance?.Awake();
+        }
 
         private void OnEnable() => serviceManagerInstance?.OnEnable();
 

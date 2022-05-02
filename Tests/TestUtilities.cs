@@ -41,15 +41,15 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
             Assert.IsNotNull(serviceManager);
             Assert.IsFalse(serviceManager.HasActiveProfile);
 
-            ServiceManagerRootProfile configuration;
+            ServiceProvidersProfile configuration;
 
             if (useDefaultProfile)
             {
-                configuration = GetDefaultServiceManagerProfile<ServiceManagerRootProfile>();
+                configuration = GetDefaultServiceManagerProfile<ServiceProvidersProfile>();
             }
             else
             {
-                configuration = ScriptableObject.CreateInstance<ServiceManagerRootProfile>();
+                configuration = ScriptableObject.CreateInstance<ServiceProvidersProfile>();
             }
 
             Assert.IsTrue(configuration != null, "Failed to find the Service Manager Profile");
