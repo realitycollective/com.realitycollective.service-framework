@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
+using NUnit.Framework;
+using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Linq;
-using NUnit.Framework;
 using System.Threading.Tasks;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Services;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using XRTK.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Tests.Utilities
 {

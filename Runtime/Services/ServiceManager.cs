@@ -1,15 +1,17 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
+using XRTK.Extensions;
+using XRTK.Utilities.Async;
 using Debug = UnityEngine.Debug;
 
 namespace RealityToolkit.ServiceFramework.Services
@@ -1660,7 +1662,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    XRTK.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )

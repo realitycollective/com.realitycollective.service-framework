@@ -1,6 +1,11 @@
-﻿// Copyright (c) XRTK. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Editor.Utilities;
+using RealityToolkit.ServiceFramework.Interfaces;
+using RealityToolkit.ServiceFramework.Providers;
+using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,15 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Providers;
-using RealityToolkit.ServiceFramework.Services;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using XRTK.Editor;
+using XRTK.Extensions;
 using Assembly = System.Reflection.Assembly;
 
 // TODO
@@ -95,7 +96,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                 return;
             }
 
-            var templatePath = $"{PathFinderUtility.AbsoluteFolderPath}\\Editor\\Templates~"; ;
+            var templatePath = $"{ServiceFrameworkFinderUtility.AbsoluteFolderPath}\\Editor\\Templates~"; ;
 
             window = CreateInstance<ServiceWizard>();
             window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE);
@@ -170,7 +171,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                 outputPath = EditorUtility.OpenFolderPanel("Generation Location", outputPath, string.Empty);
                 var namespaceRoot = $"{Application.productName.Replace("-Core", string.Empty)}";
 
-                @namespace = outputPath.Replace($"{Directory.GetParent(Application.dataPath).FullName.ToBackSlashes()}/", string.Empty);
+                @namespace = outputPath.Replace($"{Directory.GetParent(Application.dataPath).FullName.BackSlashes()}/", string.Empty);
 
                 if (@namespace.StartsWith("Assets/"))
                 {
@@ -587,13 +588,17 @@ namespace RealityToolkit.ServiceFramework.Editor
             return types;
         }
 
-        [MenuItem("xRealityLabs/ServiceGenerator/Create new service")]
+        const string createNewServiceMenuItemName = MixedRealityPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new service";
+
+        [MenuItem(createNewServiceMenuItemName)]
         private static void CreateNewService()
         {
             ServiceWizard.ShowNewServiceWizard(typeof(IService));
         }
 
-        [MenuItem("xRealityLabs/ServiceGenerator/Create new data provider")]
+        const string createNewDataProviderMenuItemName = MixedRealityPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new data provider";
+
+        [MenuItem(createNewDataProviderMenuItemName)]
         private static void CreateNewDataProvider()
         {
             ServiceWizard.ShowNewServiceWizard(typeof(IServiceDataProvider));

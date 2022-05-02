@@ -1,4 +1,5 @@
-﻿// Copyright (c) xRealityLabs. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,9 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
         /// </summary>
         string Location { get; }
     }
-    public class PathFinderUtility
+    public class ServiceFrameworkFinderUtility
     {
-        private const string CORE_PATH_FINDER = "/Editor/Utilities/CorePathFinder.cs";
+        private const string SERVICE_FRAMEWORK_PATH_FINDER = "/Editor/Utilities/ServiceFrameworkPathFinder.cs";
         
         private static readonly Dictionary<string, string> ResolvedFinderCache = new Dictionary<string, string>();
         private static List<Type> GetAllPathFinders
@@ -63,7 +64,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
         {
             get
             {
-                string resolvePath = ResolvePath(CORE_PATH_FINDER);
+                string resolvePath = ResolvePath(SERVICE_FRAMEWORK_PATH_FINDER);
                 return Path.GetFullPath(resolvePath);
             }
         }
