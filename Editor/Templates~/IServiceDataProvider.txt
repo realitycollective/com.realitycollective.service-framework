@@ -1,0 +1,7 @@
+﻿#USING#
+
+namespace #NAMESPACE#.Interfaces.#NAME#
+{
+    public interface I#NAME# : IServiceDataProvider
+    {}
+}

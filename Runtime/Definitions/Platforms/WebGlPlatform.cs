@@ -25,10 +25,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 #if UNITY_EDITOR
 
         /// <inheritdoc />
-        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
-        {
-            UnityEditor.BuildTarget.WebGL
-        };
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } = { UnityEditor.BuildTarget.WebGL };
 
 #endif // UNITY_EDITOR
     }

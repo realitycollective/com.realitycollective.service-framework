@@ -12,22 +12,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 using XRTK.Editor;
 using XRTK.Extensions;
 using Assembly = System.Reflection.Assembly;
-
-// TODO
-// Needs Service Interface name definition? - or just use name - done
-// Generate Service Interface type - done
-// Generate Data Provider Interface Type - test
-// Generate Event Data Type
-// Generate Service Event Profile
-// Remove "Service" from name if entered - done
-// Check Service has entry for EventsProfile
 
 namespace RealityToolkit.ServiceFramework.Editor
 {
@@ -77,8 +67,6 @@ namespace RealityToolkit.ServiceFramework.Editor
         private string profileTemplatePath;
         private string instanceTemplatePath;
         private string interfaceTemplatePath;
-        private string dataTemplatePath;
-        private string eventsTemplatePath;
         private string outputPath = string.Empty;
         private string @namespace = string.Empty;
         private string instanceName = string.Empty;
@@ -118,8 +106,6 @@ namespace RealityToolkit.ServiceFramework.Editor
                     window.profileTemplatePath = $"{templatePath}\\ServiceProfile.txt";
                     window.instanceTemplatePath = $"{templatePath}\\Service.txt";
                     window.interfaceTemplatePath = $"{templatePath}\\IService.txt";
-                    window.dataTemplatePath = $"{templatePath}\\ServiceData.txt";
-                    window.eventsTemplatePath = $"{templatePath}\\ServiceEventsProfile.txt";
                     window.instanceBaseType = typeof(BaseServiceWithConstructor);
                     window.profileBaseType = typeof(BaseServiceProfile<>);
                     break;
@@ -142,7 +128,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             if (string.IsNullOrWhiteSpace(outputPath))
             {
                 outputPath = Application.dataPath;
-                @namespace = $"{Application.productName.Replace("-Core", string.Empty)}";
+                @namespace = $"{Application.productName}";
             }
 
             var interfaceStrippedName = interfaceType.Name.Replace("I", string.Empty);
@@ -169,25 +155,6 @@ namespace RealityToolkit.ServiceFramework.Editor
             if (GUILayout.Button("Choose the output path"))
             {
                 outputPath = EditorUtility.OpenFolderPanel("Generation Location", outputPath, string.Empty);
-                var namespaceRoot = $"{Application.productName.Replace("-Core", string.Empty)}";
-
-                @namespace = outputPath.Replace($"{Directory.GetParent(Application.dataPath).FullName.BackSlashes()}/", string.Empty);
-
-                if (@namespace.StartsWith("Assets/"))
-                {
-                    @namespace = @namespace.Replace("Assets/", $"{namespaceRoot}/");
-                }
-                else if (@namespace.StartsWith("Packages/"))
-                {
-                    var isEditor = @namespace.Contains("Editor/") ? "Editor/" : string.Empty;
-                    @namespace = Regex.Replace(@namespace, "(?<path>(Packages.*Runtime.)|(Packages.*Editor.))", $"{namespaceRoot}/{isEditor}");
-                }
-                else
-                {
-                    Debug.LogError($"Failed to find a valid {nameof(outputPath)}");
-                }
-
-                @namespace = @namespace.Replace("/", ".");
             }
 
             EditorGUILayout.Space();
@@ -195,8 +162,6 @@ namespace RealityToolkit.ServiceFramework.Editor
 
             EditorGUI.BeginChangeCheck();
             instanceName = EditorGUILayout.TextField("Instance Name", instanceName);
-            // Remove service from name if entered, as the generator adds this in instead.
-            instanceName = instanceName.Replace("Service", string.Empty);
 
             GUILayout.FlexibleSpace();
 
@@ -228,14 +193,14 @@ namespace RealityToolkit.ServiceFramework.Editor
 
                         if (interfaceType.Name.Contains("DataProvider"))
                         {
-                            var parentInterfaceName = instanceName.Replace("DataProvider", "System");
+                            string parentInterfaceName = instanceName.Replace("DataProvider", "Service");
 
-                            parentInterfaceType = GetType(parentInterfaceName);
+                            //parentInterfaceType = GetType(parentInterfaceName);
 
-                            if (parentInterfaceType == null)
-                            {
-                                parentInterfaceName = instanceName.Replace("DataProvider", "Service");
-                            }
+                            //if (parentInterfaceType == null)
+                            //{
+                            //    parentInterfaceName = instanceName.Replace("DataProvider", "Service");
+                            //}
 
                             parentInterfaceType = GetType($"I{parentInterfaceName}");
 
@@ -330,8 +295,6 @@ namespace RealityToolkit.ServiceFramework.Editor
                         if (profileBaseTypeName != nameof(BaseProfile))
                         {
                             GenerateProfile(profileBaseTypeName, usingList);
-                            GenerateEventData();
-                            GenerateEventsProfile();
                         }
                     }
                     catch (Exception e)
@@ -355,8 +318,8 @@ namespace RealityToolkit.ServiceFramework.Editor
         {
             usingList.Clear();
 
-            usingList.EnsureListItem("xRrealityLabs.XRFoundation.Definitions");
-            usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
+            usingList.EnsureListItem("RealityToolkit.ServiceFramework.Interfaces");
+            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
 
             var @using = usingList.Aggregate(string.Empty, (current, item) => $"{current}{Environment.NewLine}using {item};");
 
@@ -372,10 +335,10 @@ namespace RealityToolkit.ServiceFramework.Editor
         private string GenerateService(string newInterfaceName, List<string> usingList, Type parentInterfaceType, string implements, string profileBaseTypeName)
         {
             usingList.EnsureListItem(profileBaseType.Namespace);
-            usingList.EnsureListItem("xRrealityLabs.XRFoundation.Extensions");
-            usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
-            usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Interfaces.{instanceName}");
-            usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Profiles.{instanceName}");
+            //usingList.EnsureListItem("xRrealityLabs.XRFoundation.Extensions");
+            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
+            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Interfaces.{instanceName}");
+            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Profiles.{instanceName}");
 
             usingList.Sort();
 
@@ -392,7 +355,8 @@ namespace RealityToolkit.ServiceFramework.Editor
             instanceTemplate = instanceTemplate.Replace(IMPLEMENTS, implements);
             instanceTemplate = instanceTemplate.Replace(PROFILE, profileBaseTypeName);
 
-            var fileName = interfaceType.Name.Contains("DataProvider") ? $"{instanceName}.cs" : $"{instanceName}Service.cs";
+            var fileName = interfaceType.Name.Contains("DataProvider") ? $"{instanceName}.cs" : $"{instanceName}.cs";
+//            var fileName = interfaceType.Name.Contains("DataProvider") ? $"{instanceName}.cs" : $"{instanceName}Service.cs";
             File.WriteAllText($"{outputPath}/{fileName}", instanceTemplate);
             return @using;
         }
@@ -402,7 +366,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             usingList.Clear();
 
             usingList.EnsureListItem(profileBaseType.Namespace);
-            usingList.EnsureListItem("xRrealityLabs.XRFoundation.Interfaces");
+            usingList.EnsureListItem("RealityToolkit.ServiceFramework.Interfaces");
             usingList.EnsureListItem("UnityEngine");
 
             usingList.Sort();
@@ -415,25 +379,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             profileTemplate = profileTemplate.Replace(NAME, instanceName);
             profileTemplate = profileTemplate.Replace(BASE, profileBaseTypeName);
 
-            File.WriteAllText($"{outputPath}/{instanceName}ServiceProfile.cs", profileTemplate);
-        }
-
-        private void GenerateEventData()
-        {
-            var eventsTemplate = File.ReadAllText(dataTemplatePath ?? throw new InvalidOperationException());
-            eventsTemplate = eventsTemplate.Replace(NAMESPACE, @namespace);
-            eventsTemplate = eventsTemplate.Replace(NAME, instanceName);
-
-            File.WriteAllText($"{outputPath}/{instanceName}Data.cs", eventsTemplate);
-        }
-
-        private void GenerateEventsProfile()
-        {
-            var eventsProfileTemplate = File.ReadAllText(eventsTemplatePath ?? throw new InvalidOperationException());
-            eventsProfileTemplate = eventsProfileTemplate.Replace(NAMESPACE, @namespace);
-            eventsProfileTemplate = eventsProfileTemplate.Replace(NAME, instanceName);
-
-            File.WriteAllText($"{outputPath}/{instanceName}EventsProfile.cs", eventsProfileTemplate);
+            File.WriteAllText($"{outputPath}/{instanceName}Profile.cs", profileTemplate);
         }
 
         private static string FormatMemberInfo(MemberInfo memberInfo, ref List<string> usingList)

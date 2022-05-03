@@ -15,13 +15,13 @@ namespace RealityToolkit.ServiceFramework.Definitions
     {
         /// <inheritdoc />
         public ServiceConfiguration(IServiceConfiguration configuration)
-            : base(configuration.InstancedType, configuration.Name, configuration.Priority, configuration.Profile)
+            : base(configuration.InstancedType, configuration.Name, configuration.Priority, configuration.RuntimePlatforms, configuration.Profile)
         {
         }
 
         /// <inheritdoc />
-        public ServiceConfiguration(SystemType instancedType, string name, uint priority, BaseProfile profile)
-            : base(instancedType, name, priority, profile)
+        public ServiceConfiguration(SystemType instancedType, string name, uint priority, IReadOnlyList<IPlatform> runtimePlatforms, BaseProfile profile)
+            : base(instancedType, name, priority, runtimePlatforms, profile)
         {
         }
 
@@ -45,11 +45,24 @@ namespace RealityToolkit.ServiceFramework.Definitions
         /// <param name="name">The simple, human readable name for the <see cref="IService"/>.</param>
         /// <param name="priority">The priority this <see cref="IService"/> will be initialized in.</param>
         /// <param name="profile">The <see cref="BaseServiceProfile"/> for <see cref="IService"/>.</param>
-        public ServiceConfiguration(SystemType instancedType, string name, uint priority, BaseProfile profile)
+        public ServiceConfiguration(SystemType instancedType, string name, uint priority, IReadOnlyList<IPlatform> runtimePlatforms, BaseProfile profile)
         {
             this.instancedType = instancedType;
             this.name = name;
             this.priority = priority;
+
+            if (runtimePlatforms != null)
+            {
+                this.runtimePlatforms = new List<IPlatform>(runtimePlatforms.Count);
+
+                for (int i = 0; i < runtimePlatforms.Count; i++)
+                {
+                    this.runtimePlatforms.Add(runtimePlatforms[i]);
+                }
+
+                platformEntries = new RuntimePlatformEntry(runtimePlatforms);
+            }
+
             this.profile = profile;
         }
 

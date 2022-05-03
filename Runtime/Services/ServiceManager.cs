@@ -22,6 +22,10 @@ namespace RealityToolkit.ServiceFramework.Services
     {
         private GameObject serviceManagerInstanceGameObject;
 
+        private Guid serviceManagerInstanceGuid;
+
+        public Guid ServiceManagerInstanceGuid => serviceManagerInstanceGuid;
+
         #region Service Manager Profile properties
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace RealityToolkit.ServiceFramework.Services
                     return false;
                 }
 
-                return instance.ActiveProfile != null;
+                return ActiveProfile != null;
             }
         }
 
@@ -138,20 +142,30 @@ namespace RealityToolkit.ServiceFramework.Services
         #region Service Manager runtime platform registry
 
         // ReSharper disable once InconsistentNaming
-        private readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
+        private static readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
 
         /// <summary>
         /// The list of active platforms detected by the <see cref="ServiceManager"/>.
         /// </summary>
-        public IReadOnlyList<IPlatform> AvailablePlatforms => availablePlatforms;
+        public static IReadOnlyList<IPlatform> AvailablePlatforms
+        {
+            get
+            {
+                if (availablePlatforms.Count == 0)
+                {
+                    CheckPlatforms();
+                }
+                return availablePlatforms;
+            }
+        }
 
         // ReSharper disable once InconsistentNaming
-        private readonly List<IPlatform> activePlatforms = new List<IPlatform>();
+        private static readonly List<IPlatform> activePlatforms = new List<IPlatform>();
 
         /// <summary>
         /// The list of active platforms detected by the <see cref="ServiceManager"/>.
         /// </summary>
-        public IReadOnlyList<IPlatform> ActivePlatforms => activePlatforms;
+        public static IReadOnlyList<IPlatform> ActivePlatforms => activePlatforms;
 
         #endregion Service Manager runtime platform registry
 
@@ -159,8 +173,6 @@ namespace RealityToolkit.ServiceFramework.Services
 
         /// <summary>
         /// Returns the Singleton instance of the classes type.
-        /// If no instance is found, then we search for an instance in the scene.
-        /// If more than one instance is found, we log an error and no instance is returned.
         /// </summary>
         public static ServiceManager Instance => instance;
 
@@ -171,45 +183,65 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         private readonly object InitializedLock = new object();
 
-        public ServiceManager(GameObject instanceGameObject = null)
+        /// <summary>
+        /// Constructor
+        /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="ServiceManagerInstance"/> will be created for you.
+        /// </summary>
+        /// <remarks>
+        /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
+        /// </remarks>
+        /// <param name="instanceGameObject"></param>
+        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
         {
             if (instanceGameObject.IsNotNull())
             {
-                Initialize(instanceGameObject);
+                Initialize(instanceGameObject, profile);
             }
         }
 
-        public void Initialize(GameObject instanceGameObject = null)
+        public void Initialize(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
         {
             instance = null;
+            serviceManagerInstanceGuid = Guid.NewGuid();
+
             ServiceManagerInstance serviceManagerInstance;
 
-            if (instanceGameObject.IsNull())
+            if (serviceManagerInstanceGameObject.IsNull())
             {
-                serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
-                if (serviceManagerInstance.IsNull())
+                if (instanceGameObject.IsNull())
                 {
-                    var go = new GameObject("ServiceManagerRelay");
-                    serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
-                    serviceManagerInstanceGameObject = serviceManagerInstance.gameObject;
+                    serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+                    if (serviceManagerInstance.IsNull())
+                    {
+                        var go = new GameObject(nameof(ServiceManager));
+                        serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
+                        serviceManagerInstanceGameObject = serviceManagerInstance.gameObject;
+                    }
+                    serviceManagerInstance.SubscribetoUnityEvents(this);
                 }
-                serviceManagerInstance.SubscribetoUnityEvents(this);
-            }
-            else
-            {
-                serviceManagerInstanceGameObject = instanceGameObject;
+                else
+                {
+                    serviceManagerInstanceGameObject = instanceGameObject;
+                }
             }
 
-            InitializeInstance();
+            InitializeInstance(profile);
         }
 
-        private void InitializeInstance()
+        private void InitializeInstance(ServiceProvidersProfile profile)
         {
             lock (InitializedLock)
             {
+                if (IsInitialized && instance != this)
+                {
+                    Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
+                    Debug.Log($"Instance [{instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
+                }
+
                 if (IsInitialized) { return; }
 
                 instance = this;
+                activeProfile = profile;
 
                 Application.quitting += () =>
                 {
@@ -328,24 +360,6 @@ namespace RealityToolkit.ServiceFramework.Services
 
             ClearSystemCache();
 
-            foreach (var configuration in ActiveProfile.ServiceConfigurations)
-            {
-                if (configuration.Enabled)
-                {
-                    if (TryCreateAndRegisterService(configuration, out var service) && service != null)
-                    {
-                        if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile)
-                        {
-                            TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, service);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError($"Failed to start {configuration.Name}!");
-                    }
-                }
-            }
-
             if (ActiveProfile?.ServiceConfigurations != null)
             {
                 TryRegisterServiceConfigurations(ActiveProfile?.ServiceConfigurations);
@@ -378,12 +392,6 @@ namespace RealityToolkit.ServiceFramework.Services
         #endregion
 
         #region MonoBehaviour Implementation
-
-        public void SubscribetoUnityEvents(GameObject subscriptionObject)
-        {
-            // Add relay component at runtime
-            //AsyncCallback function to wire up events passing "this"
-        }
 
 #if UNITY_EDITOR
         internal void OnValidate()
@@ -1117,7 +1125,7 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             if (!IsInitialized ||
                 IsApplicationQuitting ||
-                instance.ActiveProfile.IsNull())
+                ActiveProfile.IsNull())
             {
                 return default;
             }
@@ -1527,7 +1535,7 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             if (rootProfile.IsNull())
             {
-                rootProfile = instance.ActiveProfile;
+                rootProfile = ActiveProfile;
             }
 
             if (!rootProfile.IsNull() && rootProfile.ServiceConfigurations != null)
@@ -1593,7 +1601,7 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             if (rootProfile.IsNull())
             {
-                rootProfile = instance.activeProfile;
+                rootProfile = ActiveProfile;
             }
 
             if (!rootProfile.IsNull())
@@ -1639,7 +1647,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <summary>
         /// Check which platforms are active and available.
         /// </summary>
-        internal void CheckPlatforms()
+        internal static void CheckPlatforms()
         {
             activePlatforms.Clear();
             availablePlatforms.Clear();

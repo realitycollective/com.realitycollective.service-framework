@@ -168,9 +168,9 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 menu.AddItem(isAllPlatformsActive ? EditorContent : EditorBuildTargetContent, isAllPlatformsActive || editorBuildTargetIsActive, OnEditorSelected, null);
                 menu.AddSeparator(string.Empty);
 
-                for (var i = 0; i < ServiceManager.Instance.AvailablePlatforms.Count; i++)
+                for (var i = 0; i < ServiceManager.AvailablePlatforms.Count; i++)
                 {
-                    var platform = ServiceManager.Instance.AvailablePlatforms[i];
+                    var platform = ServiceManager.AvailablePlatforms[i];
                     var platformType = platform.GetType();
 
                     if (platformType == AllPlatformsType ||
@@ -307,9 +307,9 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 {
                     runtimePlatformsProperty.ClearArray();
 
-                    for (int i = 0; i < ServiceManager.Instance.AvailablePlatforms.Count; i++)
+                    for (int i = 0; i < ServiceManager.AvailablePlatforms.Count; i++)
                     {
-                        var platformType = ServiceManager.Instance.AvailablePlatforms[i].GetType();
+                        var platformType = ServiceManager.AvailablePlatforms[i].GetType();
 
                         if (platformType == AllPlatformsType ||
                             platformType == EditorPlatformType ||
@@ -327,7 +327,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                     {
                         TryRemovePlatformReference(EditorBuildTargetGuid);
 
-                        if (runtimePlatformsProperty.arraySize == ServiceManager.Instance.AvailablePlatforms.Count - 3)
+                        if (runtimePlatformsProperty.arraySize == ServiceManager.AvailablePlatforms.Count - 3)
                         {
                             OnEverythingSelected(null);
                         }
@@ -336,7 +336,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                     {
                         TryAddPlatformReference(EditorBuildTargetGuid);
 
-                        foreach (var platform in ServiceManager.Instance.AvailablePlatforms)
+                        foreach (var platform in ServiceManager.AvailablePlatforms)
                         {
                             if (platform is AllPlatforms ||
                                 platform is EditorPlatform ||
@@ -351,7 +351,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                             }
                         }
 
-                        if (runtimePlatformsProperty.arraySize == ServiceManager.Instance.AvailablePlatforms.Count - 2)
+                        if (runtimePlatformsProperty.arraySize == ServiceManager.AvailablePlatforms.Count - 2)
                         {
                             OnEverythingSelected(null);
                         }
@@ -375,7 +375,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
                 if (!TryRemovePlatformReference(selectedTypeGuid))
                 {
-                    if (runtimePlatformsProperty.arraySize == ServiceManager.Instance.AvailablePlatforms.Count - 3)
+                    if (runtimePlatformsProperty.arraySize == ServiceManager.AvailablePlatforms.Count - 3)
                     {
                         OnEverythingSelected(null);
                     }
@@ -427,9 +427,9 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 {
                     runtimePlatformsProperty.ClearArray();
 
-                    for (int j = 0; j < ServiceManager.Instance.AvailablePlatforms.Count; j++)
+                    for (int j = 0; j < ServiceManager.AvailablePlatforms.Count; j++)
                     {
-                        var platformType = ServiceManager.Instance.AvailablePlatforms[j].GetType();
+                        var platformType = ServiceManager.AvailablePlatforms[j].GetType();
 
                         if (platformType != selectedPlatformType &&
                             platformType != AllPlatformsType &&

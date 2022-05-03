@@ -18,8 +18,8 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
         {
             if (serviceManager == null)
             {
-                serviceManager = new ServiceManager();
-                serviceManager.Initialize();
+                GameObject manager = new GameObject("TestServiceManager");
+                serviceManager = new ServiceManager(manager);
             }
             serviceManager.ConfirmInitialized();
         }
@@ -29,10 +29,12 @@ namespace RealityToolkit.ServiceFramework.Tests.Utilities
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
         }
 
-        public static void InitializeServiceManagerScene(ServiceManager serviceManager = null, bool useDefaultProfile = false)
+        public static void InitializeServiceManagerScene(ref ServiceManager serviceManager, bool useDefaultProfile = false)
         {
             // Setup
+            serviceManager = null;
             CleanupScene();
+
             InitializeServiceManager(ref serviceManager);
             Assert.AreEqual(0, serviceManager.ActiveServices.Count);
 

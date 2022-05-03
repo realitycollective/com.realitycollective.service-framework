@@ -63,7 +63,7 @@ namespace RealityToolkit.ServiceFramework.Definitions
                     {
                         var serviceConfig = serviceConfigurations[i];
                         Debug.Assert(serviceConfig != null);
-                        var newConfig = new ServiceConfiguration(serviceConfig.InstancedType, serviceConfig.Name, serviceConfig.Priority, serviceConfig.Profile);
+                        var newConfig = new ServiceConfiguration(serviceConfig.InstancedType, serviceConfig.Name, serviceConfig.Priority, serviceConfig.RuntimePlatforms, serviceConfig.Profile);
                         Debug.Assert(newConfig != null);
                         configurations[i] = newConfig;
                     }

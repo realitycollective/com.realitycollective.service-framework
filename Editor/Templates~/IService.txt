@@ -1,0 +1,7 @@
+﻿#USING#
+
+namespace #NAMESPACE#.Interfaces
+{
+    public interface #INTERFACE# : IService
+    { }
+}

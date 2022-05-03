@@ -1,0 +1,80 @@
+using #NAMESPACE#.Interfaces;
+#USING#
+
+namespace #NAMESPACE#
+{
+    [System.Runtime.InteropServices.Guid("#GUID#")]
+    public class #NAME# : #BASE#, #INTERFACE#
+    {
+        public #NAME#(string name, uint priority, #NAME#Profile profile)
+            : base(name, priority)
+        {
+        }
+        
+        /// <inheritdoc />
+        public override void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Start()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Enable()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Update()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void LateUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void FixedUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Disable()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void Destroy()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void OnApplicationFocus(bool isFocused)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override void OnApplicationPause(bool isPaused)
+        {
+            throw new NotImplementedException();
+        }        
+    }
+}
