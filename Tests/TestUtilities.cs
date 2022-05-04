@@ -2,13 +2,13 @@
 
 using NUnit.Framework;
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using XRTK.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Tests.Utilities
 {

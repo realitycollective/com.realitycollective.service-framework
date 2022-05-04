@@ -3,12 +3,12 @@
 
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
+using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
-using XRTK.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 {

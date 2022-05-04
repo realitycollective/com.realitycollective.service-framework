@@ -3,6 +3,7 @@
 
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Editor.Utilities;
+using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Providers;
 using RealityToolkit.ServiceFramework.Services;
@@ -15,8 +16,6 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
-using XRTK.Editor;
-using XRTK.Extensions;
 using Assembly = System.Reflection.Assembly;
 
 namespace RealityToolkit.ServiceFramework.Editor
@@ -36,6 +35,8 @@ namespace RealityToolkit.ServiceFramework.Editor
         private const string INTERFACE = "#INTERFACE#";
         private const string IMPLEMENTS = "#IMPLEMENTS#";
         private const string PARENT_INTERFACE = "#PARENT_INTERFACE#";
+
+        private const string Editor_Menu_Keyword = "Reality Toolkit";
 
         private static ServiceWizard window = null;
 
@@ -534,7 +535,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             return types;
         }
 
-        const string createNewServiceMenuItemName = MixedRealityPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new service";
+        const string createNewServiceMenuItemName = Editor_Menu_Keyword + "/ServiceGenerator/Create new service";
 
         [MenuItem(createNewServiceMenuItemName)]
         private static void CreateNewService()
@@ -542,7 +543,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             ServiceWizard.ShowNewServiceWizard(typeof(IService));
         }
 
-        const string createNewDataProviderMenuItemName = MixedRealityPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new data provider";
+        const string createNewDataProviderMenuItemName = Editor_Menu_Keyword + "/ServiceGenerator/Create new data provider";
 
         [MenuItem(createNewDataProviderMenuItemName)]
         private static void CreateNewDataProvider()
