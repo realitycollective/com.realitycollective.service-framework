@@ -19,6 +19,9 @@ using XRTK.Editor;
 using XRTK.Extensions;
 using Assembly = System.Reflection.Assembly;
 
+// Need to add parent interface field for creating data provider
+
+
 namespace RealityToolkit.ServiceFramework.Editor
 {
     public class ServiceWizard : EditorWindow
@@ -173,7 +176,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                 {
                     try
                     {
-                        var interfaceName = interfaceType.Name.Contains("DataProvider") ? $"I{instanceName}" : $"I{instanceName}{interfaceStrippedName}";
+                        var interfaceName = $"I{instanceName}";
 
                         var usingList = new List<string>();
 
@@ -194,13 +197,6 @@ namespace RealityToolkit.ServiceFramework.Editor
                         if (interfaceType.Name.Contains("DataProvider"))
                         {
                             string parentInterfaceName = instanceName.Replace("DataProvider", "Service");
-
-                            //parentInterfaceType = GetType(parentInterfaceName);
-
-                            //if (parentInterfaceType == null)
-                            //{
-                            //    parentInterfaceName = instanceName.Replace("DataProvider", "Service");
-                            //}
 
                             parentInterfaceType = GetType($"I{parentInterfaceName}");
 
@@ -319,7 +315,6 @@ namespace RealityToolkit.ServiceFramework.Editor
             usingList.Clear();
 
             usingList.EnsureListItem("RealityToolkit.ServiceFramework.Interfaces");
-            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
 
             var @using = usingList.Aggregate(string.Empty, (current, item) => $"{current}{Environment.NewLine}using {item};");
 
@@ -335,10 +330,6 @@ namespace RealityToolkit.ServiceFramework.Editor
         private string GenerateService(string newInterfaceName, List<string> usingList, Type parentInterfaceType, string implements, string profileBaseTypeName)
         {
             usingList.EnsureListItem(profileBaseType.Namespace);
-            //usingList.EnsureListItem("xRrealityLabs.XRFoundation.Extensions");
-            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.EventDatum.{instanceName}");
-            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Interfaces.{instanceName}");
-            //usingList.EnsureListItem($"xRrealityLabs.XRFoundation.Profiles.{instanceName}");
 
             usingList.Sort();
 
@@ -355,8 +346,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             instanceTemplate = instanceTemplate.Replace(IMPLEMENTS, implements);
             instanceTemplate = instanceTemplate.Replace(PROFILE, profileBaseTypeName);
 
-            var fileName = interfaceType.Name.Contains("DataProvider") ? $"{instanceName}.cs" : $"{instanceName}.cs";
-//            var fileName = interfaceType.Name.Contains("DataProvider") ? $"{instanceName}.cs" : $"{instanceName}Service.cs";
+            var fileName = $"{instanceName}.cs";
             File.WriteAllText($"{outputPath}/{fileName}", instanceTemplate);
             return @using;
         }

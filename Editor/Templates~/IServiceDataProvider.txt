@@ -1,6 +1,6 @@
 ﻿#USING#
 
-namespace #NAMESPACE#.Interfaces.#NAME#
+namespace #NAMESPACE#.Interfaces
 {
     public interface I#NAME# : IServiceDataProvider
     {}
