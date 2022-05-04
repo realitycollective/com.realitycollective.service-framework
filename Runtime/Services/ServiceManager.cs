@@ -13,6 +13,10 @@ using UnityEngine;
 using RealityToolkit.ServiceFramework.Utilities.Async;
 using Debug = UnityEngine.Debug;
 
+// Profile Inspector
+// ServiceGenerator - interfacevalidation
+// Limit Service Type lookups for "testing" - Type Service/DataProvider
+
 namespace RealityToolkit.ServiceFramework.Services
 {
     [ExecuteInEditMode]
@@ -260,15 +264,8 @@ namespace RealityToolkit.ServiceFramework.Services
                             IsApplicationQuitting = false;
                             break;
                         case UnityEditor.PlayModeStateChange.ExitingEditMode:
-                            if (activeProfile.IsNull())
-                            {
-                                Debug.LogError($"{nameof(ServiceManager)} has no active profile! Exiting playmode...");
-                                UnityEditor.EditorApplication.isPlaying = false;
-                            }
-                            break;
                         case UnityEditor.PlayModeStateChange.EnteredPlayMode:
                         case UnityEditor.PlayModeStateChange.ExitingPlayMode:
-                            // Nothing for now.
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(playModeState), playModeState, null);

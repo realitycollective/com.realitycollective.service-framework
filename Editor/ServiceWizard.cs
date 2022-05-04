@@ -18,9 +18,6 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Assembly = System.Reflection.Assembly;
 
-// Need to add parent interface field for creating data provider
-
-
 namespace RealityToolkit.ServiceFramework.Editor
 {
     public class ServiceWizard : EditorWindow
@@ -73,7 +70,9 @@ namespace RealityToolkit.ServiceFramework.Editor
         private string interfaceTemplatePath;
         private string outputPath = string.Empty;
         private string @namespace = string.Empty;
+        private string @parentInterfaceName = string.Empty;
         private string instanceName = string.Empty;
+        private Type parentInterfaceType = null;
 
         public static void ShowNewServiceWizard(Type interfaceType)
         {
@@ -142,6 +141,11 @@ namespace RealityToolkit.ServiceFramework.Editor
                 instanceName = interfaceStrippedName;
             }
 
+            if (string.IsNullOrWhiteSpace(@parentInterfaceName))
+            {
+                @parentInterfaceName = interfaceType.Name.Replace("DataProvider", string.Empty);
+            }
+
             GUILayout.BeginVertical();
 
             GUILayout.Label($"Let's create a {interfaceType.Name}!", EditorStyles.wordWrappedLabel);
@@ -163,6 +167,21 @@ namespace RealityToolkit.ServiceFramework.Editor
 
             EditorGUILayout.Space();
             @namespace = EditorGUILayout.TextField("Namespace", @namespace);
+            if (@namespace.Contains('-'))
+            {
+                @namespace = @namespace.Replace("-", string.Empty);
+            }
+
+            if (interfaceType.Name.Contains("DataProvider"))
+            {
+                @parentInterfaceName = EditorGUILayout.TextField("Parent Service Interface", @parentInterfaceName);
+                //parentInterfaceType = GetType($"{@parentInterfaceName}");
+                //if (parentInterfaceType == null)
+                //{
+                //    EditorGUILayout.TextField("Parent Interface not found");
+                //    return;
+                //}
+            }
 
             EditorGUI.BeginChangeCheck();
             instanceName = EditorGUILayout.TextField("Instance Name", instanceName);
@@ -177,6 +196,21 @@ namespace RealityToolkit.ServiceFramework.Editor
                 {
                     try
                     {
+                        if (@namespace.Contains('-'))
+                        {
+                            @namespace = @namespace.Replace("-", string.Empty);
+                        }
+
+                        if (interfaceType.Name.Contains("DataProvider"))
+                        {
+                            parentInterfaceType = GetType($"{@parentInterfaceName}");
+                            if (parentInterfaceType == null)
+                            {
+                                Debug.Log("Parent Interface not found");
+                                return;
+                            }
+                        }
+
                         var interfaceName = $"I{instanceName}";
 
                         var usingList = new List<string>();
@@ -193,14 +227,9 @@ namespace RealityToolkit.ServiceFramework.Editor
                             usingList.Add(interfaceType.Namespace);
                         }
 
-                        Type parentInterfaceType = null;
 
                         if (interfaceType.Name.Contains("DataProvider"))
                         {
-                            string parentInterfaceName = instanceName.Replace("DataProvider", "Service");
-
-                            parentInterfaceType = GetType($"I{parentInterfaceName}");
-
                             if (parentInterfaceType != null)
                             {
                                 if (!usingList.Contains(parentInterfaceType.Namespace))
