@@ -2,9 +2,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using System;
-using XRTK.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Services
 {

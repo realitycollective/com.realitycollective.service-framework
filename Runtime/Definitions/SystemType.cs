@@ -3,7 +3,7 @@
 
 using System;
 using UnityEngine;
-using XRTK.Extensions;
+using RealityToolkit.ServiceFramework.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Definitions
 {

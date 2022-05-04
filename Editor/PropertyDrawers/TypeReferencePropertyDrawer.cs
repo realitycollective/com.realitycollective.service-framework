@@ -3,13 +3,13 @@
 
 using RealityToolkit.ServiceFramework.Attributes;
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
-using XRTK.Extensions;
 using Assembly = System.Reflection.Assembly;
 
 namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
