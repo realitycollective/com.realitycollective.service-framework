@@ -36,8 +36,6 @@ namespace RealityToolkit.ServiceFramework.Editor
         private const string IMPLEMENTS = "#IMPLEMENTS#";
         private const string PARENT_INTERFACE = "#PARENT_INTERFACE#";
 
-        private const string Editor_Menu_Keyword = "Reality Toolkit";
-
         private static ServiceWizard window = null;
 
         // https://stackoverflow.com/questions/6402864/c-pretty-type-name-function
@@ -554,7 +552,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             return types;
         }
 
-        const string createNewServiceMenuItemName = Editor_Menu_Keyword + "/ServiceGenerator/Create new service";
+        const string createNewServiceMenuItemName = ServiceFrameworkPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new service";
 
         [MenuItem(createNewServiceMenuItemName)]
         private static void CreateNewService()
@@ -562,7 +560,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             ServiceWizard.ShowNewServiceWizard(typeof(IService));
         }
 
-        const string createNewDataProviderMenuItemName = Editor_Menu_Keyword + "/ServiceGenerator/Create new data provider";
+        const string createNewDataProviderMenuItemName = ServiceFrameworkPreferences.Editor_Menu_Keyword + "/ServiceGenerator/Create new data provider";
 
         [MenuItem(createNewDataProviderMenuItemName)]
         private static void CreateNewDataProvider()
