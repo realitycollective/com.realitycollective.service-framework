@@ -1,13 +1,13 @@
 // Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.?
 
+using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Editor.Extensions;
+using RealityToolkit.ServiceFramework.Editor.Utilities;
+using RealityToolkit.ServiceFramework.Extensions;
 using System;
 using UnityEditor;
 using UnityEngine;
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Utilities.Async;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
 
 namespace RealityToolkit.ServiceFramework.Editor.Profiles
 {
@@ -66,11 +66,11 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             if (image.IsNull())
             {
-                MixedRealityInspectorUtility.RenderMixedRealityToolkitLogo();
+                ServiceFrameworkInspectorUtility.RenderMixedRealityToolkitLogo();
             }
             else
             {
-                MixedRealityInspectorUtility.RenderInspectorHeader(image);
+                ServiceFrameworkInspectorUtility.RenderInspectorHeader(image);
             }
 
             if (!ThisProfile.ParentProfile.IsNull() &&
@@ -91,7 +91,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         }
 
         [MenuItem("CONTEXT/BaseProfile/Create Clone from Profile Values", false, 0)]
-        protected static async void CreateCloneProfile()
+        protected static void CreateCloneProfile()
         {
             profileSource = currentlySelectedProfile;
             var newProfile = CreateInstance(currentlySelectedProfile.GetType().ToString());

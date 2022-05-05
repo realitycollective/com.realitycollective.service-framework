@@ -6,7 +6,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Extensions
+namespace RealityToolkit.ServiceFramework.Editor.Extensions
 {
     /// <summary>
     /// Extensions for <see cref="ScriptableObject"/>s

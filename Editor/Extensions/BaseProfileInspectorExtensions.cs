@@ -3,6 +3,7 @@
 
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Extensions;
+using RealityToolkit.ServiceFramework.Editor.Extensions;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -43,6 +44,10 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
             Debug.Assert(!instance.IsNull());
 
             var assetPath = !parentProfile.IsNull() ? AssetDatabase.GetAssetPath(parentProfile) : string.Empty;
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                assetPath = "Assets/";
+            }
             var newProfile = instance.CreateAsset(assetPath) as BaseProfile;
             Debug.Assert(!newProfile.IsNull());
 

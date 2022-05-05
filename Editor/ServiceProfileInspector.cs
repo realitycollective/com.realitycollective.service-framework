@@ -1,13 +1,13 @@
 // Copyright (c) XRTK. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.?
 
-using RealityToolkit.Interfaces;
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Editor.PropertyDrawers;
 using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.Services;
+using RealityToolkit.ServiceFramework.Interfaces;
+using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         /// </summary>
         protected Type ServiceConstraint { get; set; } = null;
 
-        private bool IsSystemConfiguration => typeof(IMixedRealitySystem).IsAssignableFrom(ServiceConstraint);
+        private bool IsSystemConfiguration => typeof(IService).IsAssignableFrom(ServiceConstraint);
 
         private List<Tuple<bool, bool>> configListHeightFlags;
 
@@ -49,6 +49,41 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                 alignment = TextAnchor.MiddleLeft,
                 fontStyle = FontStyle.Bold
             });
+
+        private int platformIndex;
+        private readonly List<IPlatform> platforms = new List<IPlatform>();
+
+        private List<IPlatform> Platforms
+        {
+            get
+            {
+                if (platforms.Count == 0)
+                {
+                    foreach (var availablePlatform in ServiceManager.AvailablePlatforms)
+                    {
+                        if (availablePlatform is AllPlatforms ||
+                            availablePlatform is EditorPlatform ||
+                            availablePlatform is CurrentBuildTargetPlatform)
+                        {
+                            continue;
+                        }
+
+                        platforms.Add(availablePlatform);
+                    }
+
+                    for (var i = 0; i < platforms.Count; i++)
+                    {
+                        if (ServiceFrameworkPreferences.CurrentPlatformTarget.GetType() == platforms[i].GetType())
+                        {
+                            platformIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                return platforms;
+            }
+        }
 
         protected override void OnEnable()
         {
@@ -77,6 +112,8 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             configurationList.onRemoveCallback += OnConfigurationOptionRemoved;
             configurationList.elementHeightCallback += ElementHeightCallback;
             configurationList.onReorderCallback += OnElementReorderedCallback;
+
+            platforms.Clear();
         }
 
         public override void OnInspectorGUI()
@@ -122,7 +159,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             var (isExpanded, hasProfile) = configListHeightFlags[index];
             var modifier = isExpanded
                 ? hasProfile
-                    ? IsSystemConfiguration
+                    ? !IsSystemConfiguration
                         ? 4f
                         : 5.5f
                     : 4f
@@ -260,7 +297,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                     var isValid = !type.IsAbstract &&
                                   type.GetInterfaces().Any(interfaceType => interfaceType == ServiceConstraint);
 
-                    return isValid && (!IsSystemConfiguration || MixedRealityToolkit.Instance.ActiveProfile.RegisteredServiceConfigurations.All(configuration => configuration.InstancedType.Type != type));
+                    return isValid;
                 };
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
@@ -286,7 +323,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                     }
                 }
 
-                if (!IsSystemConfiguration)
+                if (IsSystemConfiguration)
                 {
                     EditorGUI.PropertyField(runtimeRect, platformEntries);
                     runtimePlatforms = platformEntries.FindPropertyRelative(nameof(runtimePlatforms));
@@ -321,12 +358,13 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             {
                 serializedObject.ApplyModifiedProperties();
 
-                if (MixedRealityToolkit.IsInitialized &&
-                    runtimePlatforms.arraySize > 0 &&
-                    systemTypeReference.Type != null)
-                {
-                    MixedRealityToolkit.Instance.ResetProfile(MixedRealityToolkit.Instance.ActiveProfile);
-                }
+                //TODO
+                //if (ServiceManager.Instance.IsInitialized &&
+                //    runtimePlatforms.arraySize > 0 &&
+                //    systemTypeReference.Type != null)
+                //{
+                //    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
+                //}
             }
 
             EditorGUIUtility.wideMode = lastMode;
@@ -364,18 +402,68 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
 
-            if (MixedRealityToolkit.IsInitialized)
+            if (ServiceManager.Instance.IsInitialized)
             {
-                EditorApplication.delayCall += () => MixedRealityToolkit.Instance.ResetProfile(MixedRealityToolkit.Instance.ActiveProfile);
+                EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
         }
 
         private void OnElementReorderedCallback(ReorderableList list)
         {
-            if (MixedRealityToolkit.IsInitialized)
+            if (ServiceManager.Instance.IsInitialized)
             {
-                EditorApplication.delayCall += () => MixedRealityToolkit.Instance.ResetProfile(MixedRealityToolkit.Instance.ActiveProfile);
+                EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
         }
+
+        internal void RenderSystemFields()
+        {
+            var currentPlatform = ServiceFrameworkPreferences.CurrentPlatformTarget;
+
+            for (var i = 0; i < Platforms.Count; i++)
+            {
+                if (currentPlatform.GetType() == Platforms[i].GetType())
+                {
+                    platformIndex = i;
+                    break;
+                }
+            }
+
+            EditorGUI.BeginChangeCheck();
+            var prevPlatformIndex = platformIndex;
+            platformIndex = EditorGUILayout.Popup("Platform Target", platformIndex, Platforms.Select(p => p.Name).ToArray());
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                for (int i = 0; i < Platforms.Count; i++)
+                {
+                    if (i == platformIndex)
+                    {
+                        var platform = Platforms[i];
+
+                        var buildTarget = platform.ValidBuildTargets[0]; // For now just get the highest priority one.
+
+                        if (!EditorUserBuildSettings.SwitchActiveBuildTarget(BuildPipeline.GetBuildTargetGroup(buildTarget), buildTarget))
+                        {
+                            platformIndex = prevPlatformIndex;
+                            Debug.LogWarning($"Failed to switch {platform.Name} active build target to {buildTarget}");
+                        }
+                        else
+                        {
+                            ServiceFrameworkPreferences.CurrentPlatformTarget = platform;
+                        }
+                    }
+                }
+            }
+
+            RenderConfigurationOptions(true);
+
+            serializedObject.Update();
+
+            EditorGUI.BeginChangeCheck();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
     }
 }

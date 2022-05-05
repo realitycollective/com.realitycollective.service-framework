@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Services;
 using RealityToolkit.ServiceFramework.Tests.Interfaces;
@@ -14,7 +15,7 @@ using UnityEngine.TestTools;
 
 namespace RealityToolkit.ServiceFramework.Tests
 {
-    public class TestServiceManager
+    public class TestServiceManagerCode
     {
         private ServiceManager testServiceManager;
 
@@ -96,7 +97,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
         #endregion 01 Service Locater
 
-        #region 02 Service Registration
+        #region 02 Service Registration - Code
 
         [Test]
         public void Test_02_01_RegisterService()
@@ -134,7 +135,49 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
-        #endregion 02 Service Registration
+        #endregion 02 Service Registration - Code
+
+        #region 02 Service Registration - Config
+
+        [Test]
+        public void Test_02_03_RegisterServiceConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), "Test Service1", 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            // Tests
+            Assert.IsTrue(serviceResult, "Test service was not registered");
+            Assert.IsTrue(testService1.ServiceGuid != System.Guid.Empty, "No GUID generated for the test service");
+            Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+
+        [Test]
+        public void Test_02_04_TryRegisterServiceTwiceConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            // Register
+            testServiceManager.TryRegisterService<ITestService>(new TestService1());
+
+            // Register again
+            var testService2 = testServiceManager.TryRegisterService<ITestService>(new TestService1());
+            LogAssert.Expect(LogType.Error, $"There is already a [{nameof(ITestService)}.{TestService1.TestName}] registered!");
+
+            // Tests
+            Assert.IsFalse(testService2, "Test service was registered when it should not have been");
+            Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        #endregion 02 Service Registration - Config
+
 
         #region 03 Data Provider Registration
 

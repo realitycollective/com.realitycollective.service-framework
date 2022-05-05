@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Editor.Profiles;
+using RealityToolkit.ServiceFramework.Editor.Utilities;
 using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using UnityEditor;
@@ -51,18 +53,17 @@ namespace RealityToolkit.ServiceFramework.Editor
 
         public override void OnInspectorGUI()
         {
-            //TODO - LOGO
-            //MixedRealityInspectorUtility.RenderMixedRealityToolkitLogo();
+            ServiceFrameworkInspectorUtility.RenderMixedRealityToolkitLogo();
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.LabelField(new GUIContent("Mixed Reality Toolkit Root Profile", "This profile is the main root configuration for the entire XRTK."));
+            EditorGUILayout.LabelField(new GUIContent("Reality Toolkit Configuration Profile", "This profile is the configuration for the entire Reality Toolkit."));
 
             EditorGUILayout.PropertyField(serviceProvidersProfile, GUIContent.none);
 
             if (serviceProvidersProfile.objectReferenceValue != null)
             {
-                if (GUILayout.Button("Create a new root profile"))
+                if (GUILayout.Button("Create a new configuration profile"))
                 {
                     var rootProfile = CreateInstance<ServiceProvidersProfile>().GetOrCreateAsset();
                     serviceProvidersProfile.objectReferenceValue = rootProfile;
@@ -82,7 +83,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                         EditorGUIUtility.PingObject(target);
                         EditorApplication.delayCall += () =>
                         {
-                            EditorUtility.DisplayDialog("Attention!", "No root profile for the Mixed Reality Toolkit was found.\n\nYou'll need to create a new one.", "OK");
+                            EditorUtility.DisplayDialog("Attention!", "No root profile for the Reality Toolkit was found.\n\nYou'll need to create a new one.", "OK");
                         };
                         break;
                     case 1:
@@ -143,7 +144,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                     profileInspector = CreateEditor(rootProfile);
                 }
 
-                if (profileInspector is ServiceProvidersProfileInspector rootProfileInspector)
+                if (profileInspector is ServiceProfileInspector rootProfileInspector)
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.Space();

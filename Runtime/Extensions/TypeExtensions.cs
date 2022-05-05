@@ -152,7 +152,7 @@ namespace RealityToolkit.ServiceFramework.Extensions
 
             return isValid;
         }
-                
+
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
         {
             if (serviceType == null)
@@ -161,7 +161,8 @@ namespace RealityToolkit.ServiceFramework.Extensions
             }
 
             var returnType = interfaceType;
-            if (interfaceType == null)
+
+            if (typeof(IService).IsAssignableFrom(serviceType))
             {
                 if (!ServiceInterfaceCache.TryGetValue(serviceType, out returnType))
                 {

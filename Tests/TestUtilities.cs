@@ -2,7 +2,7 @@
 
 using NUnit.Framework;
 using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Extensions;
+using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Linq;
