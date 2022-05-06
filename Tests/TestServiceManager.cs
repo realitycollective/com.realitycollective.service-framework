@@ -15,7 +15,7 @@ using UnityEngine.TestTools;
 
 namespace RealityToolkit.ServiceFramework.Tests
 {
-    public class TestServiceManagerCode
+    public class TestServiceManager
     {
         private ServiceManager testServiceManager;
 
@@ -27,7 +27,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             testServiceManager = new ServiceManager();
             testServiceManager.Initialize();
-            LogAssert.Expect(LogType.Warning, $"There are multiple instances of the ServiceManager in this project, is this expected?");
+            //LogAssert.Expect(LogType.Warning, $"There are multiple instances of the ServiceManager in this project, is this expected?");
 
             var confirm = testServiceManager.ConfirmInitialized();
 
@@ -55,12 +55,15 @@ namespace RealityToolkit.ServiceFramework.Tests
         {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var serviceManagerGameObject = new GameObject(nameof(ServiceManager));
-            serviceManagerGameObject.AddComponent<ServiceManagerInstance>();
+            var serviceManagerInstance = serviceManagerGameObject.AddComponent<ServiceManagerInstance>();
+            serviceManagerInstance.InitialiseServiceManager();
 
             var serviceManagerGO = GameObject.Find(nameof(ServiceManager));
             ServiceManagerInstance instance = serviceManagerGO.GetComponent<ServiceManagerInstance>();
+            Assert.IsNotNull(serviceManagerGO, "Unable to find ServiceManager GO");
+            Assert.IsNotNull(instance, "Service Manager class not found on ServiceManager GO");
+            Assert.IsNotNull(instance.Manager, "Service Manager not instantiated on ServiceManagerInstance class");
             Assert.IsTrue(instance.Manager.IsInitialized, "Manager not Initialised");
-
         }
 
         [Test]
@@ -115,9 +118,27 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
+        [Test]
+        public void Test_02_02_RegisterSecondService()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var testService1 = new TestService1();
+            var serviceResult = testServiceManager.TryRegisterService<ITestService>(testService1);
+
+            var testService2 = new TestService2();
+            var serviceResult2 = testServiceManager.TryRegisterService<ITestService2>(testService2);
+
+            // Tests
+            Assert.IsTrue(serviceResult2, "Test service 2 was not registered");
+            Assert.IsTrue(testService2.ServiceGuid == System.Guid.Empty, "GUID found for the second test service when none configured");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }        
 
         [Test]
-        public void Test_02_02_TryRegisterServiceTwice()
+        public void Test_02_03_TryRegisterServiceTwice()
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
@@ -140,46 +161,113 @@ namespace RealityToolkit.ServiceFramework.Tests
         #region 02 Service Registration - Config
 
         [Test]
-        public void Test_02_03_RegisterServiceConfig()
+        public void Test_02_04_RegisterServiceConfig()
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
             ITestService testService1;
-            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), "Test Service1", 1, AllPlatforms.Platforms, null);
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
             var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
 
             // Tests
             Assert.IsTrue(serviceResult, "Test service was not registered");
+            Assert.IsNotNull(testService1, "Test service instance was not returned");
             Assert.IsTrue(testService1.ServiceGuid != System.Guid.Empty, "No GUID generated for the test service");
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
-
         [Test]
-        public void Test_02_04_TryRegisterServiceTwiceConfig()
+        public void Test_02_05_RegisterSecondServiceConfigGeneric()
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register
-            testServiceManager.TryRegisterService<ITestService>(new TestService1());
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
 
-            // Register again
-            var testService2 = testServiceManager.TryRegisterService<ITestService>(new TestService1());
-            LogAssert.Expect(LogType.Error, $"There is already a [{nameof(ITestService)}.{TestService1.TestName}] registered!");
+            ITestService2 testService2;
+            var config2 = new ServiceConfiguration<ITestService2>(typeof(TestService2), "Test Service2", 1, AllPlatforms.Platforms, null);
+            var serviceResult2 = testServiceManager.TryCreateAndRegisterService<ITestService2>(config2, out testService2);            
 
             // Tests
-            Assert.IsFalse(testService2, "Test service was registered when it should not have been");
+            Assert.IsTrue(serviceResult2, "Test service 2 was not registered");
+            Assert.IsNotNull(testService2, "Test service 2 instance was not returned");
+            Assert.IsTrue(testService2.ServiceGuid == System.Guid.Empty, "GUID found for the second test service when none configured");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+
+        [Test]
+        public void Test_02_05_RegisterSecondServiceConfigNonGeneric()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService(config, out testService1);
+
+            ITestService2 testService2;
+            var config2 = new ServiceConfiguration<ITestService2>(typeof(TestService2), "Test Service2", 1, AllPlatforms.Platforms, null);
+            var serviceResult2 = testServiceManager.TryCreateAndRegisterService(config2, out testService2);
+
+            // Tests
+            Assert.IsTrue(serviceResult2, "Test service 2 was not registered");
+            Assert.IsNotNull(testService2, "Test service 2 instance was not returned");
+            Assert.IsTrue(testService2.ServiceGuid == System.Guid.Empty, "GUID found for the second test service when none configured");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_02_06_TryRegisterServiceTwiceConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            ITestService testService2;
+            var config2 = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult2 = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService2);
+            LogAssert.Expect(LogType.Error, "There is already a [ITestService.Test Service 1] registered!");
+
+            // Tests
+            Assert.IsFalse(serviceResult2, "Test service was registered when it should not have been");
+            Assert.IsNotNull(testService2, "Test service 1 instance was not returned when it should have been");
+            Assert.IsTrue(testService2.GetType() == typeof(TestService1), "The wrong type of service was returned");
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_02_07_RegisterServiceConfigurations()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var configurations = new ServiceConfiguration<IService>[2];
+
+            configurations[0] = new ServiceConfiguration<IService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            configurations[1] = new ServiceConfiguration<IService>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, null);
+
+            var result = testServiceManager.TryRegisterServiceConfigurations(configurations);
+
+            // Tests
+            Assert.IsTrue(result, "Test services were not registered");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
         #endregion 02 Service Registration - Config
 
-
-        #region 03 Data Provider Registration
+        #region 03 Data Provider Registration - Code
 
         [Test]
         public void Test_03_01_RegisterServiceAndDataProvider()
@@ -191,7 +279,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
 
-            var testDataProvider = new TestDataProvider1(testService1);
+            var testDataProvider = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             var dataProviderResult = testServiceManager.TryRegisterService<ITestDataProvider1>(testDataProvider);
 
             // Tests
@@ -201,7 +289,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_03_02_RegisterDataProviderMultipleTimes()
+        public void Test_03_02_RegisterMultipleDataProviders()
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
@@ -211,29 +299,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             testServiceManager.TryRegisterService<ITestService>(new TestService1());
 
             // Register
-            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            LogAssert.Expect(LogType.Error, "There is already a [ITestDataProvider1.Test Data Provider 1] registered!");
-
-            // Tests
-            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
-            Assert.IsFalse(dataProvider2Result, "Data Provider 2 was not registered");
-            Assert.AreEqual(activeSystemCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
-        }
-
-        [Test]
-        public void Test_03_03_RegisterMultipleDataProviders()
-        {
-            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
-
-            var activeSystemCount = testServiceManager.ActiveServices.Count;
-
-            var testService1 = new TestService1();
-            testServiceManager.TryRegisterService<ITestService>(new TestService1());
-
-            // Register
-            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Tests
             Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
@@ -242,7 +309,7 @@ namespace RealityToolkit.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_03_04_RegisterDataProviderInMultipleServices()
+        public void Test_03_03_RegisterDataProviderInMultipleServices()
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
@@ -251,12 +318,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register Service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(new TestService1());
-            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register Service 1 and data provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(new TestService2());
-            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService2));
 
             // Tests
             Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
@@ -264,7 +331,177 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.AreEqual(activeSystemCount + 4, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
-        #endregion 03 Data Provider Registration
+        [Test]
+        public void Test_03_04_RegisterDataProviderMultipleTimes()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeSystemCount = testServiceManager.ActiveServices.Count;
+
+            var testService1 = new TestService1();
+            testServiceManager.TryRegisterService<ITestService>(new TestService1());
+
+            // Register
+            var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            LogAssert.Expect(LogType.Error, "There is already a [ITestDataProvider1.Test Data Provider 1] registered!");
+
+            // Tests
+            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
+            Assert.IsFalse(dataProvider2Result, "Data Provider 2 was registered when it should not have been");
+            Assert.AreEqual(activeSystemCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }        
+
+        #endregion 03 Data Provider Registration - Code        
+
+        #region 03 Data Provider Registration - Config
+
+        [Test]
+        public void Test_03_05_RegisterServiceAndDataProviderConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            var dataProviderconfig = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProviderResult = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProviderconfig, testService1);
+
+            // Tests
+            Assert.IsTrue(dataProviderResult, "Test data provider was not registered");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_03_06_RegisterMultipleDataProvidersConfigGeneric()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeSystemCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            var dataProvider1config = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider1Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProvider1config, testService1);
+
+            var dataProvider2config = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider2Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider2>(dataProvider2config, testService1);
+
+            // Tests
+            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
+            Assert.IsTrue(dataProvider2Result, "Data Provider 2 was not registered");
+            Assert.AreEqual(activeSystemCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_03_06_RegisterMultipleDataProvidersConfigNonGeneric()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeSystemCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService(config, out testService1);
+
+            var dataProvider1config = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider1Result = testServiceManager.TryCreateAndRegisterDataProvider(dataProvider1config, testService1);
+
+            var dataProvider2config = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider2Result = testServiceManager.TryCreateAndRegisterDataProvider(dataProvider2config, testService1);
+
+            // Tests
+            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
+            Assert.IsTrue(dataProvider2Result, "Data Provider 2 was not registered");
+            Assert.AreEqual(activeSystemCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_03_07_RegisterDataProviderInMultipleServicesConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeSystemCount = testServiceManager.ActiveServices.Count;
+
+            // Register Service 1 and data provider
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            var dataProvider1config = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider1Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProvider1config, testService1);
+
+            // Register Service 1 and data provider
+            ITestService2 testService2;
+            var config2 = new ServiceConfiguration<ITestService2>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult2 = testServiceManager.TryCreateAndRegisterService<ITestService2>(config2, out testService2);
+
+            var dataProvider2config = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider2Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider2>(dataProvider2config, testService2);
+
+            // Tests
+            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
+            Assert.IsTrue(dataProvider2Result, "Data Provider 2 was not registered");
+            Assert.AreEqual(activeSystemCount + 4, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_03_08_RegisterDataProviderMultipleTimesConfig()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeSystemCount = testServiceManager.ActiveServices.Count;
+
+            ITestService testService1;
+            var config = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            var serviceResult = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService1);
+
+            var dataProviderconfig = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider1Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProviderconfig, testService1);
+
+            var dataProviderconfig2 = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            var dataProvider2Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProviderconfig2, testService1);
+            LogAssert.Expect(LogType.Error, "There is already a [ITestDataProvider1.Test Data Provider 1] registered!");
+
+            // Tests
+            Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
+            Assert.IsFalse(dataProvider2Result, "Data Provider 2 was registered when it should not have been");
+            Assert.AreEqual(activeSystemCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        [Test]
+        public void Test_03_08_RegisterServiceConfigurationsWithDataProviders()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var configurations = new ServiceConfiguration<IService>[2];
+
+            var testService1Profile = new TestService1Profile();
+            var dataProvider1Configuration = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            testService1Profile.AddConfiguration(dataProvider1Configuration);
+
+            var testService2Profile = new TestService2Profile();
+            var dataProvider2Configuration = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
+            testService2Profile.AddConfiguration(dataProvider2Configuration);
+
+            configurations[0] = new ServiceConfiguration<IService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, testService1Profile);
+            configurations[1] = new ServiceConfiguration<IService>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, testService2Profile);
+
+            var result = testServiceManager.TryRegisterServiceConfigurations(configurations);
+
+            // Tests
+            Assert.IsTrue(result, "Test services were not registered");
+            Assert.AreEqual(activeServiceCount + 4, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
+        #endregion 03 Data Provider Registration - Config
 
         #region 04 Service Retrieval
 
@@ -413,6 +650,31 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.AreEqual(1, registeredTestService1.Count, "More or less services found than was expected from specific Interface query");
         }
 
+        [Test]
+        public void Test_04_08_RetrieveRegisterServiceConfigurations()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var configurations = new ServiceConfiguration<IService>[2];
+
+            configurations[0] = new ServiceConfiguration<IService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
+            configurations[1] = new ServiceConfiguration<IService>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, null);
+
+            var result = testServiceManager.TryRegisterServiceConfigurations(configurations);
+
+            var service1 = testServiceManager.GetService<ITestService>();
+            var service2 = testServiceManager.GetService<ITestService2>();
+
+
+            // Tests
+            Assert.IsTrue(result, "Test services were not registered");
+            Assert.IsNotNull(service1, "Test Service 1 was not registered");
+            Assert.IsNotNull(service2, "Test Service 2 was not registered");
+            Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
+
         #endregion  04 Service Retrieval
 
         #region 05 Data Provider Retrieval
@@ -427,7 +689,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register Service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
 
             // Retrieve
@@ -449,10 +711,10 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register service 1 and data provider
-            var dataProvider2 = new TestDataProvider2(testService1);
+            var dataProvider2 = new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider2>(dataProvider2);
 
             // Retrieve
@@ -475,8 +737,8 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Register service 1 and data providers
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Retrieve all registered IDataProviders
             var dataProviders = testServiceManager.GetServices<IServiceDataProvider>();
@@ -496,8 +758,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider2
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Retrieve all registered IDataProviders from service
             var testService = testServiceManager.GetService<ITestService>();
@@ -519,12 +781,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register service 2 and data provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService2));
 
             // Retrieve all registered IServiceDataProvider
             var dataProviders = testServiceManager.GetServices<IServiceDataProvider>();
@@ -543,7 +805,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            var testDataProvider2 = new TestDataProvider1(testService1);
+            var testDataProvider2 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(testDataProvider2);
 
             // Validate non-existent data provider 2
@@ -551,6 +813,38 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Tests
             Assert.IsFalse(isDataProviderRegistered, "Data Provider was found when it was not registered");
+        }
+
+        [Test]
+        public void Test_05_07_RetrieveRegisterServiceConfigurationsWithDataProviders()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var configurations = new ServiceConfiguration<IService>[2];
+
+            var testService1Profile = new TestService1Profile();
+            var dataProvider1Configuration = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
+            testService1Profile.AddConfiguration(dataProvider1Configuration);
+
+            var testService2Profile = new TestService2Profile();
+            var dataProvider2Configuration = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
+            testService2Profile.AddConfiguration(dataProvider2Configuration);
+
+            configurations[0] = new ServiceConfiguration<IService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, testService1Profile);
+            configurations[1] = new ServiceConfiguration<IService>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, testService2Profile);
+
+            var result = testServiceManager.TryRegisterServiceConfigurations(configurations);
+
+            var dataProvider1Retrieval = testServiceManager.GetService<ITestDataProvider1>();
+            var dataProvider2Retrieval = testServiceManager.GetService<ITestDataProvider2>();
+
+            // Tests
+            Assert.IsNotNull(dataProvider1Retrieval, "Test data provider 1 not found");
+            Assert.IsNotNull(dataProvider2Retrieval, "Test data provider 2 not found");
+            Assert.IsTrue(result, "Test services were not registered");
+            Assert.AreEqual(activeServiceCount + 4, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
         #endregion 05 Data Provider Retrieval
@@ -590,7 +884,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Unregister Service
             var serviceUnregister = testServiceManager.TryUnregisterService<ITestService>(testService1);
@@ -622,8 +916,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Unregister Service
             var serviceUnregister = testServiceManager.TryUnregisterService<ITestService>(testService1);
@@ -712,7 +1006,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Unregister Service
             var serviceUnregister = testServiceManager.TryUnregisterServicesOfType<ITestService>();
@@ -744,8 +1038,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Unregister Service
             var serviceUnregister = testServiceManager.TryUnregisterServicesOfType<ITestService>();
@@ -815,7 +1109,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Retrieve registered data provider
             var dataProvider1 = testServiceManager.GetService<ITestDataProvider1>();
@@ -844,8 +1138,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data providers
             var testService1 = new TestService1();
             var serviceRegistration = testServiceManager.TryRegisterService<ITestService>(testService1);
-            var dataprovider1Registration = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
-            var dataprovider2Registration = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService1));
+            var dataprovider1Registration = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
+            var dataprovider2Registration = testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService1));
 
             // Retrieve registered data provider
             var dataProvider1 = testServiceManager.GetService<ITestDataProvider1>();
@@ -878,12 +1172,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data providers
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register service 2 and data providers
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));            
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService2));            
 
             // Retrieve registered data provider
             var dataProvider1 = testServiceManager.GetService<ITestDataProvider1>();
@@ -915,7 +1209,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data providers
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Retrieve registered data provider
             var dataProvider1 = testServiceManager.GetService<ITestDataProvider1>();
@@ -1062,7 +1356,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
 
             Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
@@ -1087,7 +1381,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
 
             Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
@@ -1112,7 +1406,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
 
             Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when it was started");
@@ -1137,12 +1431,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register service 2 and data provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService2));
 
             testServiceManager.DisableAllServices();
 
@@ -1167,7 +1461,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             testServiceManager.TryRegisterService<ITestService>(testService1);
 
             // Create disabled data provider
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             dataProvider1.Disable();
 
             Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was started disabled");
@@ -1306,7 +1600,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
 
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
             dataProvider1.Disable();
 
@@ -1332,7 +1626,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
 
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
             dataProvider1.Disable();
 
@@ -1358,7 +1652,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
 
-            var dataProvider1 = new TestDataProvider1(testService1);
+            var dataProvider1 = new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestDataProvider1>(dataProvider1);
             dataProvider1.Disable();
 
@@ -1383,12 +1677,12 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register service 1 and data provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService>(testService1);
-            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(testService1));
+            testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
 
             // Register service 2 and data provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
-            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(testService2));
+            testServiceManager.TryRegisterService<ITestDataProvider2>(new TestDataProvider2(TestDataProvider2.TestName, 0, null, testService2));
 
             testServiceManager.DisableAllServices();
 

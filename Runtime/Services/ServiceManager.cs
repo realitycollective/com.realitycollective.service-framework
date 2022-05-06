@@ -13,7 +13,6 @@ using UnityEngine;
 using RealityToolkit.ServiceFramework.Utilities.Async;
 using Debug = UnityEngine.Debug;
 
-// Profile Inspector
 // ServiceGenerator - interfacevalidation
 // Limit Service Type lookups for "testing" - Type Service/DataProvider
 

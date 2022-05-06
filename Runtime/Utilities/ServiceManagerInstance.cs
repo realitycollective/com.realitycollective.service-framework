@@ -42,6 +42,14 @@ namespace RealityToolkit.ServiceFramework
             serviceManagerInstance = serviceManager;
         }
 
+        internal void InitialiseServiceManager()
+        {
+            if (serviceManagerInstance == null)
+            {
+                serviceManagerInstance = new ServiceManager(this.gameObject, serviceProvidersProfile);
+            }
+        }
+
         #region MonoBehaviour Implementation
 #if UNITY_EDITOR
         private void OnValidate()
@@ -60,12 +68,9 @@ namespace RealityToolkit.ServiceFramework
         {
             if (Application.isPlaying)
             {
-                if (serviceManagerInstance == null)
-                {
-                    serviceManagerInstance = new ServiceManager(this.gameObject, serviceProvidersProfile);
-                }
-            serviceManagerInstance?.Awake();
+                InitialiseServiceManager();
             }
+            serviceManagerInstance?.Awake();
         }
 
         private void OnEnable() => serviceManagerInstance?.OnEnable();

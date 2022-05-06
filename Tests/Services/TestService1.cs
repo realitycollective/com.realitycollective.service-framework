@@ -1,5 +1,6 @@
 ﻿// Copyright (c) xRealityLabs. All rights reserved.
 
+using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Services;
 using RealityToolkit.ServiceFramework.Tests.Interfaces;
 
@@ -10,7 +11,7 @@ namespace RealityToolkit.ServiceFramework.Tests.Services
     {
         public const string TestName = "Test Service 1";
 
-        public TestService1(string name = TestName, uint priority = 0)
+        public TestService1(string name = TestName, uint priority = 0, BaseProfile profile = null)
             : base(name, priority)
         { }
     }

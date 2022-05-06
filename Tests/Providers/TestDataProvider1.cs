@@ -12,7 +12,7 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
     {
         public const string TestName = "Test Data Provider 1";
 
-        public TestDataProvider1(IService parentService, string name = TestName, uint priority = 1, BaseProfile profile = null)
+        public TestDataProvider1(string name = TestName, uint priority = 1, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
     }

@@ -37,8 +37,6 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         /// </summary>
         protected Type ServiceConstraint { get; set; } = null;
 
-        private bool IsSystemConfiguration => typeof(IService).IsAssignableFrom(ServiceConstraint);
-
         private List<Tuple<bool, bool>> configListHeightFlags;
 
         private GUIStyle buttonGuiStyle = null;
@@ -159,9 +157,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             var (isExpanded, hasProfile) = configListHeightFlags[index];
             var modifier = isExpanded
                 ? hasProfile
-                    ? !IsSystemConfiguration
-                        ? 4f
-                        : 5.5f
+                    ? 5.5f
                     : 4f
                 : 1.5f;
             return EditorGUIUtility.singleLineHeight * modifier;
@@ -307,33 +303,20 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
                 if (EditorGUI.EndChangeCheck())
                 {
+                    profile.objectReferenceValue = null;
+
                     if (systemTypeReference.Type == null)
                     {
                         nameProperty.stringValue = string.Empty;
-                        profile.objectReferenceValue = null;
                     }
                     else
                     {
                         nameProperty.stringValue = systemTypeReference.Type.Name.ToProperCase();
-
-                        if (IsSystemConfiguration)
-                        {
-                            profile.objectReferenceValue = null;
-                        }
                     }
                 }
 
-                if (IsSystemConfiguration)
-                {
-                    EditorGUI.PropertyField(runtimeRect, platformEntries);
-                    runtimePlatforms = platformEntries.FindPropertyRelative(nameof(runtimePlatforms));
-                }
-                else
-                {
-                    runtimePlatforms = platformEntries.FindPropertyRelative(nameof(runtimePlatforms));
-                    runtimePlatforms.arraySize = 1;
-                    runtimePlatforms.GetArrayElementAtIndex(0).FindPropertyRelative("reference").stringValue = AllPlatformsGuid.ToString();
-                }
+                EditorGUI.PropertyField(runtimeRect, platformEntries);
+                runtimePlatforms = platformEntries.FindPropertyRelative(nameof(runtimePlatforms));
 
                 if (hasProfile)
                 {
