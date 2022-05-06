@@ -4,7 +4,7 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the XRTK to signal that the feature is available on the WebGL platform.
+    /// Used by the Service Framework to signal that the feature is available on the WebGL platform.
     /// </summary>
     [System.Runtime.InteropServices.Guid("2EA1714D-E989-488E-B96B-2BA85D00733A")]
     public class WebGlPlatform : BasePlatform

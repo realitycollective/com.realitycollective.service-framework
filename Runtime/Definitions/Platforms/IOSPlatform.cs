@@ -4,7 +4,7 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    ///  Used by the XRTK to signal that the feature is available on the iOS platform.
+    ///  Used by the Service Framework to signal that the feature is available on the iOS platform.
     /// </summary>
     [System.Runtime.InteropServices.Guid("99428B70-E46A-4A1A-82B3-4E29BAC872BD")]
     public class IOSPlatform : BasePlatform

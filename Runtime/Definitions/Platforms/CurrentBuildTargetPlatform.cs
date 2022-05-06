@@ -11,7 +11,7 @@ using RealityToolkit.ServiceFramework.Interfaces;
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the XRTK to signal that the feature is only available when the current built target matches the platform target.
+    /// Used by the Service Framework to signal that the feature is only available when the current built target matches the platform target.
     /// </summary>
     [System.Runtime.InteropServices.Guid("5A504905-0968-4B2F-A537-7FE804F1BD8E")]
     public sealed class CurrentBuildTargetPlatform : BasePlatform

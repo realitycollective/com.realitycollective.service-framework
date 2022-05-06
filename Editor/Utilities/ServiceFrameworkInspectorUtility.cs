@@ -108,6 +108,31 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
             }
         }
 
+        private static GUIStyle horizontalLine = null;
+
+        public static GUIStyle HorizontalLineStyle
+        {
+            get
+            {
+                if (horizontalLine == null)
+                {
+                    horizontalLine = new GUIStyle();
+                    horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
+                    horizontalLine.margin = new RectOffset(0, 0, 4, 4);
+                    horizontalLine.fixedHeight = 1;
+                }
+                return horizontalLine;
+            }
+        }
+
+        public static void HorizontalLine(Color color)
+        {
+            var c = GUI.color;
+            GUI.color = color;
+            GUILayout.Box(GUIContent.none, HorizontalLineStyle);
+            GUI.color = c;
+        }
+
         #endregion
 
         #region Logos
@@ -118,7 +143,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
             {
                 if (darkThemeLogo == null)
                 {
-                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/Textures/XRTK_Logo.png", typeof(Texture2D));
+                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollectiveBanner_600x300.png", typeof(Texture2D));
                 }
 
                 return darkThemeLogo;
@@ -133,7 +158,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
             {
                 if (lightThemeLogo == null)
                 {
-                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/Textures/XRTK_Logo.png", typeof(Texture2D));
+                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollectiveBanner_600x300.png", typeof(Texture2D));
                 }
 
                 return lightThemeLogo;

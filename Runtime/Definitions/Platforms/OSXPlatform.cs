@@ -4,7 +4,7 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the XRTK to signal that the feature is available on the OSX platform.
+    /// Used by the Service Framework to signal that the feature is available on the OSX platform.
     /// </summary>
     [System.Runtime.InteropServices.Guid("A95E05D3-09B8-4772-99F1-BDE8097264B4")]
     public class OSXPlatform : BasePlatform

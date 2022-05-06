@@ -125,7 +125,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Utilities
         private static string absoluteFolderPath = string.Empty;
 
         /// <summary>
-        /// The relative folder path to the Mixed Reality Toolkit "com.xrtk.core" folder in relation to either the "Assets" or "Packages" folders.
+        /// The relative folder path to the Service Framework folder in relation to either the "Assets" or "Packages" folders.
         /// </summary>
         public static string RelativeFolderPath
         {

@@ -4,7 +4,7 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the XRTK to signal that the feature is available on the Android platform.
+    /// Used by the Service Framework to signal that the feature is available on the Android platform.
     /// </summary>
     [System.Runtime.InteropServices.Guid("E0D70D45-A52A-4B03-BCDF-8FE367555516")]
     public class AndroidPlatform : BasePlatform

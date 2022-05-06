@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the XRTK to signal that the feature is available in the Unity Editor.
+    /// Used by the Service Framework to signal that the feature is available in the Unity Editor.
     /// </summary>
     /// <remarks>
     /// Defines any editor platform for Win, OSX, and Linux.

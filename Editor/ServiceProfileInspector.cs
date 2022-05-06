@@ -1,10 +1,11 @@
-// Copyright (c) XRTK. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root for license information.?
+// Copyright (c) Reality Collective. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Editor.PropertyDrawers;
+using RealityToolkit.ServiceFramework.Editor.Utilities;
 using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Services;
@@ -415,6 +416,8 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             EditorGUI.BeginChangeCheck();
             var prevPlatformIndex = platformIndex;
             platformIndex = EditorGUILayout.Popup("Platform Target", platformIndex, Platforms.Select(p => p.Name).ToArray());
+            EditorGUILayout.Space();
+            ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
 
             if (EditorGUI.EndChangeCheck())
             {

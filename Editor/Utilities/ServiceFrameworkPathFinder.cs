@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RealityToolkit.ServiceFramework.Editor.Utilities
 {
     /// <summary>
-    /// Dummy scriptable object used to find the relative path to com.xrtk.core.
+    /// Dummy scriptable object used to find the relative path to the Service Framework
     /// </summary>
     /// <inheritdoc cref="IPathFinder" />
     public class ServiceFrameworkPathFinder : ScriptableObject, IPathFinder
