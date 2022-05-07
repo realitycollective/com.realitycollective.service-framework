@@ -513,7 +513,8 @@ namespace RealityToolkit.ServiceFramework.Services
 
                 if (TryCreateAndRegisterService(configuration, out var serviceInstance))
                 {
-                    if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
+                    if (serviceInstance != null && 
+                        configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
                         !TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
                     {
                         anyFailed = true;
