@@ -430,6 +430,7 @@ namespace RealityToolkit.ServiceFramework.Services
             if (Application.isPlaying)
             {
                 UpdateAllServices();
+                UpdateSubscribedProcess();
             }
         }
 
@@ -1481,6 +1482,97 @@ namespace RealityToolkit.ServiceFramework.Services
         #endregion MonoBehaviour Replicators
 
         #endregion Service Management
+
+        #region Proccess Management
+
+        private static readonly List<Proccess> activeProcess = new List<Proccess>();
+        private float durationToleranceMs = 10;
+        private bool doNotRemoveIfTooLong = false;
+
+        /// <summary>
+        /// Subscribe in order to have onUpdate called approximately every period seconds (or every frame, if period <= 0).
+        /// Don't assume that onUpdate will be called in any particular order compared to other subscribers.
+        /// </summary>
+        public void AddProcessToUpdate(UpdateMethod onUpdate, float period)
+        {
+            if (onUpdate == null)
+                return;
+            foreach (Proccess currSub in activeProcess)
+                if (currSub.updateMethod.Equals(onUpdate))
+                    return;
+            activeProcess.Add(new Proccess(onUpdate, period));
+        }
+
+        /// <summary>
+        /// Safe to call even if onUpdate was not previously Subscribed.
+        /// </summary>
+        public void RemoveProcessFromUpdate(UpdateMethod onUpdate)
+        {
+            for (int sub = activeProcess.Count - 1; sub >= 0; sub--)
+                if (activeProcess[sub].updateMethod.Equals(onUpdate))
+                    activeProcess.RemoveAt(sub);
+        }
+
+        /// <summary>
+        /// Some objects might need to be on a slower update loop than the usual MonoBehaviour Update and without precise timing, e.g. to refresh data from services.
+        /// Each frame, advance all subscribers. Any that have hit their period should then act, though if they take too long they could be removed.
+        /// </summary>
+        private void UpdateSubscribedProcess()
+        {
+            // Iterate in reverse in case we need to remove something.
+            for (int s = activeProcess.Count - 1; s >= 0; s--)
+            {
+                var sub = activeProcess[s];
+                sub.periodCurrent += Time.deltaTime;
+                if (sub.periodCurrent > sub.period)
+                {
+                    System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                    UpdateMethod onUpdate = sub.updateMethod;
+
+                    // In case something forgets to Unsubscribe when it dies.
+                    if (onUpdate == null)
+                    {
+                        Remove(s, $"Did not Unsubscribe from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
+                        continue;
+                    }
+
+                    // Detect a local function that cannot be Unsubscribed since it could go out of scope.
+                    if (onUpdate.Target == null)
+                    {
+                        Remove(s, $"Removed local function from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
+                        continue;
+                    }
+
+                    // Detect an anonymous function that cannot be Unsubscribed, by checking for a character that can't exist in a declared method name.
+                    if (onUpdate.Method.ToString().Contains("<"))
+                    {
+                        Remove(s, $"Removed anonymous from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
+                        continue;
+                    }
+
+                    stopwatch.Restart();
+                    onUpdate?.Invoke(sub.periodCurrent);
+                    stopwatch.Stop();
+                    sub.periodCurrent = 0;
+
+                    if (stopwatch.ElapsedMilliseconds > durationToleranceMs)
+                    {
+                        if (!doNotRemoveIfTooLong)
+                            Remove(s, $"UpdateSlow subscriber took too long, removing: {onUpdate.Target} : {onUpdate.Method}");
+                        else
+                            Debug.LogWarning($"UpdateSlow subscriber took too long: {onUpdate.Target} : {onUpdate.Method}");
+                    }
+                }
+            }
+
+            void Remove(int index, string msg)
+            {
+                activeProcess.RemoveAt(index);
+                Debug.LogError(msg);
+            }
+        }
+
+        #endregion Proccess Management
 
         #region Service Utilities
 
