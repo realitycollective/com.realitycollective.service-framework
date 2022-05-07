@@ -1,0 +1,8 @@
+#USING#
+
+namespace #NAMESPACE#
+{
+    [CreateAssetMenu(menuName = "#NAME#Profile", fileName = "#NAME#Profile", order = (int)CreateProfileMenuItemIndices.ServiceConfig)]
+    public class #NAME#Profile : #BASE#
+    { }
+}
