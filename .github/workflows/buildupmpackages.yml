@@ -1,0 +1,54 @@
+name: Build UPM
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'development'
+  pull_request:
+    branches:
+      - '*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+# Example flow
+
+jobs:
+  # Check Unity version requird by the package
+  validate-environment:
+    name: Get Unity Version from UPM package
+    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@main
+    with:
+      build-target: windows
+
+  # Check Unity Hub and Editor Environment
+  Setup-Unity:
+    name: Validate Unity Install
+    needs: validate-environment
+    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@main
+    with:
+      build-target: windows
+      unityversion: ${{ needs.validate-environment.outputs.unityversion }}
+
+  Install-Unity-Editor:
+    if: ${{ needs.Setup-Unity.outputs.unityeditorinstalled }}  == '0'
+    needs: Setup-Unity
+    uses: realitycollective/reusableworkflows/.github/workflows/installunityeditor.yml@main
+    name: Install Unity Editor
+    with:
+      build-target: windows
+      unityversion: ${{ needs.Setup-Unity.outputs.unityeditorversion }}
+
+  # Run Unity unit tests defined in the package
+  Run-Unit-Tests:
+    name: Run Unity Unit Tests
+    needs: [Setup-Unity, Install-Unity-Editor]
+    uses: realitycollective/reusableworkflows/.github/workflows/rununityunittests.yml@main
+    with:
+      build-target: windows
+      unityversion: ${{ needs.Setup-Unity.outputs.unityeditorversion }}

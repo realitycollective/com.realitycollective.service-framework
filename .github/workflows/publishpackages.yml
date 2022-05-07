@@ -1,0 +1,21 @@
+name: Release and Tag package for Release
+
+on:
+  workflow_call:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+# Example flow
+
+jobs:
+  release-Package:
+    name: Up Version package and release
+    if: github.ref == 'refs/heads/development'    
+    uses: realitycollective/reusableworkflows/.github/workflows/tagrelease.yml@main
+    with:
+      build-target: windows  
