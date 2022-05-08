@@ -7,7 +7,7 @@ using RealityToolkit.ServiceFramework.Tests.Interfaces;
 namespace RealityToolkit.ServiceFramework.Tests.Services
 {
     [System.Runtime.InteropServices.Guid("80B2B43B-F18B-4E68-A9AB-505290D31110")]
-    public class TestService1 : BaseServiceWithConstructor, ITestService
+    internal class TestService1 : BaseServiceWithConstructor, ITestService
     {
         public const string TestName = "Test Service 1";
 

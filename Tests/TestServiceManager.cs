@@ -9,13 +9,14 @@ using RealityToolkit.ServiceFramework.Tests.Interfaces;
 using RealityToolkit.ServiceFramework.Tests.Providers;
 using RealityToolkit.ServiceFramework.Tests.Services;
 using RealityToolkit.ServiceFramework.Tests.Utilities;
+using RealityToolkit.ServiceFramework.Tests.Profiles;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace RealityToolkit.ServiceFramework.Tests
 {
-    public class TestServiceManager
+    internal class TestServiceManager
     {
         private ServiceManager testServiceManager;
 

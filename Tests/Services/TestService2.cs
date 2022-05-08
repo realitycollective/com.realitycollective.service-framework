@@ -6,7 +6,7 @@ using RealityToolkit.ServiceFramework.Tests.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Services
 {
-    public class TestService2 : BaseServiceWithConstructor, ITestService2
+    internal class TestService2 : BaseServiceWithConstructor, ITestService2
     {
         public const string TestName = "Test Service 2";
 

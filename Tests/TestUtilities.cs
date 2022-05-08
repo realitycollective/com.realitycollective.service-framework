@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Tests.Utilities
 {
-    public static class TestUtilities
+    internal static class TestUtilities
     {
        public static void InitializeServiceManager(ref ServiceManager serviceManager)
         {
