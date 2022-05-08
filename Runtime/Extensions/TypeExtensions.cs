@@ -5,6 +5,7 @@ using RealityToolkit.ServiceFramework.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -12,15 +13,19 @@ namespace RealityToolkit.ServiceFramework.Extensions
 {
     public static class TypeExtensions
     {
-        private static void BuildTypeCache()
+        public static void BuildTypeCache()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().filterIgnoredDomains();
             foreach (var assembly in assemblies)
             {
                 var types = assembly.GetTypes();
                 foreach (var type in types)
                 {
-                    if (type.IsClass && !type.IsAbstract)
+                    if (type.BaseType != null && type.BaseType.Name.Contains("Delegate"))
+                    {
+                        continue;
+                    }
+                    if (type.IsClass && !type.IsAbstract && type.GUID != Guid.Empty)
                     {
                         try
                         {
@@ -46,6 +51,41 @@ namespace RealityToolkit.ServiceFramework.Extensions
         }
 
         private static readonly Dictionary<Guid, Type> typeCache = new Dictionary<Guid, Type>();
+        private static string[] ignoredDomains = new string[]
+        {
+            "UnityEngine",
+            "Unity",
+            "System",
+            "Mono",
+            "NetStandard",
+            "nunit",
+            "log4net",
+            "Bee",
+            "NiceIO"
+        };
+
+        private static Assembly[] filterIgnoredDomains(this Assembly[] assemblies)
+        {
+            List<Assembly> returnAssemblies = new List<Assembly>();
+            for (int i = assemblies.Length - 1; i > 0; i--)
+            {
+                bool ignoreAssembly = false;
+
+                for (int j = ignoredDomains.Length - 1; j > 0; j--)
+                {
+                    if (assemblies[i].FullName.ToLower().Contains(ignoredDomains[j].ToLower()))
+                    {
+                        ignoreAssembly = true;
+                    }
+                }
+
+                if (!ignoreAssembly)
+                {
+                    returnAssemblies.Add(assemblies[i]);
+                }
+            }
+            return returnAssemblies.ToArray();
+        }
 
         private static Dictionary<Guid, Type> TypeCache
         {
