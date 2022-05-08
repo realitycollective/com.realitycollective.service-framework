@@ -12,6 +12,7 @@ using RealityToolkit.ServiceFramework.Tests.Utilities;
 using RealityToolkit.ServiceFramework.Tests.Profiles;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.TestTools;
 
 namespace RealityToolkit.ServiceFramework.Tests
@@ -484,11 +485,12 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             var configurations = new ServiceConfiguration<IService>[2];
 
-            var testService1Profile = new TestService1Profile();
+
+            var testService1Profile = (TestService1Profile)ScriptableObject.CreateInstance(typeof(TestService1Profile));
             var dataProvider1Configuration = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
             testService1Profile.AddConfiguration(dataProvider1Configuration);
 
-            var testService2Profile = new TestService2Profile();
+            var testService2Profile = (TestService2Profile)ScriptableObject.CreateInstance(typeof(TestService2Profile));
             var dataProvider2Configuration = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
             testService2Profile.AddConfiguration(dataProvider2Configuration);
 
@@ -825,11 +827,11 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             var configurations = new ServiceConfiguration<IService>[2];
 
-            var testService1Profile = new TestService1Profile();
+            var testService1Profile = (TestService1Profile)ScriptableObject.CreateInstance(typeof(TestService1Profile));
             var dataProvider1Configuration = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
             testService1Profile.AddConfiguration(dataProvider1Configuration);
 
-            var testService2Profile = new TestService2Profile();
+            var testService2Profile = (TestService2Profile)ScriptableObject.CreateInstance(typeof(TestService2Profile));
             var dataProvider2Configuration = new ServiceConfiguration<ITestDataProvider2>(typeof(TestDataProvider2), TestDataProvider2.TestName, 1, AllPlatforms.Platforms, null);
             testService2Profile.AddConfiguration(dataProvider2Configuration);
 
