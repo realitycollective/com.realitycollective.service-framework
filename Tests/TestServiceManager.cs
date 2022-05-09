@@ -14,6 +14,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.TestTools;
+using System.Text.RegularExpressions;
 
 namespace RealityToolkit.ServiceFramework.Tests
 {
@@ -83,10 +84,10 @@ namespace RealityToolkit.ServiceFramework.Tests
             testServiceManager.ActiveProfile = null;
 
             // Tests
+            LogAssert.Expect(LogType.Error, new Regex("No ServiceProvidersProfile found, cannot initialize the ServiceManager"));
             Assert.AreEqual(0, testServiceManager.ActiveServices.Count, "Service Manager services were found where none should exist");
             Assert.IsFalse(testServiceManager.HasActiveProfile, "Profile found for the Service Manager where none should exist");
             Assert.IsNull(testServiceManager.ActiveProfile, "Profile found for the Service Manager where none should exist for instance");
-            LogAssert.Expect(LogType.Error, $"No {nameof(ServiceProvidersProfile)} found, cannot initialize the {nameof(ServiceManager)}");
         }
         
         [Test]
@@ -151,7 +152,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Register again
             var testService2 = testServiceManager.TryRegisterService<ITestService>(new TestService1());
-            LogAssert.Expect(LogType.Error, $"There is already a [{nameof(ITestService)}.{TestService1.TestName}] registered!");
+            LogAssert.Expect(LogType.Error, new Regex("There is already a \\[ITestService.Test Service 1] registered!"));
 
             // Tests
             Assert.IsFalse(testService2, "Test service was registered when it should not have been");
@@ -239,8 +240,8 @@ namespace RealityToolkit.ServiceFramework.Tests
             ITestService testService2;
             var config2 = new ServiceConfiguration<ITestService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, null);
             var serviceResult2 = testServiceManager.TryCreateAndRegisterService<ITestService>(config, out testService2);
-            LogAssert.Expect(LogType.Error, "There is already a [ITestService.Test Service 1] registered!");
-
+            LogAssert.Expect(LogType.Error, new Regex("There is already a \\[ITestService.Test Service 1] registered!"));
+            
             // Tests
             Assert.IsFalse(serviceResult2, "Test service was registered when it should not have been");
             Assert.IsNotNull(testService2, "Test service 1 instance was not returned when it should have been");
@@ -346,7 +347,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             // Register
             var dataProvider1Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
             var dataProvider2Result = testServiceManager.TryRegisterService<ITestDataProvider1>(new TestDataProvider1(TestDataProvider1.TestName, 0, null, testService1));
-            LogAssert.Expect(LogType.Error, "There is already a [ITestDataProvider1.Test Data Provider 1] registered!");
+            LogAssert.Expect(LogType.Error, new Regex("There is already a \\[ITestDataProvider1.Test Data Provider 1] registered!"));
 
             // Tests
             Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
@@ -468,7 +469,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             var dataProviderconfig2 = new ServiceConfiguration<ITestDataProvider1>(typeof(TestDataProvider1), TestDataProvider1.TestName, 1, AllPlatforms.Platforms, null);
             var dataProvider2Result = testServiceManager.TryCreateAndRegisterDataProvider<ITestDataProvider1>(dataProviderconfig2, testService1);
-            LogAssert.Expect(LogType.Error, "There is already a [ITestDataProvider1.Test Data Provider 1] registered!");
+            LogAssert.Expect(LogType.Error, new Regex("There is already a \\[ITestDataProvider1.Test Data Provider 1] registered!"));
 
             // Tests
             Assert.IsTrue(dataProvider1Result, "Data Provider 1 was not registered");
@@ -602,7 +603,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Retrieve
             var testService1 = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Tests
             Assert.IsNull(testService1, "Test service was found");
@@ -621,7 +622,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Retrieve
             var testService2 = testServiceManager.GetService<ITestService2>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService2)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService2)} service."));
 
             // Tests
             Assert.IsNull(testService2, "Test service was not found");
@@ -868,7 +869,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var serviceUnregister = testServiceManager.TryUnregisterService<ITestService>(testService1);
 
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Tests
             Assert.IsNotNull(testService1, "Test service was not registered");
@@ -894,11 +895,11 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve unregistered Data Provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Tests
             Assert.IsNotNull(testService1, "Test service was not registered");
@@ -927,13 +928,13 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve unregistered Data Provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
             var testDataProvider2Unregistered = testServiceManager.GetService<ITestDataProvider2>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider2)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider2)} service."));
 
 
             // Tests
@@ -964,7 +965,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service 1
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve still registered Service 2
             var testService2 = testServiceManager.GetService<ITestService2>();
@@ -991,7 +992,7 @@ namespace RealityToolkit.ServiceFramework.Tests
             var serviceUnregister = testServiceManager.TryUnregisterServicesOfType<ITestService>();
 
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Tests
             Assert.IsTrue(serviceUnregister, "Service was not unregistered correctly");
@@ -1016,11 +1017,11 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve unregistered Data Provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Tests
             Assert.IsNotNull(testService1, "Test service was not registered");
@@ -1049,13 +1050,13 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve unregistered Data Provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
             var testDataProvider2Unregistered = testServiceManager.GetService<ITestDataProvider2>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider2)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider2)} service."));
 
 
             // Tests
@@ -1085,7 +1086,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered Service 1
             var testService1Unregistered = testServiceManager.GetService<ITestService>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestService)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService)} service."));
 
             // Try and retrieve still registered Service 2
             var testService2 = testServiceManager.GetService<ITestService2>();
@@ -1096,7 +1097,6 @@ namespace RealityToolkit.ServiceFramework.Tests
             Assert.IsNull(testService1Unregistered, "Service was found, it should have been unregistered");
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
-
 
         #endregion 06 Service unRegistration
 
@@ -1122,7 +1122,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered data provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Tests
             Assert.IsNotNull(dataProvider1, "Test data provider was not registered");
@@ -1152,7 +1152,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered data provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Try and retrieve still registered Service
             var testDataProvider2Unregistered = testServiceManager.GetService<ITestDataProvider2>();
@@ -1190,7 +1190,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered data provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Try and retrieve still registered Service
             var testDataProvider2Unregistered = testServiceManager.GetService<ITestDataProvider2>();            
@@ -1222,7 +1222,7 @@ namespace RealityToolkit.ServiceFramework.Tests
 
             // Try and retrieve unregistered data provider
             var testDataProvider1Unregistered = testServiceManager.GetService<ITestDataProvider1>();
-            LogAssert.Expect(LogType.Error, $"Unable to find {nameof(ITestDataProvider1)} service.");
+            LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestDataProvider1)} service."));
 
             // Tests
             Assert.IsNotNull(dataProvider1, "Test data provider was not registered");
