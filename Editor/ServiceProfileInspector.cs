@@ -26,6 +26,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
+        private string[] excludedProperties = new string[] { "m_Script", nameof(configurations)};
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
 
@@ -119,6 +120,11 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         {
             RenderHeader();
             EditorGUILayout.Space();
+            if (CheckForCustomProperties())
+            {
+                ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
+                EditorGUILayout.Space(); 
+            }
             RenderConfigurationOptions();
         }
 
@@ -129,6 +135,21 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                 configurations.isExpanded = true;
             }
 
+            SerializedProperty iterator = serializedObject.GetIterator();
+            bool enterChildren = true;
+            while (iterator.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (iterator.name != nameof(configurations) && iterator.name != "m_Script")
+                    EditorGUILayout.PropertyField(iterator, true);
+            }
+            if (CheckForCustomProperties())
+            {
+                EditorGUILayout.Space();
+                ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
+                EditorGUILayout.Space(); 
+            }
+            
             configurations.isExpanded = EditorGUILayoutExtensions.FoldoutWithBoldLabel(configurations.isExpanded, new GUIContent($"{ServiceConstraint.Name} Configuration Options"));
 
             if (configurations.isExpanded)
@@ -354,6 +375,23 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             EditorGUIUtility.wideMode = lastMode;
             EditorGUIUtility.labelWidth = prevLabelWidth;
             configListHeightFlags[index] = new Tuple<bool, bool>(configurationProperty.isExpanded, hasProfile);
+        }
+
+        private bool CheckForCustomProperties()
+        {
+            bool enterChildren = true;
+            var iterator = serializedObject.GetIterator();
+            
+            while (iterator.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (!excludedProperties.Contains(iterator.name))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void OnConfigurationOptionAdded(ReorderableList list)
