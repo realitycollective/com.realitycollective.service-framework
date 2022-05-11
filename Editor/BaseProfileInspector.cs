@@ -80,6 +80,9 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             }
 
             EditorGUILayout.Space();
+            ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
+
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
 
             if (isOverrideHeader)
