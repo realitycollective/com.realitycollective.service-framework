@@ -18,7 +18,7 @@ namespace RealityToolkit.ServiceFramework
     {
         public const string Editor_Menu_Keyword = "Reality Toolkit";
 
-        private static readonly string[] Package_Keywords = { "RealityToolkit", "Mixed", "Reality" };
+        private static readonly string[] Package_Keywords = { "RealityToolkit", "Mixed", "Reality","ServiceFramework" };
 
         #region Show Inspector Debug View settings prompt
         private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Data Providers in the inspector view.");
@@ -140,9 +140,9 @@ namespace RealityToolkit.ServiceFramework
         [SettingsProvider]
         private static SettingsProvider Preferences()
         {
-            return new SettingsProvider("Preferences/RealityToolkit", SettingsScope.User, Package_Keywords)
+            return new SettingsProvider("Preferences/ServiceFramework", SettingsScope.User, Package_Keywords)
             {
-                label = "RealityToolkit",
+                label = "Service Framework",
                 guiHandler = OnPreferencesGui,
                 keywords = new HashSet<string>(Package_Keywords)
             };
