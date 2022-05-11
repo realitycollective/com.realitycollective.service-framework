@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
+using RealityToolkit.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Linq;
