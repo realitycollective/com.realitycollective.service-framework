@@ -1,16 +1,17 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.Extensions;
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
 using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
+using RealityToolkit.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using RealityToolkit.ServiceFramework.Utilities.Async;
 using Debug = UnityEngine.Debug;
 
 // ServiceGenerator - interfacevalidation

@@ -1,12 +1,13 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.Definitions.Utilities;
+using RealityToolkit.Editor.Extensions;
+using RealityToolkit.Extensions;
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Editor.PropertyDrawers;
 using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Services;
 using System;
@@ -26,7 +27,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
-        private string[] excludedProperties = new string[] { "m_Script", nameof(configurations)};
+        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations)};
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
 
@@ -120,11 +121,6 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
         {
             RenderHeader();
             EditorGUILayout.Space();
-            if (CheckForCustomProperties())
-            {
-                ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
-                EditorGUILayout.Space(); 
-            }
             RenderConfigurationOptions();
         }
 
@@ -134,22 +130,30 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             {
                 configurations.isExpanded = true;
             }
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
 
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
             while (iterator.NextVisible(enterChildren))
             {
-                enterChildren = false;
-                if (iterator.name != nameof(configurations) && iterator.name != "m_Script")
+                //Interesting side effect of letting the Inspector show all children, you get a debug view of all properties
+                if (!ServiceFrameworkPreferences.ShowInspectorDebugView)
+                {
+                    enterChildren = false;
+                }
+
+                if (!excludedProperties.Contains(iterator.name))
+                {
                     EditorGUILayout.PropertyField(iterator, true);
+                }
             }
-            if (CheckForCustomProperties())
-            {
-                EditorGUILayout.Space();
-                ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
-                EditorGUILayout.Space(); 
-            }
-            
+
+            EditorGUILayout.Space();
+            ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
+            EditorGUILayout.Space();
+
             configurations.isExpanded = EditorGUILayoutExtensions.FoldoutWithBoldLabel(configurations.isExpanded, new GUIContent($"{ServiceConstraint.Name} Configuration Options"));
 
             if (configurations.isExpanded)
@@ -377,23 +381,6 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             configListHeightFlags[index] = new Tuple<bool, bool>(configurationProperty.isExpanded, hasProfile);
         }
 
-        private bool CheckForCustomProperties()
-        {
-            bool enterChildren = true;
-            var iterator = serializedObject.GetIterator();
-            
-            while (iterator.NextVisible(enterChildren))
-            {
-                enterChildren = false;
-                if (!excludedProperties.Contains(iterator.name))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void OnConfigurationOptionAdded(ReorderableList list)
         {
             configurations.arraySize += 1;
@@ -440,6 +427,8 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
         internal void RenderSystemFields()
         {
+            EditorGUILayout.LabelField($"Platform Target Selection", EditorStyles.boldLabel);
+ 
             var currentPlatform = ServiceFrameworkPreferences.CurrentPlatformTarget;
 
             for (var i = 0; i < Platforms.Count; i++)

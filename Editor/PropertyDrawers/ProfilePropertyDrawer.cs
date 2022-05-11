@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
+using RealityToolkit.Extensions;
 using RealityToolkit.ServiceFramework.Definitions;
+using RealityToolkit.ServiceFramework.Editor.Utilities;
 using RealityToolkit.ServiceFramework.Services;
+using System;
 using UnityEditor;
 using UnityEngine;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
 
 namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 {

@@ -1,11 +1,11 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.Editor.Extensions;
+using RealityToolkit.Extensions;
 using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
 using RealityToolkit.ServiceFramework.Editor.Profiles;
 using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
 using RealityToolkit.ServiceFramework.Services;
 using UnityEditor;
 using UnityEngine;
