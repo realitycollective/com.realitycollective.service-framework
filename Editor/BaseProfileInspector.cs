@@ -82,15 +82,10 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             EditorGUILayout.Space();
             ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
 
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
-
             if (isOverrideHeader)
             {
                 EditorGUILayout.HelpBox(infoBoxText, MessageType.Info);
             }
-
-            EditorGUILayout.Space();
         }
 
         [MenuItem("CONTEXT/BaseProfile/Create Clone from Profile Values", false, 0)]

@@ -130,6 +130,9 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             {
                 configurations.isExpanded = true;
             }
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
 
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
@@ -424,6 +427,8 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
         internal void RenderSystemFields()
         {
+            EditorGUILayout.LabelField($"Platform Target Selection", EditorStyles.boldLabel);
+ 
             var currentPlatform = ServiceFrameworkPreferences.CurrentPlatformTarget;
 
             for (var i = 0; i < Platforms.Count; i++)
