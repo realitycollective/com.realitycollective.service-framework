@@ -6,7 +6,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available on the OSX platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("A95E05D3-09B8-4772-99F1-BDE8097264B4")]
+    [System.Runtime.InteropServices.Guid("97344133-03B4-4314-9581-E42D1AAC91BA")]
     public class OSXPlatform : BasePlatform
     {
         /// <inheritdoc />

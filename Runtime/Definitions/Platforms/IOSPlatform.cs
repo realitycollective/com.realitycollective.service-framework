@@ -6,7 +6,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     ///  Used by the Service Framework to signal that the feature is available on the iOS platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("99428B70-E46A-4A1A-82B3-4E29BAC872BD")]
+    [System.Runtime.InteropServices.Guid("BCAC2CEF-E793-47B8-9DB7-116AF668CB66")]
     public class IOSPlatform : BasePlatform
     {
         /// <inheritdoc />

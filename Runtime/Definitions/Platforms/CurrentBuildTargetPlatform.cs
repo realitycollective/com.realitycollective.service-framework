@@ -13,7 +13,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Service Framework to signal that the feature is only available when the current built target matches the platform target.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("5A504905-0968-4B2F-A537-7FE804F1BD8E")]
+    [System.Runtime.InteropServices.Guid("C838C4F5-A87E-48C7-8742-09A4D85FC3BC")]
     public sealed class CurrentBuildTargetPlatform : BasePlatform
     {
         /// <inheritdoc />

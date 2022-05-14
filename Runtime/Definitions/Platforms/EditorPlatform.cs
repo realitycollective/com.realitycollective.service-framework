@@ -11,7 +11,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <remarks>
     /// Defines any editor platform for Win, OSX, and Linux.
     /// </remarks>
-    [System.Runtime.InteropServices.Guid("3DFB96A6-7F67-4F83-835B-32725BC0A2C0")]
+    [System.Runtime.InteropServices.Guid("3324B4A2-30F0-4145-BB06-CD65B8945487")]
     public sealed class EditorPlatform : BasePlatform
     {
         /// <inheritdoc />

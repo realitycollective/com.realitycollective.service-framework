@@ -6,7 +6,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available on the Windows Universal Platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("16A3125F-31D5-4EC6-A120-8BE889A74D27")]
+    [System.Runtime.InteropServices.Guid("7DC72B4E-34F6-4B26-AFD7-CDE0C51F83A3")]
     public class UniversalWindowsPlatform : BasePlatform
     {
         /// <inheritdoc />
