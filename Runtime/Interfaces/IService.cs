@@ -113,5 +113,10 @@ namespace RealityToolkit.ServiceFramework.Interfaces
         /// </summary>
         /// <returns></returns>
         bool IsServiceRegistered { get; }
+
+        /// <summary>
+        /// Should this services data providers be automatically registered and maintained by the Service Framework, or are they managed internally by the Service itself.
+        /// </summary>
+        bool RegisterDataProviders { get; }
     }
 }

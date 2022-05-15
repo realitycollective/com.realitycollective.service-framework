@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityToolkit.ServiceFramework.Interfaces;
 using System;
 using System.Collections.Generic;
-using RealityToolkit.ServiceFramework.Interfaces;
 using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Services
@@ -61,31 +61,32 @@ namespace RealityToolkit.ServiceFramework.Services
         public virtual void Initialize() { }
 
         /// <inheritdoc />
-        public virtual void Start() { }
+        public virtual void Start() => StartAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void Reset() { }
+        public virtual void Reset() => ResetAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void Enable() => IsEnabled = true;
+        public virtual void Enable() => EnableAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void Update() { }
+        public virtual void Update() => UpdateAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void LateUpdate() { }
+        public virtual void LateUpdate() => LateUpdateAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void FixedUpdate() { }
+        public virtual void FixedUpdate() => FixedUpdateAllDataProviders();
 
         /// <inheritdoc />
-        public virtual void Disable() => IsEnabled = false;
+        public virtual void Disable() => DisableAllDataProviders();
 
         /// <inheritdoc />
         public virtual void Destroy()
         {
             isDestroying = true;
             IsEnabled = false;
+            DestroyAllDataProviders();
         }
 
         /// <inheritdoc />
@@ -106,6 +107,8 @@ namespace RealityToolkit.ServiceFramework.Services
                 return ServiceManager.Instance.IsServiceRegistered(this);
             }
         }
+
+        public virtual bool RegisterDataProviders => true;
 
         #endregion IService Implementation
 
@@ -140,5 +143,269 @@ namespace RealityToolkit.ServiceFramework.Services
         protected virtual void OnDispose(bool finalizing) { }
 
         #endregion IDisposable Implementation
+
+
+        private bool NoDataProvidersFound => (dataProviders == null || dataProviders.Count == 0);
+
+        #region MonoBehaviour Replicators
+        internal void StartAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Start all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    if (dataProvider.IsEnabled)
+                    {
+                        dataProvider.Start();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        internal void ResetAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Reset all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    dataProvider.Reset();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        internal void EnableAllDataProviders()
+        {
+            IsEnabled = true;
+
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Enable all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    dataProvider.Enable();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        internal void UpdateAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Update all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    if (dataProvider.IsEnabled)
+                    {
+                        dataProvider.Update();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        internal void LateUpdateAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Late update all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    if (dataProvider.IsEnabled)
+                    {
+                        dataProvider.LateUpdate();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        internal void FixedUpdateAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Fix update all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    if (dataProvider.IsEnabled)
+                    {
+                        dataProvider.FixedUpdate();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        public void DisableAllDataProviders()
+        {
+            IsEnabled = false;
+
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            // Disable all data providers
+            foreach (var dataProvider in dataProviders)
+            {
+                try
+                {
+                    dataProvider.Disable();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
+        public void DestroyAllDataProviders()
+        {
+            // If the data providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterDataProviders)
+            {
+                return;
+            }
+
+            // If there are no data providers are configured, exit
+            if (NoDataProvidersFound)
+            {
+                return;
+            }
+
+            IServiceDataProvider[] dataProvidersClone = new IServiceDataProvider[dataProviders.Count];
+            dataProviders.CopyTo(dataProvidersClone);
+            dataProviders.Clear();
+
+            // Destroy all data providers
+            foreach (var dataProvider in dataProvidersClone)
+            {
+                try
+                {
+                    dataProvider.Destroy();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            // Dispose all data providers
+            foreach (var dataProvider in dataProvidersClone)
+            {
+                try
+                {
+                    dataProvider.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+
+            dataProviders.Clear();
+        }
+        #endregion MonoBehaviour Replicators
     }
 }

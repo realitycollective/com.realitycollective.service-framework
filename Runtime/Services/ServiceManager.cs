@@ -373,16 +373,17 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
-                TryRegisterServiceConfigurations(ActiveProfile?.ServiceConfigurations);
+                var orderedConfig = ActiveProfile.ServiceConfigurations.OrderBy(s => s.Priority).ToArray();
+                TryRegisterServiceConfigurations(orderedConfig);
             }
 
-            var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
-            activeServices.Clear();
+            //var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
+            //activeServices.Clear();
 
-            foreach (var service in orderedCoreSystems)
-            {
-                TryRegisterService(service.Key, service.Value);
-            }
+            //foreach (var service in orderedCoreSystems)
+            //{
+            //    TryRegisterService(service.Key, service.Value);
+            //}
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
@@ -688,7 +689,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             try
             {
-               serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
+                serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
             }
             catch (System.Reflection.TargetInvocationException e)
             {
@@ -709,7 +710,11 @@ namespace RealityToolkit.ServiceFramework.Services
                 Debug.LogError($"Failed to create a valid instance of {concreteType.Name}!");
                 return false;
             }
-
+            // If a service does not want its data providers registered, then do not add them to the registry.
+            if (args.Length == 4 && !(args[3] as IService).RegisterDataProviders)
+            {
+                return true;
+            }
             return TryRegisterService(typeof(T), serviceInstance);
         }
 
@@ -1466,7 +1471,7 @@ namespace RealityToolkit.ServiceFramework.Services
         public void DestroyAllServices()
         {
             // If the Service Manager is not configured, stop.
-            if (activeProfile == null) { return; }
+            if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
             // Destroy all service
             foreach (var service in activeServices)
