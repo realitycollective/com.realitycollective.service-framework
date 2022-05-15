@@ -2,37 +2,15 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.Utilities;
+using RealityToolkit.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Extensions
 {
-    public static class SFTypeExtensions
+    public static class TypeExtensions
     {
-        /// <summary>
-        /// Checks if the <see cref="IMixedRealityService"/> has any valid implementations.
-        /// </summary>
-        /// <typeparam name="T">The specific <see cref="IMixedRealityService"/> interface to check.</typeparam>
-        /// <returns>True, if the project contains valid implementations of <see cref="T"/>.</returns>
-        public static bool HasValidImplementations<T>() where T : IService
-        {
-            var concreteTypes = TypeCache.Current
-                .Select(pair => pair.Value)
-                .Where(type => typeof(T).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
-
-            var isValid = concreteTypes.Any();
-
-            if (!isValid)
-            {
-                Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
-            }
-
-            return isValid;
-        }
-
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
         {
             if (serviceType == null)
@@ -81,8 +59,7 @@ namespace RealityToolkit.ServiceFramework.Extensions
                 return false;
             }
 
-            if (inputType != typeof(IService) &&
-                inputType != typeof(IServiceDataProvider))
+            if (!ServiceManager.ServiceInterfaceTypes.Contains(inputType))
             {
                 returnType = inputType;
                 return true;

@@ -23,6 +23,10 @@ namespace RealityToolkit.ServiceFramework.Services
     [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
+        private static Type[] serviceInterfaceTypes = new[] { typeof(IService), typeof(IServiceDataProvider) };
+
+        public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
+
         private GameObject serviceManagerInstanceGameObject;
 
         private Guid serviceManagerInstanceGuid;
@@ -194,8 +198,19 @@ namespace RealityToolkit.ServiceFramework.Services
         /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
         /// </remarks>
         /// <param name="instanceGameObject"></param>
-        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
+        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null, Type[] additionalBaseServiceTypes = null)
         {
+            if (additionalBaseServiceTypes != null)
+            {
+                for (int i = additionalBaseServiceTypes.Length - 1; i >= 0; i--)
+                {
+                    if (!serviceInterfaceTypes.Contains(additionalBaseServiceTypes[i]))
+                    {
+                        serviceInterfaceTypes = serviceInterfaceTypes.AddItem(additionalBaseServiceTypes[i]);
+                    }
+                }
+            }
+
             if (instanceGameObject.IsNotNull())
             {
                 Initialize(instanceGameObject, profile);
@@ -673,7 +688,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             try
             {
-                serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
+               serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
             }
             catch (System.Reflection.TargetInvocationException e)
             {
@@ -1768,7 +1783,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    RealityToolkit.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )
