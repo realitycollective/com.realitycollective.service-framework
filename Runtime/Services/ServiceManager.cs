@@ -85,7 +85,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// When a profile is replaced with a new one, force all services to reset and read the new values
         /// </summary>
         /// <param name="profile"></param>
-        public void ResetProfile(ServiceProvidersProfile profile)
+        public void ResetProfile(ServiceProvidersProfile profile, GameObject instance = null)
         {
             if (Application.isEditor && Application.isPlaying)
             {
@@ -123,7 +123,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 DestroyAllServices();
             }
 
-            InitializeServiceLocator();
+            InitializeServiceLocator(instance);
 
             isResetting = false;
         }
@@ -337,7 +337,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
         /// </summary>
-        private void InitializeServiceLocator()
+        private void InitializeServiceLocator(GameObject instance = null)
         {
             if (isInitializing)
             {
@@ -349,7 +349,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (!IsInitialized)
             {
-                Initialize();
+                Initialize(instance);
             }
 
             // If the Service Manager is not configured, stop.
