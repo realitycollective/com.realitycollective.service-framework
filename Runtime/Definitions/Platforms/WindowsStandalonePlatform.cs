@@ -6,7 +6,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available on the Windows Standalone platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("58DE2D2A-DB5F-4090-A949-4028B8EA3AFD")]
+    [System.Runtime.InteropServices.Guid("5B39043A-BF08-4ECE-81C4-57F945760382")]
     public class WindowsStandalonePlatform : BasePlatform
     {
         /// <inheritdoc />

@@ -8,7 +8,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Reality Toolkit to signal that the feature is available on every platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("C6BF6315-2E9C-4602-827D-2D4871D29422")]
+    [System.Runtime.InteropServices.Guid("9869B29E-43BB-44CC-AE49-EB5C913263F9")]
     public sealed class AllPlatforms : BasePlatform
     {
         /// <inheritdoc />

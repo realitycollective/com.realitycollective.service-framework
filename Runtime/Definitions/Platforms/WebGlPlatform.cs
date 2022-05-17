@@ -6,7 +6,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available on the WebGL platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("A2FFB628-3CE7-4759-9C66-8F2BA8D16FC2")]
+    [System.Runtime.InteropServices.Guid("2EA1714D-E989-488E-B96B-2BA85D00733A")]
     public class WebGlPlatform : BasePlatform
     {
         /// <inheritdoc />
