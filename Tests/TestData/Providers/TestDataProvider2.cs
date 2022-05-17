@@ -4,10 +4,11 @@ using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Interfaces;
 using RealityToolkit.ServiceFramework.Providers;
 using RealityToolkit.ServiceFramework.Tests.Interfaces;
+using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Tests.Providers
 {
-    internal class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
+    public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
     {
         public const string TestName = "Test Data Provider 2";
 
@@ -15,15 +16,10 @@ namespace RealityToolkit.ServiceFramework.Tests.Providers
             : base(name, priority, profile, parentService)
         { }
 
-
-        public override void Enable()
+        public override void Initialize()
         {
-            base.Enable();
-        }
-
-        public override void Disable()
-        {
-            base.Disable();
+            base.Initialize();
+            Debug.Log($"{TestName} is Initialised");
         }
     }
 }

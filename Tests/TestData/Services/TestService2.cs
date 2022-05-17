@@ -3,10 +3,11 @@
 using RealityToolkit.ServiceFramework.Definitions;
 using RealityToolkit.ServiceFramework.Services;
 using RealityToolkit.ServiceFramework.Tests.Interfaces;
+using UnityEngine;
 
 namespace RealityToolkit.ServiceFramework.Tests.Services
 {
-    internal class TestService2 : BaseServiceWithConstructor, ITestService2
+    public class TestService2 : BaseServiceWithConstructor, ITestService2
     {
         public const string TestName = "Test Service 2";
 
@@ -14,14 +15,12 @@ namespace RealityToolkit.ServiceFramework.Tests.Services
             : base(name, priority)
         { }
 
-        public override void Enable()
+        public override void Initialize()
         {
-            base.Enable();
+            //base.Initialize();
+            Debug.Log($"{TestName} is Initialised");
         }
 
-        public override void Disable()
-        {
-            base.Disable();
-        }
+        public override bool RegisterDataProviders => false;
     }
 }

@@ -748,7 +748,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (TryGetService(interfaceType, serviceInstance.Name, out var preExistingService))
             {
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
             }
 
@@ -759,7 +759,7 @@ namespace RealityToolkit.ServiceFramework.Services
             catch (ArgumentException)
             {
                 preExistingService = GetService(interfaceType, false);
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
             }
 

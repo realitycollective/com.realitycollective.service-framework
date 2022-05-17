@@ -3,6 +3,6 @@ using RealityToolkit.ServiceFramework.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Profiles
 {
-    internal class TestService2Profile : BaseServiceProfile<IServiceDataProvider>
+    public class TestService2Profile : BaseServiceProfile<IServiceDataProvider>
     { }
 }
