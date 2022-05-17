@@ -4,5 +4,5 @@ using RealityToolkit.ServiceFramework.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Interfaces
 {
-    internal interface ITestService : IService { }
+    public interface ITestService2 : IService { }
 }

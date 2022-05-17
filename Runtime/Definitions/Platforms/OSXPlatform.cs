@@ -18,14 +18,17 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif
+#endif // UNITY_STANDALONE_OSX
             }
         }
 
 #if UNITY_EDITOR
 
         /// <inheritdoc />
-        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } = { UnityEditor.BuildTarget.StandaloneOSX };
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
+        {
+            UnityEditor.BuildTarget.StandaloneOSX
+        };
 
 #endif // UNITY_EDITOR
     }

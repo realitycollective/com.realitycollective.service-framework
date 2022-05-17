@@ -71,7 +71,7 @@ namespace RealityToolkit.ServiceFramework.Definitions
             }
         }
 
-        internal void AddConfiguration(IServiceConfiguration<TService> configuration)
+        public void AddConfiguration(IServiceConfiguration<TService> configuration)
         {
             var newConfigs = new IServiceConfiguration<TService>[ServiceConfigurations.Length + 1];
 

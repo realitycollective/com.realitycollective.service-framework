@@ -14,18 +14,21 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
         {
             get
             {
-#if PLATFORM_IOS
+#if PLATFORM_IOS || UNITY_IOS
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif
+#endif // PLATFORM_IOS || UNITY_IOS
             }
         }
 
 #if UNITY_EDITOR
 
         /// <inheritdoc />
-        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } = { UnityEditor.BuildTarget.iOS };
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
+        {
+            UnityEditor.BuildTarget.iOS
+        };
 
 #endif // UNITY_EDITOR
     }

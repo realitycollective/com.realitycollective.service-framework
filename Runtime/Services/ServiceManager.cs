@@ -20,9 +20,12 @@ using Debug = UnityEngine.Debug;
 namespace RealityToolkit.ServiceFramework.Services
 {
     [ExecuteInEditMode]
-    [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
+        private static Type[] serviceInterfaceTypes = new[] { typeof(IService), typeof(IServiceDataProvider) };
+
+        public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
+
         private GameObject serviceManagerInstanceGameObject;
 
         private Guid serviceManagerInstanceGuid;
@@ -81,7 +84,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// When a profile is replaced with a new one, force all services to reset and read the new values
         /// </summary>
         /// <param name="profile"></param>
-        public void ResetProfile(ServiceProvidersProfile profile)
+        public void ResetProfile(ServiceProvidersProfile profile, GameObject instance = null)
         {
             if (Application.isEditor && Application.isPlaying)
             {
@@ -119,7 +122,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 DestroyAllServices();
             }
 
-            InitializeServiceLocator();
+            InitializeServiceLocator(instance);
 
             isResetting = false;
         }
@@ -194,8 +197,19 @@ namespace RealityToolkit.ServiceFramework.Services
         /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
         /// </remarks>
         /// <param name="instanceGameObject"></param>
-        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
+        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null, Type[] additionalBaseServiceTypes = null)
         {
+            if (additionalBaseServiceTypes != null)
+            {
+                for (int i = additionalBaseServiceTypes.Length - 1; i >= 0; i--)
+                {
+                    if (!serviceInterfaceTypes.Contains(additionalBaseServiceTypes[i]))
+                    {
+                        serviceInterfaceTypes = serviceInterfaceTypes.AddItem(additionalBaseServiceTypes[i]);
+                    }
+                }
+            }
+
             if (instanceGameObject.IsNotNull())
             {
                 Initialize(instanceGameObject, profile);
@@ -322,7 +336,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
         /// </summary>
-        private void InitializeServiceLocator()
+        private void InitializeServiceLocator(GameObject instance = null)
         {
             if (isInitializing)
             {
@@ -334,7 +348,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (!IsInitialized)
             {
-                Initialize();
+                Initialize(instance);
             }
 
             // If the Service Manager is not configured, stop.
@@ -358,15 +372,8 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
-                TryRegisterServiceConfigurations(ActiveProfile?.ServiceConfigurations);
-            }
-
-            var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
-            activeServices.Clear();
-
-            foreach (var service in orderedCoreSystems)
-            {
-                TryRegisterService(service.Key, service.Value);
+                var orderedConfig = ActiveProfile.ServiceConfigurations.OrderBy(s => s.Priority).ToArray();
+                TryRegisterServiceConfigurations(orderedConfig);
             }
 
 #if UNITY_EDITOR
@@ -694,7 +701,11 @@ namespace RealityToolkit.ServiceFramework.Services
                 Debug.LogError($"Failed to create a valid instance of {concreteType.Name}!");
                 return false;
             }
-
+            // If a service does not want its data providers registered, then do not add them to the registry.
+            if (args.Length == 4 && !(args[3] as IService).RegisterDataProviders)
+            {
+                return true;
+            }
             return TryRegisterService(typeof(T), serviceInstance);
         }
 
@@ -728,7 +739,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (TryGetService(interfaceType, serviceInstance.Name, out var preExistingService))
             {
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
             }
 
@@ -739,7 +750,7 @@ namespace RealityToolkit.ServiceFramework.Services
             catch (ArgumentException)
             {
                 preExistingService = GetService(interfaceType, false);
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
             }
 
@@ -1451,7 +1462,7 @@ namespace RealityToolkit.ServiceFramework.Services
         public void DestroyAllServices()
         {
             // If the Service Manager is not configured, stop.
-            if (activeProfile == null) { return; }
+            if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
             // Destroy all service
             foreach (var service in activeServices)
@@ -1768,7 +1779,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    RealityToolkit.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )

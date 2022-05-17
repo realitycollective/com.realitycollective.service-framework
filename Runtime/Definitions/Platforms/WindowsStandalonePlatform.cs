@@ -18,7 +18,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif
+#endif // UNITY_STANDALONE_WIN
             }
         }
 

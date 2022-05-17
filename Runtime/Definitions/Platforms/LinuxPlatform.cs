@@ -4,21 +4,21 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the Service Framework to signal that the feature is available on the Windows Universal Platform.
+    /// Used by the Service Framework to signal that the feature is available on the OSX platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("16A3125F-31D5-4EC6-A120-8BE889A74D27")]
-    public class UniversalWindowsPlatform : BasePlatform
+    [System.Runtime.InteropServices.Guid("47F5A60F-2505-4CFC-B493-977296FCC6F0")]
+    public class LinuxPlatform : BasePlatform
     {
         /// <inheritdoc />
         public override bool IsAvailable
         {
             get
             {
-#if WINDOWS_UWP
+#if UNITY_STANDALONE_LINUX
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif // WINDOWS_UWP
+#endif // UNITY_STANDALONE_LINUX
             }
         }
 
@@ -27,7 +27,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
         /// <inheritdoc />
         public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
         {
-            UnityEditor.BuildTarget.WSAPlayer
+            UnityEditor.BuildTarget.StandaloneLinux64
         };
 
 #endif // UNITY_EDITOR

@@ -4,21 +4,21 @@
 namespace RealityToolkit.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
-    /// Used by the Service Framework to signal that the feature is available on the Windows Universal Platform.
+    ///  Used by the Service Framework to signal that the feature is available on the iOS platform.
     /// </summary>
-    [System.Runtime.InteropServices.Guid("16A3125F-31D5-4EC6-A120-8BE889A74D27")]
-    public class UniversalWindowsPlatform : BasePlatform
+    [System.Runtime.InteropServices.Guid("926F2418-99CC-4A9A-B909-C3C18AEA00CE")]
+    public class PS5Platform : BasePlatform
     {
         /// <inheritdoc />
         public override bool IsAvailable
         {
             get
             {
-#if WINDOWS_UWP
+#if PLATFORM_PS5 || UNITY_PS5
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif // WINDOWS_UWP
+#endif // PLATFORM_PS5 || UNITY_PS5
             }
         }
 
@@ -27,7 +27,7 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
         /// <inheritdoc />
         public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
         {
-            UnityEditor.BuildTarget.WSAPlayer
+            UnityEditor.BuildTarget.PS5
         };
 
 #endif // UNITY_EDITOR

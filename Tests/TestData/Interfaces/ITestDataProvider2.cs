@@ -5,5 +5,5 @@ using RealityToolkit.ServiceFramework.Interfaces;
 
 namespace RealityToolkit.ServiceFramework.Tests.Interfaces
 {
-    internal interface ITestDataProvider2 : IServiceDataProvider { }
+    public interface ITestDataProvider2 : IServiceDataProvider { }
 }
