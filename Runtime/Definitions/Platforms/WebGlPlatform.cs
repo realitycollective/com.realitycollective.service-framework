@@ -14,18 +14,21 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
         {
             get
             {
-#if PLATFORM_WEBGL
+#if PLATFORM_WEBGL || UNITY_WEBGL
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif
+#endif // PLATFORM_WEBGL || UNITY_WEBGL
             }
         }
 
 #if UNITY_EDITOR
 
         /// <inheritdoc />
-        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } = { UnityEditor.BuildTarget.WebGL };
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
+        {
+            UnityEditor.BuildTarget.WebGL
+        };
 
 #endif // UNITY_EDITOR
     }

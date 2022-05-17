@@ -14,18 +14,21 @@ namespace RealityToolkit.ServiceFramework.Definitions.Platforms
         {
             get
             {
-#if PLATFORM_ANDROID
+#if PLATFORM_ANDROID || UNITY_ANDROID
                 return !UnityEngine.Application.isEditor;
 #else
                 return false;
-#endif
+#endif // PLATFORM_ANDROID || UNITY_ANDROID
             }
         }
 
 #if UNITY_EDITOR
 
         /// <inheritdoc />
-        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } = { UnityEditor.BuildTarget.Android };
+        public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
+        {
+            UnityEditor.BuildTarget.Android
+        };
 
 #endif // UNITY_EDITOR
     }
