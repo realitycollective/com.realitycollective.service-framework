@@ -20,7 +20,6 @@ using Debug = UnityEngine.Debug;
 namespace RealityToolkit.ServiceFramework.Services
 {
     [ExecuteInEditMode]
-    [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
         private static Type[] serviceInterfaceTypes = new[] { typeof(IService), typeof(IServiceDataProvider) };
@@ -376,14 +375,6 @@ namespace RealityToolkit.ServiceFramework.Services
                 var orderedConfig = ActiveProfile.ServiceConfigurations.OrderBy(s => s.Priority).ToArray();
                 TryRegisterServiceConfigurations(orderedConfig);
             }
-
-            //var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
-            //activeServices.Clear();
-
-            //foreach (var service in orderedCoreSystems)
-            //{
-            //    TryRegisterService(service.Key, service.Value);
-            //}
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
