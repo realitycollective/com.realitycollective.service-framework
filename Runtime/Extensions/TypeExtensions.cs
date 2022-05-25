@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RealityToolkit.ServiceFramework.Extensions
+namespace RealityCollective.ServiceFramework.Extensions
 {
     public static class TypeExtensions
     {

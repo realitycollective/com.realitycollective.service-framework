@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Interfaces;
 using System;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Attributes
+namespace RealityCollective.ServiceFramework.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public class RuntimePlatformAttribute : PropertyAttribute

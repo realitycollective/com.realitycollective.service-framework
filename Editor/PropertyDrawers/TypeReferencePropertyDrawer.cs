@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Attributes;
-using RealityToolkit.Definitions.Utilities;
-using RealityToolkit.Extensions;
+using RealityCollective.Attributes;
+using RealityCollective.Definitions.Utilities;
+using RealityCollective.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Assembly = System.Reflection.Assembly;
 
-namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
+namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 {
     /// <summary>
     /// Custom property drawer for <see cref="SystemType"/> properties.

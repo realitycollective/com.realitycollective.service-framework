@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
-using RealityToolkit.Editor.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Tests.Utilities
+namespace RealityCollective.ServiceFramework.Tests.Utilities
 {
     internal static class TestUtilities
     {

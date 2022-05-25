@@ -1,12 +1,12 @@
 // Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
-using RealityToolkit.ServiceFramework.Services;
-using RealityToolkit.ServiceFramework.Tests.Interfaces;
-using RealityToolkit.ServiceFramework.Tests.Services;
-using RealityToolkit.ServiceFramework.Tests.Utilities;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Tests.Interfaces;
+using RealityCollective.ServiceFramework.Tests.Services;
+using RealityCollective.ServiceFramework.Tests.Utilities;
 
-namespace RealityToolkit.ServiceFramework.Tests.H_ServiceDisabling
+namespace RealityCollective.ServiceFramework.Tests.H_ServiceDisabling
 {
     internal class ServiceDisableTests
     {

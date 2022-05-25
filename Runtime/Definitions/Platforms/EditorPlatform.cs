@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Definitions.Platforms
+namespace RealityCollective.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available in the Unity Editor.

@@ -1,11 +1,11 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Services;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework
+namespace RealityCollective.ServiceFramework
 {
     [ExecuteInEditMode]
     [DisallowMultipleComponent]

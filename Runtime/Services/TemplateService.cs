@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Interfaces;
 using System;
 
-namespace RealityToolkit.ServiceFramework.Services
+namespace RealityCollective.ServiceFramework.Services
 {
     public class TemplateService : BaseServiceWithConstructor, IService
     {

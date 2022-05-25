@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Utilities
+namespace RealityCollective.ServiceFramework.Editor.Utilities
 {
     /// <summary>
     /// Dummy scriptable object used to find the relative path to the Service Framework

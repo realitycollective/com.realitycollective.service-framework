@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-namespace RealityToolkit.ServiceFramework.Definitions.Platforms
+namespace RealityCollective.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
     /// Used by the Service Framework to signal that the feature is available on the OSX platform.

@@ -1,6 +1,6 @@
-# ServiceFramework
+# Service Framework
 
-The ServiceFramework package for the [Reality Toolkit](https://github.com/realitycollective/com.realitytoolkit.core).
+The Service Framework package components for the [Reality Collective](https://realityCollective.io). This package an extensible service framework to build highly performant components for your Unity projects.
 
 [![openupm](https://img.shields.io/npm/v/com.xrtk.spatial-persistence.asa?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.xrtk.spatial-persistence.asa/)
 
@@ -12,6 +12,35 @@ The Service framework provides a service repository for enabling background serv
 * Zero Latency from Unity operations - services are fully c# based with no Unity overhead.
 * Ability to host several sub-services (data providers) as part of a service, automatically maintained by a parent service and also platform aware.
 * Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
+
+## Requirements
+<!-- Fill in list of requirements here -->
+
+- [Unity 2020.3 and above](https://unity.com/)
+- [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+
+### OpenUPM
+<!-- Check openUPM links and details -->
+
+[![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
+
+The simplest way to getting started using the utilities package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
+
+```
+`openupm add com.realitycollective.service-framework`
+```
+
+> For more details on using [OpenUPM CLI, check the docs here](https://github.com/openupm/openupm-cli#installation).
+
+## Build Status
+<!-- Check build status links and details -->
+
+| branch | build status |
+| --- | --- |
+| main | [![main](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml/badge.svg?branch=main)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml) |
+| development | [![development](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml/badge.svg?branch=development)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml) |
+
+---
 
 ## Use cases
 

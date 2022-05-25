@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Providers;
-using RealityToolkit.ServiceFramework.Tests.Interfaces;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Providers;
+using RealityCollective.ServiceFramework.Tests.Interfaces;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Tests.Providers
+namespace RealityCollective.ServiceFramework.Tests.Providers
 {
     public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
     {

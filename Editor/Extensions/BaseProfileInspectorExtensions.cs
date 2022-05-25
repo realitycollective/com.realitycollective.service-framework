@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Editor.Extensions;
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Utilities
+namespace RealityCollective.ServiceFramework.Editor.Utilities
 {
     public static class BaseProfileInspectorExtensions
     {

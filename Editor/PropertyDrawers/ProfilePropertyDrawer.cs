@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
+namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 {
     [CustomPropertyDrawer(typeof(BaseProfile), true)]
     public class ProfilePropertyDrawer : PropertyDrawer

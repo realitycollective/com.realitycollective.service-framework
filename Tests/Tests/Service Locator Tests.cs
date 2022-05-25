@@ -1,14 +1,14 @@
 // Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
-using RealityToolkit.ServiceFramework.Services;
-using RealityToolkit.ServiceFramework.Tests.Utilities;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Tests.Utilities;
 using System.Text.RegularExpressions;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace RealityToolkit.ServiceFramework.Tests.A_ServiceManager
+namespace RealityCollective.ServiceFramework.Tests.A_ServiceManager
 {
     internal class ServiceLocatorTests
     {

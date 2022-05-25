@@ -1,15 +1,15 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Editor.Extensions;
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Profiles
+namespace RealityCollective.ServiceFramework.Editor.Profiles
 {
     /// <summary>
     /// Base class for all <see cref="BaseProfile"/> Inspectors to inherit from.

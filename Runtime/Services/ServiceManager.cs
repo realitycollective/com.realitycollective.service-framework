@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.Utilities.Async;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Extensions;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using Debug = UnityEngine.Debug;
 // ServiceGenerator - interfacevalidation
 // Limit Service Type lookups for "testing" - Type Service/DataProvider
 
-namespace RealityToolkit.ServiceFramework.Services
+namespace RealityCollective.ServiceFramework.Services
 {
     [ExecuteInEditMode]
     public class ServiceManager : IDisposable
@@ -1590,8 +1590,8 @@ namespace RealityToolkit.ServiceFramework.Services
         #region Service Utilities
 
         private string[] ignoredNamespaces = { "System.IDisposable",
-                                                      "RealityToolkit.ServiceFramework.Interfaces.IService",
-                                                      "RealityToolkit.ServiceFramework.Interfaces.IServiceDataProvider"};
+                                                      "RealityCollective.ServiceFramework.Interfaces.IService",
+                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
 
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
@@ -1779,7 +1779,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    RealityToolkit.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    RealityCollective.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )

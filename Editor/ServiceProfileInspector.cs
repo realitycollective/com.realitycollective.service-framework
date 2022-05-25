@@ -1,15 +1,15 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Definitions.Utilities;
-using RealityToolkit.Editor.Extensions;
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Editor.PropertyDrawers;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Definitions.Utilities;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Profiles
+namespace RealityCollective.ServiceFramework.Editor.Profiles
 {
     [CustomEditor(typeof(BaseServiceProfile<>), true, isFallback = true)]
     public class ServiceProfileInspector : BaseProfileInspector
