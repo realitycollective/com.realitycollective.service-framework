@@ -83,7 +83,7 @@ namespace RealityToolkit.ServiceFramework.Editor
                         EditorGUIUtility.PingObject(target);
                         EditorApplication.delayCall += () =>
                         {
-                            EditorUtility.DisplayDialog("Attention!", "No root profile for the Reality Toolkit was found.\n\nYou'll need to create a new one.", "OK");
+                            EditorUtility.DisplayDialog("Attention!", "No configuration found for the Service Manager instance.\n\nYou will need to create a new one.", "OK");
                         };
                         break;
                     case 1:
