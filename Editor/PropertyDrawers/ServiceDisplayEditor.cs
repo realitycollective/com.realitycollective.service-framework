@@ -1,4 +1,8 @@
-﻿#if UNITY_EDITOR
+﻿// Copyright (c) Reality Collective. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+// Submitted by Joost van Schaik
+
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Linq;
@@ -29,6 +33,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         /// Used as postfix for keys
         /// </summary>
         private int keyCounter;
+        
         /// <summary>
         /// Key prefix (set to class name)
         /// </summary>
@@ -106,11 +111,12 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
             {
                 return;
             }
+
             foreach (var prop in targetObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 var propVal = prop.GetValue(targetObject);
 
-                // When property value equals the full name, we have a complex type so render its properties recursively
+                // When the property value equals the full name we have a complex type, so render its properties recursively
                 // This does not work for types with ToString overridden, so the InspectorExpandAttribute can be used to force that
                 if (propVal?.ToString() == propVal?.GetType().FullName ||
                     prop.PropertyType.GetCustomAttribute(typeof(InspectorExpandAttribute)) != null)
@@ -132,13 +138,13 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         }
 
         /// <summary>
-        /// Draw various field types
+        /// Draw the various field types
         /// </summary>
         /// <param name="propName">property name</param>
         /// <param name="propVal">property value</param>
         private void DrawField(string propName, object propVal)
         {
-            // Check if there's a custom field drawer first
+            // Check if there is a custom field drawer first
             if (DrawCustomField(propName, propVal))
             {
                 return;
@@ -157,24 +163,19 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
             switch (propVal)
             {
                 case bool boolVal:
-                    EditorGUILayout.Toggle(propName, boolVal,
-                        Array.Empty<GUILayoutOption>());
+                    EditorGUILayout.Toggle(propName, boolVal, Array.Empty<GUILayoutOption>());
                     break;
                 case Vector2 v2Val:
-                    EditorGUILayout.Vector2Field(propName, v2Val,
-                        Array.Empty<GUILayoutOption>());
+                    EditorGUILayout.Vector2Field(propName, v2Val, Array.Empty<GUILayoutOption>());
                     break;
                 case Vector3 v3Val:
-                    EditorGUILayout.Vector3Field(propName, v3Val,
-                        Array.Empty<GUILayoutOption>());
+                    EditorGUILayout.Vector3Field(propName, v3Val, Array.Empty<GUILayoutOption>());
                     break;
                 case Color colorVal:
-                    EditorGUILayout.ColorField(propName, colorVal,
-                        Array.Empty<GUILayoutOption>());
+                    EditorGUILayout.ColorField(propName, colorVal, Array.Empty<GUILayoutOption>());
                     break;
                 default:
-                    EditorGUILayout.TextField(propName, propVal?.ToString(),
-                        Array.Empty<GUILayoutOption>());
+                    EditorGUILayout.TextField(propName, propVal?.ToString(), Array.Empty<GUILayoutOption>());
                     break;
             }
         }
@@ -208,15 +209,14 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
                     }
                 }, (++keyCounter).ToString());
 
-
                 return true;
             }
+
             return false;
         }
 
-
         /// <summary>
-        /// If this object has a Value property (*cough*React*cough*) draw it's value property)
+        /// If this object has a Value property, draw its value property)
         /// </summary>
         /// <param name="propName">property name</param>
         /// <param name="propVal">property value</param>
@@ -247,8 +247,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         }
 
         /// <summary>
-        /// Render Bold/HelpBox style Foldout. Graciously borrowed adapted from BaseMixedRealityProfileInspector - and very much
-        /// simplified
+        /// Render Bold/HelpBox style Foldout
         /// </summary>
         /// <param name="title">Title in foldout</param>
         /// <param name="renderContent">code to execute to render inside of foldout</param>
@@ -274,14 +273,13 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
             EditorGUILayout.EndVertical();
         }
 
-
         void OnEnable()
         {
             RepaintLoop();
         }
 
         /// <summary>
-        /// Forced repaint every 100ms to give instant effect
+        /// Force repaint every 100ms to give instant effect
         /// </summary>
         /// <returns></returns>
         private async Task RepaintLoop()
