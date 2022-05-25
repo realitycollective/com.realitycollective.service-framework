@@ -18,7 +18,6 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
         private const string Nothing = "Nothing";
         private const string Everything = "Everything";
         private const string Platform = "Platform";
-        private const string EditorOnly = "Editor Only";
         private const string EditorAnd = "Editor &";
         private const string TypeReferenceUpdated = "TypeReferenceUpdated";
 
@@ -26,19 +25,18 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
         private static readonly GUIContent EditorContent = new GUIContent("Editor");
         private static readonly GUIContent NothingContent = new GUIContent(Nothing);
         private static readonly GUIContent EverythingContent = new GUIContent(Everything);
-        private static readonly GUIContent EditorOnlyContent = new GUIContent(EditorOnly);
         private static readonly GUIContent RuntimePlatformContent = new GUIContent("Runtime Platforms");
-        private static readonly GUIContent EditorBuildTargetContent = new GUIContent($"{EditorAnd} Build Target");
+        private static readonly GUIContent EditorBuildTargetContent = new GUIContent($"{EditorAnd}Build Target");
 
         private static readonly int ControlHint = typeof(PlatformEntryPropertyDrawer).GetHashCode();
 
         private static readonly Type AllPlatformsType = typeof(AllPlatforms);
         private static readonly Type EditorPlatformType = typeof(EditorPlatform);
-        private static readonly Type EditorBuildTargetType = typeof(CurrentBuildTargetPlatform);
+        private static readonly Type CurrentBuildTargetType = typeof(CurrentBuildTargetPlatform);
 
         private static readonly Guid AllPlatformsGuid = AllPlatformsType.GUID;
         private static readonly Guid EditorPlatformGuid = EditorPlatformType.GUID;
-        private static readonly Guid EditorBuildTargetGuid = EditorBuildTargetType.GUID;
+        private static readonly Guid CurrentEditorBuildTargetGuid = CurrentBuildTargetType.GUID;
 
         private static int selectionControlId;
         private static int arraySize = 0;
@@ -142,7 +140,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
                 var editorIsActive = IsPlatformActive(EditorPlatformType);
                 var isAllPlatformsActive = IsPlatformActive(AllPlatformsType);
-                var editorBuildTargetIsActive = IsPlatformActive(EditorBuildTargetType);
+                var editorBuildTargetIsActive = IsPlatformActive(CurrentBuildTargetType);
 
                 if (editorIsActive || editorBuildTargetIsActive)
                 {
@@ -152,20 +150,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 menu.AddItem(NothingContent, arraySize == 0, OnNothingSelected, null);
                 menu.AddItem(EverythingContent, isAllPlatformsActive, OnEverythingSelected, null);
 
-                if (!isAllPlatformsActive)
-                {
-                    menu.AddItem(EditorOnlyContent, editorIsActive, () =>
-                    {
-                        if (!TryRemovePlatformReference(EditorPlatformGuid))
-                        {
-                            runtimePlatformsProperty.ClearArray();
-                            TryAddPlatformReference(EditorPlatformGuid);
-                            EditorWindow.focusedWindow.SendEvent(EditorGUIUtility.CommandEvent(TypeReferenceUpdated));
-                        }
-                    });
-                }
-
-                menu.AddItem(isAllPlatformsActive ? EditorContent : EditorBuildTargetContent, isAllPlatformsActive || editorBuildTargetIsActive, OnEditorSelected, null);
+                menu.AddItem(EditorContent, isAllPlatformsActive || editorIsActive, OnEditorSelected, null);
                 menu.AddSeparator(string.Empty);
 
                 for (var i = 0; i < ServiceManager.AvailablePlatforms.Count; i++)
@@ -175,7 +160,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
                     if (platformType == AllPlatformsType ||
                         platformType == EditorPlatformType ||
-                        platformType == EditorBuildTargetType)
+                        platformType == CurrentBuildTargetType)
                     {
                         continue;
                     }
@@ -226,11 +211,6 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                         return Everything;
                     }
 
-                    if (IsPlatformActive(EditorPlatformType))
-                    {
-                        return EditorOnly;
-                    }
-
                     var systemTypeProperty = new SerializedTypeProperty(runtimePlatformsProperty.GetArrayElementAtIndex(0));
 
                     return systemTypeProperty.ReferenceType != null
@@ -240,7 +220,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
                 var contentText = "Multiple...";
 
-                if (IsPlatformActive(EditorBuildTargetType))
+                if (IsPlatformActive(CurrentBuildTargetType))
                 {
                     if (runtimePlatformsProperty.arraySize == 2)
                     {
@@ -250,7 +230,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                         {
                             var systemTypeProperty = new SerializedTypeProperty(runtimePlatformsProperty.GetArrayElementAtIndex(i));
 
-                            if (systemTypeProperty.ReferenceType != EditorBuildTargetType)
+                            if (systemTypeProperty.ReferenceType != CurrentBuildTargetType)
                             {
                                 type = systemTypeProperty.ReferenceType;
                                 break;
@@ -292,7 +272,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 {
                     var typeProperty = new SerializedTypeProperty(runtimePlatformsProperty.GetArrayElementAtIndex(i));
 
-                    if (typeProperty.ReferenceType == EditorBuildTargetType)
+                    if (typeProperty.ReferenceType == CurrentBuildTargetType)
                     {
                         isCurrentBuildTargetPlatformActive = true;
                     }
@@ -313,7 +293,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
                         if (platformType == AllPlatformsType ||
                             platformType == EditorPlatformType ||
-                            platformType == EditorBuildTargetType)
+                            platformType == CurrentBuildTargetType)
                         {
                             continue;
                         }
@@ -325,7 +305,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                 {
                     if (isCurrentBuildTargetPlatformActive)
                     {
-                        TryRemovePlatformReference(EditorBuildTargetGuid);
+                        TryRemovePlatformReference(CurrentEditorBuildTargetGuid);
 
                         if (runtimePlatformsProperty.arraySize == ServiceManager.AvailablePlatforms.Count - 3)
                         {
@@ -334,27 +314,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                     }
                     else
                     {
-                        TryAddPlatformReference(EditorBuildTargetGuid);
-
-                        foreach (var platform in ServiceManager.AvailablePlatforms)
-                        {
-                            if (platform is AllPlatforms ||
-                                platform is EditorPlatform ||
-                                platform is CurrentBuildTargetPlatform)
-                            {
-                                continue;
-                            }
-
-                            if (platform.IsBuildTargetAvailable)
-                            {
-                                TryAddPlatformReference(platform.GetType().GUID);
-                            }
-                        }
-
-                        if (runtimePlatformsProperty.arraySize == ServiceManager.AvailablePlatforms.Count - 2)
-                        {
-                            OnEverythingSelected(null);
-                        }
+                        TryAddPlatformReference(EditorPlatformGuid);
                     }
                 }
 
@@ -392,7 +352,7 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
             {
                 if (TryRemovePlatformReference(EditorPlatformGuid))
                 {
-                    TryAddPlatformReference(EditorBuildTargetGuid);
+                    TryAddPlatformReference(CurrentEditorBuildTargetGuid);
                 }
 
                 if (!TypeExtensions.TryResolveType(classReference, out var selectedPlatformType)) { return; }
@@ -449,8 +409,8 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
                     if (systemTypeProperty.ReferenceType == selectedPlatformType)
                     {
                         if (runtimePlatformsProperty.arraySize == 2 &&
-                            IsPlatformActive(EditorBuildTargetType) &&
-                            selectedPlatformType != EditorBuildTargetType)
+                            IsPlatformActive(CurrentBuildTargetType) &&
+                            selectedPlatformType != CurrentBuildTargetType)
                         {
                             runtimePlatformsProperty.ClearArray();
                             runtimePlatformsProperty.serializedObject.ApplyModifiedProperties();
