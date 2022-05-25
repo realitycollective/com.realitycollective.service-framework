@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Providers;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Providers;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -18,7 +18,7 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Assembly = System.Reflection.Assembly;
 
-namespace RealityToolkit.ServiceFramework.Editor
+namespace RealityCollective.ServiceFramework.Editor
 {
     public class ServiceWizard : EditorWindow
     {
@@ -342,7 +342,7 @@ namespace RealityToolkit.ServiceFramework.Editor
         {
             usingList.Clear();
 
-            usingList.EnsureListItem("RealityToolkit.ServiceFramework.Interfaces");
+            usingList.EnsureListItem("RealityCollective.ServiceFramework.Interfaces");
 
             var @using = usingList.Aggregate(string.Empty, (current, item) => $"{current}{Environment.NewLine}using {item};");
 
@@ -384,7 +384,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             usingList.Clear();
 
             usingList.EnsureListItem(profileBaseType.Namespace);
-            usingList.EnsureListItem("RealityToolkit.ServiceFramework.Interfaces");
+            usingList.EnsureListItem("RealityCollective.ServiceFramework.Interfaces");
             usingList.EnsureListItem("UnityEngine");
 
             usingList.Sort();

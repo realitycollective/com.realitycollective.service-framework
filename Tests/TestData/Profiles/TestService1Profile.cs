@@ -1,7 +1,7 @@
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Interfaces;
 
-namespace RealityToolkit.ServiceFramework.Tests.Profiles
+namespace RealityCollective.ServiceFramework.Tests.Profiles
 {
     public class TestService1Profile : BaseServiceProfile<IServiceDataProvider>
     { }

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Interfaces;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Definitions
+namespace RealityCollective.ServiceFramework.Definitions
 {
     /// <summary>
     /// The base profile type to derive all <see cref="IService"/>s from.

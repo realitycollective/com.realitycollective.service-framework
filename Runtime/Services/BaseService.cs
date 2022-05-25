@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Interfaces;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Services
+namespace RealityCollective.ServiceFramework.Services
 {
     /// <summary>
     /// Base <see cref="IService"/> Implementation.

@@ -1,28 +1,28 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.Editor.Utilities;
-using RealityToolkit.Extensions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Editor.Utilities;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework
+namespace RealityCollective.ServiceFramework
 {
     public static class ServiceFrameworkPreferences
     {
         public const string Editor_Menu_Keyword = "Reality Toolkit";
 
-        private static readonly string[] Package_Keywords = { "RealityToolkit", "Mixed", "Reality","ServiceFramework" };
+        private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
 
         #region Show Inspector Debug View settings prompt
         private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Data Providers in the inspector view.");
-        private static readonly string ShowInspectorDebugViewKey = $"{Application.productName}_RealityToolkit_Editor_ShowInspectorDebugView";
+        private static readonly string ShowInspectorDebugViewKey = $"{Application.productName}_RealityCollective_Editor_ShowInspectorDebugView";
         private static bool showInspectorDebugViewPrefLoaded;
         private static bool showInspectorDebugView = false;
 

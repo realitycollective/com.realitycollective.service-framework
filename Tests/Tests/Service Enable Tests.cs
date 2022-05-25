@@ -1,12 +1,12 @@
 // Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
-using RealityToolkit.ServiceFramework.Services;
-using RealityToolkit.ServiceFramework.Tests.Interfaces;
-using RealityToolkit.ServiceFramework.Tests.Services;
-using RealityToolkit.ServiceFramework.Tests.Utilities;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Tests.Interfaces;
+using RealityCollective.ServiceFramework.Tests.Services;
+using RealityCollective.ServiceFramework.Tests.Utilities;
 
-namespace RealityToolkit.ServiceFramework.Tests.J_ServiceEnabling
+namespace RealityCollective.ServiceFramework.Tests.J_ServiceEnabling
 {
     internal class ServiceEnableTests
     {

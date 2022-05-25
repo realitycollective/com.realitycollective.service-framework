@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Definitions
+namespace RealityCollective.ServiceFramework.Definitions
 {
     public abstract class BaseProfile : ScriptableObject
     {

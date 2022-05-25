@@ -9,7 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace RealityToolkit.ServiceFramework.Editor.Utilities
+namespace RealityCollective.ServiceFramework.Editor.Utilities
 {
     /// <summary>
     /// This class has handy inspector utilities and functions.

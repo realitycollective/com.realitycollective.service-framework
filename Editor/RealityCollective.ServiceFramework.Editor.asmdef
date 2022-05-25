@@ -1,5 +1,5 @@
 {
-    "name": "RealityToolkit.ServiceFramework.Editor",
+    "name": "RealityCollective.ServiceFramework.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:13703f41b24bb904cb2305abe6317e3d",

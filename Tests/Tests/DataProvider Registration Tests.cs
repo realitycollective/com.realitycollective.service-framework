@@ -1,20 +1,20 @@
 // Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
-using RealityToolkit.ServiceFramework.Tests.Interfaces;
-using RealityToolkit.ServiceFramework.Tests.Profiles;
-using RealityToolkit.ServiceFramework.Tests.Providers;
-using RealityToolkit.ServiceFramework.Tests.Services;
-using RealityToolkit.ServiceFramework.Tests.Utilities;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Tests.Interfaces;
+using RealityCollective.ServiceFramework.Tests.Profiles;
+using RealityCollective.ServiceFramework.Tests.Providers;
+using RealityCollective.ServiceFramework.Tests.Services;
+using RealityCollective.ServiceFramework.Tests.Utilities;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace RealityToolkit.ServiceFramework.Tests.C_DataProviderRegistration
+namespace RealityCollective.ServiceFramework.Tests.C_DataProviderRegistration
 {
     internal class DataProviderRegistrationTests
     {

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RealityToolkit.ServiceFramework.Interfaces
+namespace RealityCollective.ServiceFramework.Interfaces
 {
     /// <summary>
     /// Generic interface for all Services

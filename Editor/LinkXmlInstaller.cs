@@ -7,7 +7,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 
-namespace RealityToolkit.ServiceFramework.Editor
+namespace RealityCollective.ServiceFramework.Editor
 {
     public class LinkXmlInstaller : IUnityLinkerProcessor
     {

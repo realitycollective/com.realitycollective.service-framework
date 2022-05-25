@@ -1,11 +1,11 @@
 ﻿// Copyright (c) xRealityLabs. All rights reserved.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Services;
-using RealityToolkit.ServiceFramework.Tests.Interfaces;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Tests.Interfaces;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Tests.Services
+namespace RealityCollective.ServiceFramework.Tests.Services
 {
     [System.Runtime.InteropServices.Guid("80B2B43B-F18B-4E68-A9AB-505290D31110")]
     public class TestService1 : BaseServiceWithConstructor, ITestService1

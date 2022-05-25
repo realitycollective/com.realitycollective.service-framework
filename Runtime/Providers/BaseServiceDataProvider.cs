@@ -2,11 +2,11 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 
-namespace RealityToolkit.ServiceFramework.Providers
+namespace RealityCollective.ServiceFramework.Providers
 {
     /// <summary>
     /// The base data provider implements <see cref="IServiceDataProvider"/> and provides default properties for all data providers.
