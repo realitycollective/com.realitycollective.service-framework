@@ -150,6 +150,12 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                 }
             }
 
+            if (GUI.changed)
+            {
+            
+                serializedObject.ApplyModifiedProperties();
+            }
+
             EditorGUILayout.Space();
             ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
             EditorGUILayout.Space();
