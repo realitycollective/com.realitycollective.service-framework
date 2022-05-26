@@ -80,7 +80,12 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 
             EditorGUI.BeginChangeCheck();
 
-            var selectedProfile = EditorGUI.ObjectField(objectRect, propertyLabel, profile, profileType, false) as BaseProfile;
+            BaseProfile selectedProfile = null;
+            try
+            {
+                selectedProfile = EditorGUI.ObjectField(objectRect, propertyLabel, profile, profileType, false) as BaseProfile;
+            }
+            catch { }
 
             if (EditorGUI.EndChangeCheck())
             {
