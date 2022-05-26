@@ -95,6 +95,7 @@ namespace RealityCollective.ServiceFramework.Editor
                             var rootProfile = AssetDatabase.LoadAssetAtPath<ServiceProvidersProfile>(rootProfilePath);
                             Debug.Assert(rootProfile != null);
                             serviceProvidersProfile.objectReferenceValue = rootProfile;
+                            serializedObject.ApplyModifiedProperties();
                             EditorGUIUtility.PingObject(rootProfile);
                             Selection.activeObject = rootProfile;
                             ServiceManager.Instance?.ResetProfile(rootProfile);

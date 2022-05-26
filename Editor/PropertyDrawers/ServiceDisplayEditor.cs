@@ -275,7 +275,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 
         void OnEnable()
         {
-            RepaintLoop();
+            Task.Run(()=> RepaintLoop());
         }
 
         /// <summary>
