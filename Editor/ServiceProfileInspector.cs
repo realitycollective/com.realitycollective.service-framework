@@ -152,7 +152,6 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             if (GUI.changed)
             {
-            
                 serializedObject.ApplyModifiedProperties();
             }
 
