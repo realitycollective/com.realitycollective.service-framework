@@ -48,6 +48,11 @@ namespace RealityCollective.ServiceFramework
             if (serviceManagerInstance == null)
             {
                 serviceManagerInstance = new ServiceManager(this.gameObject, serviceProvidersProfile);
+
+                if (Application.isPlaying)
+                {
+                    DontDestroyOnLoad(transform.root);
+                }
             }
         }
 
