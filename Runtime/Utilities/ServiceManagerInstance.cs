@@ -49,7 +49,9 @@ namespace RealityCollective.ServiceFramework
             {
                 serviceManagerInstance = new ServiceManager(this.gameObject, serviceProvidersProfile);
 
-                if (Application.isPlaying)
+                // If there is a profile and the DontDestroyServiceManagerOnLoad setting is enabled, ensure that the ServiceManager persists between scene changes.
+                var dontDestroyServiceManagerOnLoad = ServiceProvidersProfile != null ? ServiceProvidersProfile.DontDestroyServiceManagerOnLoad : false;
+                if (Application.isPlaying && dontDestroyServiceManagerOnLoad)
                 {
                     DontDestroyOnLoad(transform.root);
                 }
