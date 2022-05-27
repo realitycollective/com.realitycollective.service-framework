@@ -54,7 +54,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
                 if (hook != null)
                 {
                     serviceName = hook.gameObject.name;
-                    if (ServiceManager.Instance.IsInitialized)
+                    if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized)
                     {
                         service = ServiceManager.Instance.GetAllServices()
                             .FirstOrDefault(p => p.Name == serviceName);

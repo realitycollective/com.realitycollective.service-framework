@@ -373,12 +373,12 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 serializedObject.ApplyModifiedProperties();
 
                 //TODO
-                //if (ServiceManager.Instance.IsInitialized &&
-                //    runtimePlatforms.arraySize > 0 &&
-                //    systemTypeReference.Type != null)
-                //{
-                //    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
-                //}
+                if (ServiceManager.Instance.IsInitialized &&
+                    runtimePlatforms.arraySize > 0 &&
+                    systemTypeReference.Type != null)
+                {
+                    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
+                }
             }
 
             EditorGUIUtility.wideMode = lastMode;
@@ -416,7 +416,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
 
-            if (ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }

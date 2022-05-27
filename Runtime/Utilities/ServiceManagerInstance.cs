@@ -3,6 +3,7 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Services;
+using UnityEditor;
 using UnityEngine;
 
 namespace RealityCollective.ServiceFramework
@@ -22,7 +23,7 @@ namespace RealityCollective.ServiceFramework
         /// <summary>
         /// Check to see if the Service Manager is available and a profile is available to apply
         /// </summary>
-        private bool isServiceManagerConfigured => serviceManagerInstance != null && serviceProvidersProfile != null;
+        private bool isServiceManagerInstanceConfigured => serviceManagerInstance != null && serviceProvidersProfile != null;
 
         /// <summary>
         /// All the additional non-required systems, features, and managers registered with the Service Manager.
@@ -54,9 +55,24 @@ namespace RealityCollective.ServiceFramework
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (isServiceManagerConfigured && 
-                (serviceManagerInstance?.ActiveProfile == null || 
-                serviceManagerInstance?.ActiveProfile != serviceProvidersProfile))
+            if(EditorApplication.isPlaying || !gameObject.activeInHierarchy || !enabled)
+            {
+                return;
+            }
+
+            if(GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+            {
+                Debug.LogError($"There are multiple instances of the {nameof(ServiceManagerInstance)} in the Scene, this is not supported");
+            }
+
+            if (serviceManagerInstance == null)
+            {
+                InitialiseServiceManager();
+            }
+
+            if (isServiceManagerInstanceConfigured && 
+                (serviceManagerInstance.ActiveProfile == null || 
+                serviceManagerInstance.ActiveProfile != serviceProvidersProfile))
             {
                 serviceManagerInstance.ResetProfile(serviceProvidersProfile);
             }
@@ -66,7 +82,7 @@ namespace RealityCollective.ServiceFramework
 
         private void Awake()
         {
-            if (Application.isPlaying)
+            if (Application.isPlaying && gameObject.activeInHierarchy && enabled)
             {
                 InitialiseServiceManager();
             }
