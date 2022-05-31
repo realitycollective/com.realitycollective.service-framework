@@ -102,8 +102,13 @@ namespace RealityCollective.ServiceFramework.Editor
                         };
                         break;
                     default:
-                        currentPickerWindow = GUIUtility.GetControlID(FocusType.Passive);
-                        EditorGUIUtility.ShowObjectPicker<ServiceProvidersProfile>(null, false, string.Empty, currentPickerWindow);
+                        try
+                        {
+                            currentPickerWindow = GUIUtility.GetControlID(FocusType.Passive);
+                            EditorGUIUtility.ShowObjectPicker<ServiceProvidersProfile>(null, false, string.Empty, currentPickerWindow);
+                        }
+                        catch { }
+
                         break;
                 }
 

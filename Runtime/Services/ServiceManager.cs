@@ -249,7 +249,8 @@ namespace RealityCollective.ServiceFramework.Services
         {
             lock (InitializedLock)
             {
-                if (IsInitialized && instance != this)
+                if (IsInitialized && 
+                    ServiceManager.Instance.ServiceManagerInstanceGuid != this.serviceManagerInstanceGuid)
                 {
                     Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
                     Debug.Log($"Instance [{instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
