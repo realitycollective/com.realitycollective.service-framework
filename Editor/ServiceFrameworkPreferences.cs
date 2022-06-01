@@ -16,7 +16,7 @@ namespace RealityCollective.ServiceFramework
 {
     public static class ServiceFrameworkPreferences
     {
-        public const string Editor_Menu_Keyword = "Reality Toolkit";
+        public const string Editor_Menu_Keyword = "Reality Collective";
 
         private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
 
