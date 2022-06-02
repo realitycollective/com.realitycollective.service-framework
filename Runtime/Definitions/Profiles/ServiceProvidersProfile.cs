@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
-    [CreateAssetMenu(menuName = "Reality Collective/Service Manager/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
+    [CreateAssetMenu(menuName = "Reality Collective/Service Framework/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
     public class ServiceProvidersProfile : BaseServiceProfile<IService> 
     {
         [SerializeField]
