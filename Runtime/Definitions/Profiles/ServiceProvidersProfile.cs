@@ -11,20 +11,20 @@ namespace RealityCollective.ServiceFramework.Definitions
     {
         [SerializeField]
         [Tooltip("The service manager will only initialise services in the Editor when it is running\nThe default is to always be active and validating service configuration.")]
-        private bool initialiseOnPlay = false;
+        private bool initializeOnPlay = false;
 
         /// <summary>
         /// Configuration of the service manager for initialisation of services on play
         /// </summary>
-        public bool InitialiseOnPlay => initialiseOnPlay;
+        public bool InitializeOnPlay => initializeOnPlay;
 
         [SerializeField]
         [Tooltip("Ensure that the Service Manager Instance is not destroyed on scene change")]
-        private bool dontDestroyServiceManagerOnLoad = true;
+        private bool doNotDestroyServiceManagerOnLoad = true;
 
         /// <summary>
         /// Configuration of the service manager for initialisation of services on play
         /// </summary>
-        public bool DontDestroyServiceManagerOnLoad => dontDestroyServiceManagerOnLoad;
+        public bool DoNotDestroyServiceManagerOnLoad => doNotDestroyServiceManagerOnLoad;
     }
 }
