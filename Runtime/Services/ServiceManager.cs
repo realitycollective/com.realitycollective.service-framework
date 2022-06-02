@@ -382,7 +382,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 InitializeAllServices();
             }
-            else if (!ActiveProfile.InitialiseOnPlay)
+            else if (!ActiveProfile.InitializeOnPlay)
             {
                 UnityEditor.EditorApplication.delayCall += InitializeAllServices;
             }
