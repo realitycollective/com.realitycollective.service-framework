@@ -57,7 +57,7 @@ namespace RealityCollective.ServiceFramework.Editor
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.LabelField(new GUIContent("Reality Toolkit Configuration Profile", "This profile is the configuration for the entire Reality Toolkit."));
+            EditorGUILayout.LabelField(new GUIContent("Service Framework Configuration Profile", "This profile is the configuration for the Service Framework."));
 
             EditorGUILayout.PropertyField(serviceProvidersProfile, GUIContent.none);
 
