@@ -25,7 +25,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         private static readonly GUIContent EditorContent = new GUIContent("Editor");
         private static readonly GUIContent NothingContent = new GUIContent(Nothing);
         private static readonly GUIContent EverythingContent = new GUIContent(Everything);
-        private static readonly GUIContent RuntimePlatformContent = new GUIContent("Runtime Platforms");
+        private static readonly GUIContent RuntimePlatformContent = new GUIContent("Runtime Platforms", "Which runtime platforms will this service be activated on?");
         private static readonly GUIContent EditorBuildTargetContent = new GUIContent($"{EditorAnd}Build Target");
 
         private static readonly int ControlHint = typeof(PlatformEntryPropertyDrawer).GetHashCode();

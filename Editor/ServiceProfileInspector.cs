@@ -24,6 +24,8 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
     {
         private static readonly Type AllPlatformsType = typeof(AllPlatforms);
         private static readonly Guid AllPlatformsGuid = AllPlatformsType.GUID;
+        private readonly GUIContent nameContent = new GUIContent("Name", "The referenced name of the service");
+        private readonly GUIContent instancedTypeContent = new GUIContent("Instanced Type", "The concrete type of the service to instantiate");
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
@@ -277,7 +279,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             if (configurationProperty.isExpanded)
             {
-                EditorGUI.PropertyField(labelRect, nameProperty);
+                EditorGUI.PropertyField(labelRect, nameProperty, nameContent);
                 configurationProperty.isExpanded = EditorGUI.Foldout(dropdownRect, configurationProperty.isExpanded, GUIContent.none, true);
 
                 if (!configurationProperty.isExpanded)
@@ -329,7 +331,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
                 EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(typeRect, instancedType);
+                EditorGUI.PropertyField(typeRect, instancedType, instancedTypeContent);
                 systemTypeReference = new SystemType(instancedType);
 
                 if (EditorGUI.EndChangeCheck())
@@ -433,7 +435,8 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
         internal void RenderSystemFields()
         {
             EditorGUILayout.LabelField($"Platform Target Selection", EditorStyles.boldLabel);
- 
+            EditorGUILayout.LabelField($"Changing the 'Platform Target Selection' dropdown will automatically change the platform the project is currently targetting.  Automating the 'Switch Targets' selection in the Build Settings Window.", EditorStyles.helpBox);
+
             var currentPlatform = ServiceFrameworkPreferences.CurrentPlatformTarget;
 
             for (var i = 0; i < Platforms.Count; i++)
