@@ -2,7 +2,7 @@
 
 The Service Framework package components for the [Reality Collective](https://realityCollective.io). This package an extensible service framework to build highly performant components for your Unity projects.
 
-[![openupm](https://img.shields.io/npm/v/com.xrtk.spatial-persistence.asa?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.xrtk.spatial-persistence.asa/)
+[![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
 
 ## Overview
 
@@ -52,6 +52,8 @@ The service framework has been the foundation behind such toolkits as Microsoft'
 
 The possibilities are almost endless.
 
+---
+
 ## Getting Started
 
 ### 1. Creating a service
@@ -90,14 +92,20 @@ Alternatively, there are also TryGet versions of the Service endpoints which ret
     }
 ```
 
+---
+
 ## Final notes
 
 The Service Framework is robustly tested and confirmed to be working in most versions of Unity, including Unity 2021 LTS.  However, it is still classed as a preview while the rest of the Reality Toolkit is going through active development.
 It is being used in production solutions by the Reality Collective team, but it will be up to you as a developer how you choose to consume and operate the framework in your solutions.
 
+---
+
 ## Feedback
 
 Please feel free to provide feedback via the [Reality Toolkit dev channel here](https://github.com/realitycollective/realitytoolkit.dev/issues), all feedback. suggestions and fixes are welcome.
+
+---
 
 ## Known Issues
 
@@ -112,10 +120,14 @@ There are some fringe areas of the framework which are still under development a
 
 ## Related Articles
 
-Coming soon
-
+* [Welcome to the Service Framework](https://service-framework.realitycollective.io/docs/get-started)
+* [Introduction](https://service-framework.realitycollective.io/docs/basics/introduction)
+* [Creating your first service](https://service-framework.realitycollective.io/docs/basics/getting_started)
+* [Roadmap](https://service-framework.realitycollective.io/docs/basics/roadmap)
 ---
 
 ## Raise an Information Request
 
 If there is anything not mentioned in this document or you simply want to know more, raise an [RFI (Request for Information) request here](https://github.com/realitycollective/realitytoolkit.dev/issues/new?assignees=&labels=question&template=request_for_information.md&title=).
+
+Or simply [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you
