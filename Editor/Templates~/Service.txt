@@ -9,14 +9,17 @@ namespace #NAMESPACE#
         public #NAME#(string name, uint priority, #NAME#Profile profile)
             : base(name, priority)
         {
+            // THe constructor should be used to gather required properties from the profile (or cache the profile) and to ready any components needed.
+            // Note, during this call, not all services will be registered with the Service Framework, so this should only be used to ready this individual servce.
         }
 		
 	    // Below are the Unity events that are replicated by the Service Framework, simply delete any that are not required.
-        
+        #region MonoBehaviour callbacks
         /// <inheritdoc />
         public override void Initialize()
         {
-            // Initialize is called when the Service Framework first instantiates the service.  (Awake)
+            // Initialize is called when the Service Framework first instantiates the service.  ( during MonoBehaviour 'Awake')
+            // This is called AFTER all services have been registered but before the 'Start' call.
         }
 
         /// <inheritdoc />
@@ -79,5 +82,6 @@ namespace #NAMESPACE#
         {
             // The Unity "OnApplicationPause" MonoBehaviour, called when Unity generates the OnPause event on App pauses or is about to suspend.
         }        
+        #endregion MonoBehaviour callbacks
     }
 }
