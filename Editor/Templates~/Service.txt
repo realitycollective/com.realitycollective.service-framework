@@ -12,7 +12,7 @@ namespace #NAMESPACE#
         }
 		
 	    // Below are the Unity events that are replicated by the Service Framework, simply delete any that are not required.
-        #region MonoBehaviours
+        #region MonoBehaviour callbacks
         /// <inheritdoc />
         public override void Initialize()
         {
@@ -79,6 +79,6 @@ namespace #NAMESPACE#
         {
             // The Unity "OnApplicationPause" MonoBehaviour, called when Unity generates the OnPause event on App pauses or is about to suspend.
         }        
-        #endregion MonoBehaviours
+        #endregion MonoBehaviour callbacks
     }
 }
