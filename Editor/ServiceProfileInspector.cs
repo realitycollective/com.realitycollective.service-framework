@@ -374,7 +374,6 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
             {
                 serializedObject.ApplyModifiedProperties();
 
-                //TODO
                 if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized &&
                     runtimePlatforms.arraySize > 0 &&
                     systemTypeReference.Type != null)

@@ -65,7 +65,7 @@ namespace RealityCollective.ServiceFramework
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            var UnityEditorRunState = EditorPrefs.GetBool(ServiceFrameworkStatus.UnityEditorRunStateKey);
+            var unityEditorRunState = EditorPrefs.GetBool(ServiceFrameworkStatus.UnityEditorRunStateKey);
             if(UnityEditorRunState || !gameObject.activeInHierarchy || !enabled)
             {
                 return;
