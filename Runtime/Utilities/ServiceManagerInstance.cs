@@ -3,8 +3,11 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Services;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace RealityCollective.ServiceFramework
 {
@@ -62,7 +65,8 @@ namespace RealityCollective.ServiceFramework
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if(EditorApplication.isPlaying || !gameObject.activeInHierarchy || !enabled)
+            var UnityEditorRunState = EditorPrefs.GetBool(ServiceFrameworkStatus.UnityEditorRunStateKey);
+            if(UnityEditorRunState || !gameObject.activeInHierarchy || !enabled)
             {
                 return;
             }
