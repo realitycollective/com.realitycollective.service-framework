@@ -8,7 +8,7 @@ namespace RealityCollective.ServiceFramework
         /// <summary>
         /// Editor Prefs key name to store the current Unity editor play state
         /// </summary>
-        internal const string UnityEditorRunStateKey = "UnityEditorRunState";
+        internal const string UnityEditorRunStateKey = "RealityCollective_UnityEditorRunState";
 
         /// <summary>
         /// Internal editor flag to capture when the Unity Editor is entering Run mode
