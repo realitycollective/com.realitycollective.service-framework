@@ -129,7 +129,7 @@ namespace RealityCollective.ServiceFramework.Editor
             if (string.IsNullOrWhiteSpace(outputPath))
             {
                 outputPath = Application.dataPath;
-                @namespace = $"{Application.productName}";
+                @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
             }
 
             var interfaceStrippedName = interfaceType.Name.Replace("I", string.Empty);
@@ -165,16 +165,12 @@ namespace RealityCollective.ServiceFramework.Editor
 
             EditorGUILayout.Space();
             @namespace = EditorGUILayout.TextField("Namespace", @namespace);
-            if (@namespace.Contains('-'))
-            {
-                @namespace = @namespace.Replace("-", string.Empty);
-            }
+            CleanNamespace(ref @namespace);
 
             if (interfaceType.Name.Contains("DataProvider"))
             {
                 @parentInterfaceName = EditorGUILayout.TextField("Parent Service Interface", @parentInterfaceName);
             }
-
             EditorGUI.BeginChangeCheck();
             instanceName = EditorGUILayout.TextField("Instance Name", instanceName);
 
@@ -188,10 +184,7 @@ namespace RealityCollective.ServiceFramework.Editor
                 {
                     try
                     {
-                        if (@namespace.Contains('-'))
-                        {
-                            @namespace = @namespace.Replace("-", string.Empty);
-                        }
+                        CleanNamespace(ref @namespace);
 
                         if (interfaceType.Name.Contains("DataProvider"))
                         {
@@ -330,6 +323,16 @@ namespace RealityCollective.ServiceFramework.Editor
             GUI.enabled = true;
             EditorGUILayout.Space();
             GUILayout.EndVertical();
+        }
+
+        private string CleanNamespace(ref string value)
+        {
+            if (value.Contains('-'))
+            {
+                value = @namespace.Replace("-", string.Empty);
+            }
+            value.Replace(" ", string.Empty);
+            return value;
         }
 
         private void GenerateInterface(string newInterfaceName, List<string> usingList)
