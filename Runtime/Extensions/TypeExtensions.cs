@@ -34,11 +34,18 @@ namespace RealityCollective.ServiceFramework.Extensions
                         return returnType;
                     }
 
-                    var types = serviceType.GetInterfaces();
-
-                    for (int i = 0; i < types.Length; i++)
+                    var allInterfaces = new HashSet<Type>(serviceType.GetInterfaces());
+                    if (serviceType.BaseType != null)
                     {
-                        if (IsValidServiceType(types[i], out returnType))
+                        // Remove all the interfaces implemented by the base class, so that now only
+                        // interfaces implemented by the most derived class and interfaces implemented by those
+                        // (interfaces of the most derived class) remain.
+                        allInterfaces.ExceptWith(serviceType.BaseType.GetInterfaces());
+                    }
+
+                    foreach (var typeInterface in allInterfaces)
+                    {
+                        if (IsValidServiceType(typeInterface, out returnType))
                         {
                             break;
                         }
