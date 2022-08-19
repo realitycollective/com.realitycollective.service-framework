@@ -1755,7 +1755,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Check which platforms are active and available.
         /// </summary>
-        public static void CheckPlatforms()
+        internal static void CheckPlatforms()
         {
             activePlatforms.Clear();
             availablePlatforms.Clear();
