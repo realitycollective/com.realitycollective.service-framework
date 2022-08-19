@@ -4,7 +4,7 @@
 namespace RealityCollective.ServiceFramework.Interfaces
 {
     /// <summary>
-    /// Defines the platform to be registered
+    /// Defines a target platform to run a service on.
     /// </summary>
     public interface IPlatform
     {
