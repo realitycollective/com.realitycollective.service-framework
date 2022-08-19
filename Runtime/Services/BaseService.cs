@@ -32,7 +32,7 @@ namespace RealityCollective.ServiceFramework.Services
         {
             if (!dataProvider.ParentService.IsServiceRegistered)
             {
-                Debug.LogError($"Cannot register {nameof(dataProvider)} as its Parent Service [{dataProvider.ParentService.Name}] is not registered");
+                Debug.LogError($"Cannot register {dataProvider.GetType().Name} as its Parent Service [{dataProvider.ParentService.Name}] is not registered");
                 return;
             }
             dataProviders.Add(dataProvider);

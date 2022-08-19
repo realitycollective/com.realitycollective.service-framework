@@ -22,7 +22,12 @@ namespace RealityCollective.ServiceFramework.Services
     [ExecuteInEditMode]
     public class ServiceManager : IDisposable
     {
-        private static Type[] serviceInterfaceTypes = new[] { typeof(IService), typeof(IServiceDataProvider) };
+        private static Type[] serviceInterfaceTypes = new[]
+        {
+            typeof(IService),
+            typeof(IEventService),
+            typeof(IServiceDataProvider)
+        };
 
         public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
 
@@ -249,7 +254,7 @@ namespace RealityCollective.ServiceFramework.Services
         {
             lock (InitializedLock)
             {
-                if (IsInitialized && 
+                if (IsInitialized &&
                     ServiceManager.Instance.ServiceManagerInstanceGuid != this.serviceManagerInstanceGuid)
                 {
                     Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
@@ -522,7 +527,7 @@ namespace RealityCollective.ServiceFramework.Services
 
                 if (TryCreateAndRegisterService(configuration, out var serviceInstance))
                 {
-                    if (serviceInstance != null && 
+                    if (serviceInstance != null &&
                         configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
                         !TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
                     {
@@ -917,7 +922,11 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public IService GetServiceByName<T>(string serviceName, bool showLogs = true) where T : IService
         {
-            TryGetServiceByName<T>(serviceName, out var serviceInstance, showLogs);
+            if (!TryGetServiceByName<T>(serviceName, out var serviceInstance) && showLogs)
+            {
+                Debug.LogError($"Unable to find {serviceName} service.");
+            }
+
             return serviceInstance;
         }
 
@@ -943,11 +952,10 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public bool TryGetService<T>(out T service, bool showLogs = true) where T : IService
+        public bool TryGetService<T>(out T service) where T : IService
         {
-            service = GetService<T>(showLogs);
+            service = GetService<T>(false);
             return service != null;
         }
 
@@ -984,11 +992,10 @@ namespace RealityCollective.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <param name="serviceName">Name of the specific service to search for.</param>
         /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public bool TryGetServiceByName<T>(string serviceName, out T service, bool showLogs = true) where T : IService
+        public bool TryGetServiceByName<T>(string serviceName, out T service) where T : IService
         {
-            service = (T)GetServiceByName(typeof(T), serviceName, showLogs);
+            service = (T)GetServiceByName(typeof(T), serviceName, false);
             return service != null;
         }
 
@@ -1146,7 +1153,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 if (IsServiceRegistered<T>())
                 {
-                    if (TryGetService(out service, false))
+                    if (TryGetService(out service))
                     {
                         serviceCache.Add(typeof(T), service);
                     }
@@ -1696,7 +1703,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <param name="profile">The profile instance.</param>
         /// <param name="rootProfile">Optional root profile reference.</param>
         /// <returns>True if a <see cref="TSystem"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
-        public bool TryGetSystemProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
+        public bool TryGetServiceProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
             where TService : IService
             where TProfile : BaseProfile
         {
@@ -1748,7 +1755,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Check which platforms are active and available.
         /// </summary>
-        internal static void CheckPlatforms()
+        public static void CheckPlatforms()
         {
             activePlatforms.Clear();
             availablePlatforms.Clear();
