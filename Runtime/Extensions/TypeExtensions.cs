@@ -3,6 +3,7 @@
 
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace RealityCollective.ServiceFramework.Extensions
 {
     public static class TypeExtensions
     {
+        private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
+
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
         {
             if (serviceType == null)
@@ -48,7 +51,26 @@ namespace RealityCollective.ServiceFramework.Extensions
             return returnType;
         }
 
-        private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
+        /// <summary>
+        /// Checks if the <see cref="IService"/> has any valid implementations.
+        /// </summary>
+        /// <typeparam name="T">The specific <see cref="IService"/> interface to check.</typeparam>
+        /// <returns>True, if the project contains valid implementations of <typeparamref name="T"/>.</returns>
+        internal static bool HasValidImplementations<T>() where T : IService
+        {
+            var concreteTypes = TypeCache.Current
+                .Select(pair => pair.Value)
+                .Where(type => typeof(T).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
+
+            var isValid = concreteTypes.Any();
+
+            if (!isValid)
+            {
+                UnityEngine.Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
+            }
+
+            return isValid;
+        }
 
         private static bool IsValidServiceType(Type inputType, out Type returnType)
         {
