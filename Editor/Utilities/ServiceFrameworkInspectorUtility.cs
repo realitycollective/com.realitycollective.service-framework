@@ -143,7 +143,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (darkThemeLogo == null)
                 {
-                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollectiveBanner_600x300.png", typeof(Texture2D));
+                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
                 }
 
                 return darkThemeLogo;
@@ -158,7 +158,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (lightThemeLogo == null)
                 {
-                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollectiveBanner_600x300.png", typeof(Texture2D));
+                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
                 }
 
                 return lightThemeLogo;
