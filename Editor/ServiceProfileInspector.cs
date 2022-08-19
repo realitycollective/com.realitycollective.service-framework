@@ -425,7 +425,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
         private void OnElementReorderedCallback(ReorderableList list)
         {
-            if (ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
