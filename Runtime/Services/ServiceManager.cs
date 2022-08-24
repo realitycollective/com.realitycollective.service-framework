@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
 // ServiceGenerator - interfacevalidation
@@ -751,13 +752,20 @@ namespace RealityCollective.ServiceFramework.Services
 
             try
             {
-                activeServices.Add(interfaceType, serviceInstance as IService);
+                activeServices.Add(interfaceType, serviceInstance);
             }
             catch (ArgumentException)
             {
                 preExistingService = GetService(interfaceType, false);
                 Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
+            }
+
+            // If we have registered at least one event system, we're gonna need the Unity UI event
+            // system to be available.
+            if (typeof(IEventService).IsAssignableFrom(interfaceType))
+            {
+                EnsureEventSystemSetup();
             }
 
             if (!isInitializing)
@@ -1895,5 +1903,23 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         #endregion IDisposable Implementation
+
+        #region Service Dependencies
+
+        private static void EnsureEventSystemSetup()
+        {
+            var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
+            if (eventSystems.Length == 0)
+            {
+                new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
+                Debug.Log($"There was no {nameof(EventSystem)} in the scene. The {nameof(ServiceManager)} requires one for registered {nameof(IEventService)}s to work. An {nameof(EventSystem)} game object was created.");
+            }
+            else if (eventSystems.Length > 1)
+            {
+                Debug.LogError($"There is more than one {nameof(EventSystem)} active in the scene. Please make sure only one instance of it exists as it may cause errors.");
+            }
+        }
+
+        #endregion Service Dependencies
     }
 }
