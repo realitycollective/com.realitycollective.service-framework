@@ -1,19 +1,19 @@
-﻿// Copyright (c) Reality Collective. All rights reserved.
+// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.ServiceFramework.Providers;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Tests.Providers
 {
-    public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
+    [System.Runtime.InteropServices.Guid("df746fcc-cf9b-414f-bf7e-0d311cfdd8ac")]
+    public class TestService1DataProviderB : BaseTestService1DataProvider, ITestService1DataProviderB
     {
-        public const string TestName = "Test Data Provider 2";
+        public new const string TestName = "TestService1DataProviderB";
 
-        public TestDataProvider2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
+        public TestService1DataProviderB(string name = TestName, uint priority = 1, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
 

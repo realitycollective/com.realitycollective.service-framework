@@ -1,4 +1,4 @@
-﻿// Copyright (c) Reality Collective. All rights reserved.
+// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Definitions;
@@ -9,11 +9,12 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Tests.Providers
 {
-    public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
+    [System.Runtime.InteropServices.Guid("f5309e95-8811-4200-8831-49a8043d6afa")]
+    public class BaseTestService1DataProvider : BaseServiceDataProvider, ITestService1DataProvider
     {
-        public const string TestName = "Test Data Provider 2";
+        public const string TestName = "BaseTestService1DataProvider";
 
-        public TestDataProvider2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
+        public BaseTestService1DataProvider(string name = TestName, uint priority = 1, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
 
