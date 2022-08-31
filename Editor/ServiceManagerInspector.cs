@@ -95,8 +95,6 @@ namespace RealityCollective.ServiceFramework.Editor
                             Debug.Assert(rootProfile != null);
                             serviceProvidersProfile.objectReferenceValue = rootProfile;
                             serializedObject.ApplyModifiedProperties();
-                            EditorGUIUtility.PingObject(rootProfile);
-                            Selection.activeObject = rootProfile;
                             ServiceManager.Instance?.ResetProfile(rootProfile);
                         };
                         break;
@@ -126,11 +124,6 @@ namespace RealityCollective.ServiceFramework.Editor
                         serviceProvidersProfile.objectReferenceValue = EditorGUIUtility.GetObjectPickerObject();
                         currentPickerWindow = -1;
                         changed = true;
-                        EditorApplication.delayCall += () =>
-                        {
-                            EditorGUIUtility.PingObject(serviceProvidersProfile.objectReferenceValue);
-                            Selection.activeObject = serviceProvidersProfile.objectReferenceValue;
-                        };
                         break;
                 }
             }

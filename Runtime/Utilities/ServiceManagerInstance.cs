@@ -46,7 +46,10 @@ namespace RealityCollective.ServiceFramework
             serviceManagerInstance = serviceManager;
         }
 
-        internal void InitialiseServiceManager()
+        /// <summary>
+        /// Initializes the <see cref="ServiceManager"/> associcated with this instance.
+        /// </summary>
+        public void InitialiseServiceManager()
         {
             if (serviceManagerInstance == null)
             {
@@ -66,12 +69,12 @@ namespace RealityCollective.ServiceFramework
         private void OnValidate()
         {
             var unityEditorRunState = EditorPrefs.GetBool(ServiceFrameworkStatus.UnityEditorRunStateKey);
-            if(unityEditorRunState || !gameObject.activeInHierarchy || !enabled)
+            if (unityEditorRunState || !gameObject.activeInHierarchy || !enabled)
             {
                 return;
             }
 
-            if(GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+            if (GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
             {
                 Debug.LogError($"There are multiple instances of the {nameof(ServiceManagerInstance)} in the Scene, this is not supported");
             }
@@ -81,8 +84,8 @@ namespace RealityCollective.ServiceFramework
                 InitialiseServiceManager();
             }
 
-            if (isServiceManagerInstanceConfigured && 
-                (serviceManagerInstance.ActiveProfile == null || 
+            if (isServiceManagerInstanceConfigured &&
+                (serviceManagerInstance.ActiveProfile == null ||
                 serviceManagerInstance.ActiveProfile != serviceProvidersProfile))
             {
                 serviceManagerInstance.ResetProfile(serviceProvidersProfile);
@@ -104,7 +107,7 @@ namespace RealityCollective.ServiceFramework
 
         private void Start() => serviceManagerInstance?.Start();
 
-        private void Update() =>serviceManagerInstance?.Update();
+        private void Update() => serviceManagerInstance?.Update();
 
         private void LateUpdate() => serviceManagerInstance?.LateUpdate();
 
