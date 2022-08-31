@@ -74,18 +74,17 @@ namespace RealityCollective.ServiceFramework.Editor
             var commandName = Event.current.commandName;
             var rootProfiles = ScriptableObjectExtensions.GetAllInstances<ServiceProvidersProfile>();
 
-            if (serviceProvidersProfile.objectReferenceValue.IsNull() &&
+            if (rootProfiles.Length == 0 &&
+                currentPickerWindow == -1)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.HelpBox("No service manager configuration profiles found in project.\n\nCreate a new one using the '+' button above.", MessageType.Warning);
+            }
+            else if (serviceProvidersProfile.objectReferenceValue.IsNull() &&
                 currentPickerWindow == -1 && checkChange)
             {
                 switch (rootProfiles.Length)
                 {
-                    case 0:
-                        EditorGUIUtility.PingObject(target);
-                        EditorApplication.delayCall += () =>
-                        {
-                            EditorUtility.DisplayDialog("Attention!", "No configuration found for the Service Manager instance.\n\nYou will need to create a new one.", "OK");
-                        };
-                        break;
                     case 1:
                         var rootProfilePath = AssetDatabase.GetAssetPath(rootProfiles[0]);
 
