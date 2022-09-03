@@ -21,7 +21,6 @@ namespace RealityCollective.ServiceFramework.Editor
         private SerializedProperty serviceProvidersProfile;
 
         private int currentPickerWindow = -1;
-        private bool checkChange;
 
         private UnityEditor.Editor profileInspector;
 
@@ -37,7 +36,6 @@ namespace RealityCollective.ServiceFramework.Editor
         {
             serviceProvidersProfile = serializedObject.FindProperty(nameof(serviceProvidersProfile));
             currentPickerWindow = -1;
-            checkChange = serviceProvidersProfile.objectReferenceValue.IsNull();
             profileInspector.Destroy();
         }
 
@@ -61,7 +59,7 @@ namespace RealityCollective.ServiceFramework.Editor
 
             EditorGUILayout.PropertyField(serviceProvidersProfile, GUIContent.none);
 
-            if (serviceProvidersProfile.objectReferenceValue != null)
+            if (serviceProvidersProfile.objectReferenceValue.IsNull())
             {
                 if (GUILayout.Button("Create a new configuration profile"))
                 {
@@ -80,8 +78,9 @@ namespace RealityCollective.ServiceFramework.Editor
                 EditorGUILayout.Space();
                 EditorGUILayout.HelpBox("No service manager configuration profiles found in project.\n\nCreate a new one using the '+' button above.", MessageType.Warning);
             }
+            // If there is no profile configured, try to automatically find one, if only one found use it, else put up a prompt to select one
             else if (serviceProvidersProfile.objectReferenceValue.IsNull() &&
-                currentPickerWindow == -1 && checkChange)
+                currentPickerWindow == -1)
             {
                 switch (rootProfiles.Length)
                 {
@@ -108,8 +107,6 @@ namespace RealityCollective.ServiceFramework.Editor
 
                         break;
                 }
-
-                checkChange = false;
             }
 
             if (EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
