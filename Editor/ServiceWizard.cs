@@ -85,7 +85,7 @@ namespace RealityCollective.ServiceFramework.Editor
                 return;
             }
 
-            var templatePath = $"{ServiceFrameworkFinderUtility.AbsoluteFolderPath}\\Editor\\Templates~"; ;
+            var templatePath = $"{ServiceFrameworkFinderUtility.AbsoluteFolderPath}{Path.DirectorySeparatorChar}Editor{Path.DirectorySeparatorChar}Templates~"; ;
 
             window = CreateInstance<ServiceWizard>();
             window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE);
@@ -97,16 +97,16 @@ namespace RealityCollective.ServiceFramework.Editor
             switch (interfaceType)
             {
                 case Type _ when typeof(IServiceDataProvider).IsAssignableFrom(interfaceType):
-                    window.profileTemplatePath = $"{templatePath}\\DataProviderProfile.txt";
-                    window.instanceTemplatePath = $"{templatePath}\\DataProvider.txt";
-                    window.interfaceTemplatePath = $"{templatePath}\\IServiceDataProvider.txt";
+                    window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}DataProviderProfile.txt";
+                    window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}DataProvider.txt";
+                    window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IServiceDataProvider.txt";
                     window.instanceBaseType = typeof(BaseServiceDataProvider);
                     window.profileBaseType = typeof(BaseProfile);
                     break;
                 case Type _ when typeof(IService).IsAssignableFrom(interfaceType):
-                    window.profileTemplatePath = $"{templatePath}\\ServiceProfile.txt";
-                    window.instanceTemplatePath = $"{templatePath}\\Service.txt";
-                    window.interfaceTemplatePath = $"{templatePath}\\IService.txt";
+                    window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}ServiceProfile.txt";
+                    window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}Service.txt";
+                    window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IService.txt";
                     window.instanceBaseType = typeof(BaseServiceWithConstructor);
                     window.profileBaseType = typeof(BaseServiceProfile<>);
                     break;
