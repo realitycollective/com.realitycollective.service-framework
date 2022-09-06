@@ -6,7 +6,7 @@ namespace #NAMESPACE#
     [System.Runtime.InteropServices.Guid("#GUID#")]
     public class #NAME# : #BASE#, #INTERFACE#
     {
-        public #NAME#(string name, uint priority, #NAME#Profile profile)
+        public #NAME#(string name, uint priority, #PROFILE# profile)
             : base(name, priority)
         {
             // The constructor should be used to gather required properties from the profile (or cache the profile) and to ready any components needed.

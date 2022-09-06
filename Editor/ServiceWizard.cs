@@ -22,7 +22,8 @@ namespace RealityCollective.ServiceFramework.Editor
 {
     public class ServiceWizard : EditorWindow
     {
-        private const float MIN_VERTICAL_SIZE = 192f;
+        private const float MIN_VERTICAL_SIZE_SERVICE = 200f;
+        private const float MIN_VERTICAL_SIZE_DATAPROVIDER = 240f;
         private const float MIN_HORIZONTAL_SIZE = 384f;
 
         private const string TABS = "        ";
@@ -70,7 +71,11 @@ namespace RealityCollective.ServiceFramework.Editor
         private string @namespace = string.Empty;
         private string @parentInterfaceName = string.Empty;
         private string instanceName = string.Empty;
+        private bool generateProfile = true;
         private Type parentInterfaceType = null;
+        private bool isServiceType = true;
+
+        private bool IsNameValid => isServiceType ? !instanceName.Equals("Service") : !instanceName.Equals("DataProvider") && !@parentInterfaceName.Equals("IService");
 
         public static void ShowNewServiceWizard(Type interfaceType)
         {
@@ -88,27 +93,32 @@ namespace RealityCollective.ServiceFramework.Editor
             var templatePath = $"{ServiceFrameworkFinderUtility.AbsoluteFolderPath}{Path.DirectorySeparatorChar}Editor{Path.DirectorySeparatorChar}Templates~"; ;
 
             window = CreateInstance<ServiceWizard>();
-            window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE);
-            window.maxSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE);
-            window.position = new Rect(0f, 0f, MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE);
             window.titleContent = new GUIContent("Service Wizard");
             window.interfaceType = interfaceType;
 
             switch (interfaceType)
             {
                 case Type _ when typeof(IServiceDataProvider).IsAssignableFrom(interfaceType):
-                    window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}DataProviderProfile.txt";
+                    window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
+                    window.maxSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
+                    window.position = new Rect(0f, 0f, MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
+                    window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}ServiceProfile.txt";
                     window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}DataProvider.txt";
                     window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IServiceDataProvider.txt";
                     window.instanceBaseType = typeof(BaseServiceDataProvider);
                     window.profileBaseType = typeof(BaseProfile);
+                    window.isServiceType = false;
                     break;
                 case Type _ when typeof(IService).IsAssignableFrom(interfaceType):
+                    window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICE);
+                    window.maxSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICE);
+                    window.position = new Rect(0f, 0f, MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICE);
                     window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}ServiceProfile.txt";
                     window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}Service.txt";
                     window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IService.txt";
                     window.instanceBaseType = typeof(BaseServiceWithConstructor);
                     window.profileBaseType = typeof(BaseServiceProfile<>);
+                    window.isServiceType = true;
                     break;
                 default:
                     Debug.LogError($"{interfaceType.Name} does not implement {nameof(IService)}");
@@ -136,7 +146,7 @@ namespace RealityCollective.ServiceFramework.Editor
 
             if (string.IsNullOrWhiteSpace(instanceName))
             {
-                instanceName = interfaceStrippedName;
+                instanceName = isServiceType ? "Service" : "DataProvider";
             }
 
             if (string.IsNullOrWhiteSpace(@parentInterfaceName))
@@ -167,157 +177,178 @@ namespace RealityCollective.ServiceFramework.Editor
             @namespace = EditorGUILayout.TextField("Namespace", @namespace);
             CleanNamespace(ref @namespace);
 
-            if (interfaceType.Name.Contains("DataProvider"))
+            if (!isServiceType)
             {
                 @parentInterfaceName = EditorGUILayout.TextField("Parent Service Interface", @parentInterfaceName);
             }
             EditorGUI.BeginChangeCheck();
             instanceName = EditorGUILayout.TextField("Instance Name", instanceName);
 
+            EditorGUILayout.Space();
+
+            generateProfile = EditorGUILayout.Toggle("Generate Profile?", generateProfile);
             GUILayout.FlexibleSpace();
 
             GUI.enabled = !string.IsNullOrWhiteSpace(instanceName) && !string.IsNullOrWhiteSpace(@namespace);
 
-            if (GUILayout.Button("Generate!"))
+            string checkName = isServiceType ? instanceName : @parentInterfaceName;
+
+            EditorGUILayout.Space();
+
+            if (IsNameValid)
             {
-                EditorApplication.delayCall += () =>
-                {
-                    try
+                if (GUILayout.Button("Generate!"))
                     {
-                        CleanNamespace(ref @namespace);
-
-                        if (interfaceType.Name.Contains("DataProvider"))
+                    EditorApplication.delayCall += () =>
+                    {
+                        try
                         {
-                            parentInterfaceType = GetType($"{@parentInterfaceName}");
-                            if (parentInterfaceType == null)
+                            CleanNamespace(ref @namespace);
+
+                            if (interfaceType.Name.Contains("DataProvider"))
                             {
-                                Debug.Log("Parent Interface not found");
-                                return;
-                            }
-                        }
-
-                        var interfaceName = $"I{instanceName}";
-
-                        var usingList = new List<string>();
-
-                        GenerateInterface(interfaceName, usingList);
-
-                        if (!usingList.Contains(instanceBaseType.Namespace))
-                        {
-                            usingList.Add(instanceBaseType.Namespace);
-                        }
-
-                        if (!usingList.Contains(interfaceType.Namespace))
-                        {
-                            usingList.Add(interfaceType.Namespace);
-                        }
-
-
-                        if (interfaceType.Name.Contains("DataProvider"))
-                        {
-                            if (parentInterfaceType != null)
-                            {
-                                if (!usingList.Contains(parentInterfaceType.Namespace))
+                                parentInterfaceType = GetType($"{@parentInterfaceName}");
+                                if (parentInterfaceType == null)
                                 {
-                                    usingList.Add(parentInterfaceType.Namespace);
+                                    Debug.Log($"Parent Interface not found - {@parentInterfaceName}");
+                                    return;
                                 }
                             }
-                            else
+
+                            var interfaceName = $"I{instanceName}";
+
+                            var usingList = new List<string>();
+
+                            GenerateInterface(interfaceName, usingList);
+
+                            if (!usingList.Contains(instanceBaseType.Namespace))
                             {
-                                Debug.LogError($"Failed to resolve parent interface for {interfaceType.Name}");
+                                usingList.Add(instanceBaseType.Namespace);
                             }
-                        }
 
-                        var implements = string.Empty;
-
-                        var members = interfaceType.GetMembers();
-                        var events = new List<EventInfo>();
-                        var properties = new List<PropertyInfo>();
-                        var methods = new List<MethodInfo>();
-
-                        foreach (var memberInfo in members)
-                        {
-                            switch (memberInfo)
+                            if (!usingList.Contains(interfaceType.Namespace))
                             {
-                                case EventInfo eventInfo:
-                                    events.Add(eventInfo);
-                                    break;
-                                case PropertyInfo propertyInfo:
-                                    properties.Add(propertyInfo);
-                                    break;
-                                case MethodInfo methodInfo:
-                                    methods.Add(methodInfo);
-                                    break;
+                                usingList.Add(interfaceType.Namespace);
                             }
-                        }
 
-                        implements = events.Aggregate(implements, (current, eventInfo) => $"{current}{FormatMemberInfo(eventInfo, ref usingList)}");
-                        implements = properties.Aggregate(implements, (current, propertyInfo) => $"{current}{FormatMemberInfo(propertyInfo, ref usingList)}");
-                        implements = methods.Aggregate(implements, (current, methodInfo) => $"{current}{FormatMemberInfo(methodInfo, ref usingList)}");
-
-                        Type profileType = null;
-                        var profileBaseTypeName = profileBaseType.Name;
-
-                        if (profileBaseTypeName.Contains("`1"))
-                        {
-                            var dataProviderInterfaceTypeName = interfaceType.Name
-                                .Replace("Service", "ServiceDataProvider");
-
-                            var dataProviderType = GetType(dataProviderInterfaceTypeName);
-
-                            if (dataProviderType != null)
+                            if (interfaceType.Name.Contains("DataProvider"))
                             {
-                                if (!usingList.Contains(dataProviderType.Namespace))
+                                if (parentInterfaceType != null)
                                 {
-                                    usingList.Add(dataProviderType.Namespace);
-                                }
-
-                                var constructors = dataProviderType.GetConstructors();
-
-                                foreach (var constructorInfo in constructors)
-                                {
-                                    var parameters = constructorInfo.GetParameters();
-
-                                    foreach (var parameterInfo in parameters)
+                                    if (!usingList.Contains(parentInterfaceType.Namespace))
                                     {
-                                        if (parameterInfo.ParameterType.IsAbstract) { continue; }
+                                        usingList.Add(parentInterfaceType.Namespace);
+                                    }
+                                }
+                                else
+                                {
+                                    Debug.LogError($"Failed to resolve parent interface for {interfaceType.Name}");
+                                }
+                            }
 
-                                        if (parameterInfo.ParameterType.IsSubclassOf(typeof(BaseProfile)))
+                            var implements = string.Empty;
+
+                            var members = interfaceType.GetMembers();
+                            var events = new List<EventInfo>();
+                            var properties = new List<PropertyInfo>();
+                            var methods = new List<MethodInfo>();
+
+                            foreach (var memberInfo in members)
+                            {
+                                switch (memberInfo)
+                                {
+                                    case EventInfo eventInfo:
+                                        events.Add(eventInfo);
+                                        break;
+                                    case PropertyInfo propertyInfo:
+                                        properties.Add(propertyInfo);
+                                        break;
+                                    case MethodInfo methodInfo:
+                                        methods.Add(methodInfo);
+                                        break;
+                                }
+                            }
+
+                            implements = events.Aggregate(implements, (current, eventInfo) => $"{current}{FormatMemberInfo(eventInfo, ref usingList)}");
+                            implements = properties.Aggregate(implements, (current, propertyInfo) => $"{current}{FormatMemberInfo(propertyInfo, ref usingList)}");
+                            implements = methods.Aggregate(implements, (current, methodInfo) => $"{current}{FormatMemberInfo(methodInfo, ref usingList)}");
+
+                            Type profileType = null;
+                            var profileBaseTypeName = generateProfile ? profileBaseType.Name : nameof(BaseProfile);
+
+                            if (profileBaseTypeName.Contains("`1"))
+                            {
+                                var dataProviderInterfaceTypeName = interfaceType.Name
+                                    .Replace("Service", "ServiceDataProvider");
+
+                                var dataProviderType = GetType(dataProviderInterfaceTypeName);
+
+                                if (dataProviderType != null)
+                                {
+                                    if (!usingList.Contains(dataProviderType.Namespace))
+                                    {
+                                        usingList.Add(dataProviderType.Namespace);
+                                    }
+
+                                    var constructors = dataProviderType.GetConstructors();
+
+                                    foreach (var constructorInfo in constructors)
+                                    {
+                                        var parameters = constructorInfo.GetParameters();
+
+                                        foreach (var parameterInfo in parameters)
                                         {
-                                            profileType = parameterInfo.ParameterType;
+                                            if (parameterInfo.ParameterType.IsAbstract) { continue; }
+
+                                            if (parameterInfo.ParameterType.IsSubclassOf(typeof(BaseProfile)))
+                                            {
+                                                profileType = parameterInfo.ParameterType;
+                                                break;
+                                            }
+                                        }
+
+                                        if (profileType != null)
+                                        {
+                                            profileBaseTypeName = profileType.Name;
                                             break;
                                         }
                                     }
 
-                                    if (profileType != null)
-                                    {
-                                        profileBaseTypeName = profileType.Name;
-                                        break;
-                                    }
                                 }
 
+                                profileBaseTypeName = profileBaseTypeName.Replace("`1", $"<{dataProviderInterfaceTypeName}>");
                             }
 
-                            profileBaseTypeName = profileBaseTypeName.Replace("`1", $"<{dataProviderInterfaceTypeName}>");
+                            GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
+
+                            if (generateProfile || profileBaseTypeName != nameof(BaseProfile))
+                            {
+                                GenerateProfile(profileBaseTypeName, usingList);
+                            }
                         }
-
-                        GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
-
-                        if (profileBaseTypeName != nameof(BaseProfile))
+                        catch (Exception e)
                         {
-                            GenerateProfile(profileBaseTypeName, usingList);
+                            Debug.LogError(e);
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e);
-                    }
-                    finally
-                    {
-                        Close();
-                        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-                    }
-                };
+                        finally
+                        {
+                            Close();
+                            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                        }
+                    };
+                }
+            }
+            else
+            {
+                if (isServiceType)
+                {
+                    GUILayout.Label($"Please enter the name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
+                }
+                else
+                {
+                    GUILayout.Label($"Please enter the Parent Interface name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
+                }
+                EditorGUILayout.Space();
             }
 
             GUI.enabled = true;
@@ -359,6 +390,8 @@ namespace RealityCollective.ServiceFramework.Editor
             usingList.Sort();
 
             var @using = usingList.Aggregate(string.Empty, (current, item) => $"{current}{Environment.NewLine}using {item};");
+
+            profileBaseTypeName = generateProfile ? $"{instanceName}Profile" : profileBaseTypeName;
 
             var instanceTemplate = File.ReadAllText(instanceTemplatePath ?? throw new InvalidOperationException());
             instanceTemplate = instanceTemplate.Replace(USING, @using);
