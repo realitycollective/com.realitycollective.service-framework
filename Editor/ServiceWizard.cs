@@ -198,7 +198,7 @@ namespace RealityCollective.ServiceFramework.Editor
             if (IsNameValid)
             {
                 if (GUILayout.Button("Generate!"))
-                    {
+                {
                     EditorApplication.delayCall += () =>
                     {
                         try
@@ -346,7 +346,7 @@ namespace RealityCollective.ServiceFramework.Editor
                 }
                 else
                 {
-                    GUILayout.Label($"Please enter the Parent Interface name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
+                    GUILayout.Label($"Please enter the Parent Interface name \nand a new Data Provider name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
                 }
                 EditorGUILayout.Space();
             }
@@ -479,9 +479,6 @@ namespace RealityCollective.ServiceFramework.Editor
                                 ? "out "
                                 : "ref "
                             : string.Empty;
-                        //var isOptional = parameterInfo.IsOptional
-                        //    ? $" = {PrettyPrintTypeName(parameterInfo.GetOptionalCustomModifiers()[0], ref usingList)}"
-                        //    : string.Empty;
                         parameterList.Add($"{isByRef}{PrettyPrintTypeName(parameterInfo.ParameterType, ref usingList)} {parameterInfo.Name}");
                     }
 
