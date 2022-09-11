@@ -21,3 +21,4 @@ jobs:
     uses: realitycollective/reusableworkflows/.github/workflows/tagrelease.yml@main
     with:
       build-target: windows
+    secrets: inherit
