@@ -579,7 +579,7 @@ namespace RealityCollective.ServiceFramework.Editor
             return types;
         }
 
-        const string createNewServiceMenuItemName = ServiceFrameworkPreferences.Editor_Menu_Keyword + "/Service Framework/Create new service";
+        const string createNewServiceMenuItemName = ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Create new service";
 
         [MenuItem(createNewServiceMenuItemName)]
         private static void CreateNewService()
@@ -587,7 +587,7 @@ namespace RealityCollective.ServiceFramework.Editor
             ServiceWizard.ShowNewServiceWizard(typeof(IService));
         }
 
-        const string createNewDataProviderMenuItemName = ServiceFrameworkPreferences.Editor_Menu_Keyword + "/Service Framework/Create new data provider";
+        const string createNewDataProviderMenuItemName = ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Create new data provider";
 
         [MenuItem(createNewDataProviderMenuItemName)]
         private static void CreateNewDataProvider()

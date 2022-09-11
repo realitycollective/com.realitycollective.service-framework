@@ -18,6 +18,8 @@ namespace RealityCollective.ServiceFramework
     {
         public const string Editor_Menu_Keyword = "Reality Collective";
 
+        public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework"; 
+
         private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
 
         #region Show Inspector Debug View settings prompt
