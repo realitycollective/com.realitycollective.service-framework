@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Editor.Utilities
 {
-    public class EditorMenuUtilities : MonoBehaviour
+    public static class EditorMenuUtilities
     {
         /// <summary>
         /// Simple scene helper to create the beginnings of a scene, creating the scene root and a floor.
