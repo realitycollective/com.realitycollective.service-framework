@@ -489,6 +489,5 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
         }
-
     }
 }
