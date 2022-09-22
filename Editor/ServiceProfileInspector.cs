@@ -126,7 +126,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
             RenderConfigurationOptions();
         }
 
-        protected void RenderConfigurationOptions(bool forceExpanded = false)
+        protected virtual void RenderConfigurationOptions(bool forceExpanded = false)
         {
             if (forceExpanded)
             {
@@ -157,6 +157,11 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 serializedObject.ApplyModifiedProperties();
             }
 
+            DrawDataProviderPropertyDrawer();
+        }
+
+        protected void DrawDataProviderPropertyDrawer()
+        {
             EditorGUILayout.Space();
             ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
             EditorGUILayout.Space();
@@ -484,6 +489,5 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
         }
-
     }
 }
