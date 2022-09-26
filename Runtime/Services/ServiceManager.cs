@@ -979,16 +979,20 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (!CanGetService(interfaceType, serviceName)) { return false; }
 
-            if (activeServices.TryGetValue(interfaceType, out var service))
+            foreach (var activeService in activeServices)
             {
-                serviceInstance = service;
-
-                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+                var activeServiceType = activeService.Key;
+                if (interfaceType.IsAssignableFrom(activeServiceType))
                 {
-                    return true;
-                }
+                    serviceInstance = activeService.Value;
 
-                serviceInstance = null;
+                    if (CheckServiceMatch(interfaceType, serviceName, interfaceType, serviceInstance))
+                    {
+                        return true;
+                    }
+
+                    serviceInstance = null;
+                }
             }
 
             return false;
@@ -1678,7 +1682,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>True, if the registered service contains the interface type and name.</returns>
         private bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || serviceInstance.Name == serviceName;
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName);
             bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
             return isNameValid && isInstanceValid;
         }
