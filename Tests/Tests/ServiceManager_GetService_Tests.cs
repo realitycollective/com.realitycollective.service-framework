@@ -262,6 +262,7 @@ namespace RealityCollective.ServiceFramework.Tests
         public void TearDownServiceManager_GetService_Tests()
         {
             serviceManager.Dispose();
+            serviceManager.DestroyAllServices();
             serviceManager = null;
         }
     }
