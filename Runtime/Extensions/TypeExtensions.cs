@@ -34,36 +34,7 @@ namespace RealityCollective.ServiceFramework.Extensions
                         return returnType;
                     }
 
-                    var allInterfaces = new HashSet<Type>(serviceType.GetInterfaces());
-                    if (serviceType.BaseType != null)
-                    {
-                        // Remove all the interfaces implemented by the base class, so that now only
-                        // interfaces implemented by the most derived class and interfaces implemented by those
-                        // (interfaces of the most derived class) remain.
-                        allInterfaces.ExceptWith(serviceType.BaseType.GetInterfaces());
-                    }
-
-                    // We want to remove interfaces that are implemented by other interfaces
-                    // i.e
-                    // public interface A : B {}
-                    // public interface B {}
-                    // public class Top : A {} → We only want to dump interface A so interface B must be removed
-
-                    // Considering class A given above allInterfaces contains A and B now.
-                    var toRemove = new HashSet<Type>();
-                    foreach (var implementedByMostDerivedClass in allInterfaces)
-                    {
-                        // For interface A this will only contain single element, namely B
-                        // For interface B this will an empty array
-                        foreach (var implementedByOtherInterfaces in implementedByMostDerivedClass.GetInterfaces())
-                        {
-                            toRemove.Add(implementedByOtherInterfaces);
-                        }
-                    }
-
-                    // Finally remove the interfaces that do not belong to the most derived class.
-                    allInterfaces.ExceptWith(toRemove);
-
+                    var allInterfaces = FindCandidateInterfaceTypes(serviceType);
                     foreach (var typeInterface in allInterfaces)
                     {
                         if (IsValidServiceType(typeInterface, out returnType))
@@ -77,6 +48,51 @@ namespace RealityCollective.ServiceFramework.Extensions
             }
 
             return returnType;
+        }
+
+        private static HashSet<Type> FindCandidateInterfaceTypes(Type serviceType)
+        {
+            var derivedTypeInterfaces = new HashSet<Type>(serviceType.GetInterfaces());
+
+            if (serviceType.BaseType != null)
+            {
+                var baseInterfaces = new HashSet<Type>(serviceType.BaseType.GetInterfaces());
+
+                // If interfaces on the base type and most derived type match exactly, that means
+                // that both declare the same set of interfaces, if we were to filter the base types out
+                // now, we'd end up having nothing, because 1 - 1 = 0.
+                // In this case we don't worry about filtering the base types because the next filter will
+                // make sure interface inheritance is filtered out.
+                if (!baseInterfaces.SequenceEqual(derivedTypeInterfaces))
+                {
+                    // Remove all the interfaces implemented by the base class, so that now only
+                    // interfaces implemented by the most derived class and interfaces implemented by those
+                    // (interfaces of the most derived class) remain.
+                    derivedTypeInterfaces.ExceptWith(baseInterfaces);
+                }
+            }
+
+            // We want to remove interfaces that are implemented by other interfaces
+            // i.e
+            // public interface A : B {}
+            // public interface B {}
+            // public class Top : A {} → We only want to dump interface A so interface B must be removed
+
+            // Considering class A given above allInterfaces contains A and B now.
+            var toRemove = new HashSet<Type>();
+            foreach (var implementedByMostDerivedClass in derivedTypeInterfaces)
+            {
+                // For interface A this will only contain single element, namely B
+                // For interface B this will an empty array
+                foreach (var implementedByOtherInterfaces in implementedByMostDerivedClass.GetInterfaces())
+                {
+                    toRemove.Add(implementedByOtherInterfaces);
+                }
+            }
+
+            // Finally remove the interfaces that do not belong to the most derived class.
+            derivedTypeInterfaces.ExceptWith(toRemove);
+            return derivedTypeInterfaces;
         }
 
         /// <summary>

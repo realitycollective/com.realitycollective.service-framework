@@ -35,12 +35,13 @@ namespace RealityCollective.ServiceFramework.Tests
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
 
             // Act
-            var retrievedService = serviceManager.GetService<ITestService1>();
+            var retrievedServices = serviceManager.GetServices<ITestService1>();
 
             // Assert
-            Assert.IsNotNull(retrievedService);
-            Assert.IsTrue(retrievedService is ITestService1);
-            Assert.IsTrue(retrievedService == serviceInstance);
+            Assert.IsNotNull(retrievedServices);
+            Assert.IsTrue(retrievedServices.Count == 1);
+            Assert.IsTrue(retrievedServices[0] is ITestService1);
+            Assert.IsTrue(retrievedServices[0] == serviceInstance);
         }
 
         /// <summary>
@@ -56,12 +57,13 @@ namespace RealityCollective.ServiceFramework.Tests
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
 
             // Act
-            var retrievedService = serviceManager.GetService<ITestService>();
+            var retrievedServices = serviceManager.GetServices<ITestService>();
 
             // Assert
-            Assert.IsNotNull(retrievedService);
-            Assert.IsTrue(retrievedService is ITestService);
-            Assert.IsTrue(retrievedService == serviceInstance);
+            Assert.IsNotNull(retrievedServices);
+            Assert.IsTrue(retrievedServices.Count == 1);
+            Assert.IsTrue(retrievedServices[0] is ITestService);
+            Assert.IsTrue(retrievedServices[0] == serviceInstance);
         }
 
         /// <summary>
@@ -76,12 +78,13 @@ namespace RealityCollective.ServiceFramework.Tests
             serviceManager.TryRegisterService<ITestService>(serviceInstance);
 
             // Act
-            var retrievedService = serviceManager.GetService<ITestService1>();
+            var retrievedServices = serviceManager.GetServices<ITestService1>();
 
             // Assert
-            Assert.IsNotNull(retrievedService);
-            Assert.IsTrue(retrievedService is ITestService1);
-            Assert.IsTrue(retrievedService == serviceInstance);
+            Assert.IsNotNull(retrievedServices);
+            Assert.IsTrue(retrievedServices.Count == 1);
+            Assert.IsTrue(retrievedServices[0] is ITestService1);
+            Assert.IsTrue(retrievedServices[0] == serviceInstance);
         }
 
         /// <summary>
@@ -97,12 +100,13 @@ namespace RealityCollective.ServiceFramework.Tests
             serviceManager.TryRegisterService<ITestService>(serviceInstance);
 
             // Act
-            var retrievedService = serviceManager.GetService<ITestService>();
+            var retrievedServices = serviceManager.GetServices<ITestService>();
 
             // Assert
-            Assert.IsNotNull(retrievedService);
-            Assert.IsTrue(retrievedService is ITestService);
-            Assert.IsTrue(retrievedService == serviceInstance);
+            Assert.IsNotNull(retrievedServices);
+            Assert.IsTrue(retrievedServices.Count == 1);
+            Assert.IsTrue(retrievedServices[0] is ITestService);
+            Assert.IsTrue(retrievedServices[0] == serviceInstance);
         }
 
         /// <summary>
@@ -122,23 +126,21 @@ namespace RealityCollective.ServiceFramework.Tests
 
             // Act
             var retrievedServices = serviceManager.GetServices<ITestService>();
-            var retrievedService1 = serviceManager.GetService<ITestService1>();
             var retrievedServices1 = serviceManager.GetServices<ITestService1>();
-            var retrievedService2 = serviceManager.GetService<ITestService2>();
             var retrievedServices2 = serviceManager.GetServices<ITestService2>();
 
             // Assert
             Assert.IsTrue(retrievedServices.Count == 2);
             Assert.IsTrue(retrievedServices.Contains(serviceInstance1));
             Assert.IsTrue(retrievedServices.Contains(serviceInstance2));
-            Assert.IsNotNull(retrievedService1);
-            Assert.IsTrue(retrievedService1 is ITestService1);
-            Assert.IsTrue(retrievedService1 == serviceInstance1);
+            Assert.IsNotNull(retrievedServices1);
             Assert.IsTrue(retrievedServices1.Count == 1);
-            Assert.IsNotNull(retrievedService2);
-            Assert.IsTrue(retrievedService2 is ITestService2);
-            Assert.IsTrue(retrievedService2 == serviceInstance2);
+            Assert.IsTrue(retrievedServices1[0] is ITestService1);
+            Assert.IsTrue(retrievedServices1[0] == serviceInstance1);
+            Assert.IsNotNull(retrievedServices2);
             Assert.IsTrue(retrievedServices2.Count == 1);
+            Assert.IsTrue(retrievedServices2[0] is ITestService2);
+            Assert.IsTrue(retrievedServices2[0] == serviceInstance2);
         }
 
         [TearDown]
