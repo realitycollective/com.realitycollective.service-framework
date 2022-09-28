@@ -7,7 +7,7 @@ using RealityCollective.ServiceFramework.Tests.Interfaces;
 using RealityCollective.ServiceFramework.Tests.Services;
 using RealityCollective.ServiceFramework.Tests.Utilities;
 
-namespace RealityCollective.ServiceFramework.Tests
+namespace RealityCollective.ServiceFramework.Tests.L_ServiceInterfaceTests
 {
     /// <summary>
     /// This class contains tests for all <see cref="ServiceManager"/> APIs
@@ -46,6 +46,29 @@ namespace RealityCollective.ServiceFramework.Tests
 
         /// <summary>
         /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
+        /// using it's dedicated interface type <see cref="ITestService1"/> after registering it using said interface type.
+        /// </summary>
+        [Test]
+        public void ServiceManager_GetService_TopInterfaceType_WithPopulation()
+        {
+            // Arrange
+            var serviceInstance = new TestService1();
+            serviceManager.TryRegisterService<ITestService1>(serviceInstance);
+            var serviceInstance2 = new TestService2();
+            serviceManager.TryRegisterService<ITestService2>(serviceInstance2);
+
+            // Act
+            var retrievedServices = serviceManager.GetServices<ITestService1>();
+
+            // Assert
+            Assert.IsNotNull(retrievedServices);
+            Assert.IsTrue(retrievedServices.Count == 1);
+            Assert.IsTrue(retrievedServices[0] is ITestService1);
+            Assert.IsTrue(retrievedServices[0] == serviceInstance);
+        }
+
+        /// <summary>
+        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
         /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
         /// was registered using it's dedicated interface type <see cref="ITestService1"/>.
         /// </summary>
@@ -64,6 +87,31 @@ namespace RealityCollective.ServiceFramework.Tests
             Assert.IsTrue(retrievedServices.Count == 1);
             Assert.IsTrue(retrievedServices[0] is ITestService);
             Assert.IsTrue(retrievedServices[0] == serviceInstance);
+        }
+
+
+        /// <summary>
+        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
+        /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
+        /// was registered using it's dedicated interface type <see cref="ITestService1"/>.
+        /// </summary>
+        [Test]
+        public void ServiceManager_GetService_BaseInterfaceType_WithPopulation()
+        {
+            // Arrange
+            var serviceInstance = new TestService1();
+            serviceManager.TryRegisterService<ITestService1>(serviceInstance);
+            var serviceInstance2 = new TestService2();
+            serviceManager.TryRegisterService<ITestService2>(serviceInstance2);
+
+            // Act
+            var retrievedServices = serviceManager.GetServices<ITestService>();
+
+            // Assert
+            Assert.IsNotNull(retrievedServices, "No services returned from registry");
+            Assert.IsTrue(retrievedServices.Count == 2, $"Number of services did not match the expected [2]");
+            Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service is not of type {typeof(ITestService)}");
+            Assert.IsTrue(retrievedServices[0] == serviceInstance, "Instance of service does not match the created service");
         }
 
         /// <summary>
@@ -89,6 +137,29 @@ namespace RealityCollective.ServiceFramework.Tests
 
         /// <summary>
         /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
+        /// using it's dedicated interface type <see cref="ITestService1"/> after registering it using the base interface type <see cref="ITestService"/>.
+        /// </summary>
+        [Test]
+        public void ServiceManager_GetService_TopInterfaceType_RegisteredByBaseInterfaceType_WithPopulation()
+        {
+            // Arrange
+            var serviceInstance = new TestService1();
+            serviceManager.TryRegisterService<ITestService>(serviceInstance);
+            var serviceInstance2 = new TestService2();
+            serviceManager.TryRegisterService<ITestService2>(serviceInstance2);
+
+            // Act
+            var retrievedServices = serviceManager.GetServices<ITestService1>();
+
+            // Assert
+            Assert.IsNotNull(retrievedServices, "No services returned from registry");
+            Assert.IsTrue(retrievedServices.Count == 1, $"Number of services did not match the expected [1]");
+            Assert.IsTrue(retrievedServices[0] is ITestService1, $"Returned service is not of type {typeof(ITestService)}");
+            Assert.IsTrue(retrievedServices[0] == serviceInstance, "Instance of service does not match the created service");
+        }
+
+        /// <summary>
+        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
         /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
         /// was registered using the base interface type <see cref="ITestService"/>.
         /// </summary>
@@ -107,6 +178,30 @@ namespace RealityCollective.ServiceFramework.Tests
             Assert.IsTrue(retrievedServices.Count == 1);
             Assert.IsTrue(retrievedServices[0] is ITestService);
             Assert.IsTrue(retrievedServices[0] == serviceInstance);
+        }
+
+        /// <summary>
+        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
+        /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
+        /// was registered using the base interface type <see cref="ITestService"/>.
+        /// </summary>
+        [Test]
+        public void ServiceManager_GetService_BaseInterfaceType_RegisteredByBaseInterfaceType_WithPopulation()
+        {
+            // Arrange
+            var serviceInstance = new TestService1();
+            serviceManager.TryRegisterService<ITestService>(serviceInstance);
+            var serviceInstance2 = new TestService2();
+            serviceManager.TryRegisterService<ITestService2>(serviceInstance2);
+
+            // Act
+            var retrievedServices = serviceManager.GetServices<ITestService>();
+
+            // Assert
+            Assert.IsNotNull(retrievedServices, "No services returned from registry");
+            Assert.IsTrue(retrievedServices.Count == 2, $"Number of services did not match the expected [2]");
+            Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service is not of type {typeof(ITestService)}");
+            Assert.IsTrue(retrievedServices[0] == serviceInstance, "Instance of service does not match the created service");
         }
 
         /// <summary>
