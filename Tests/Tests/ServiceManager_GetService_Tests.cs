@@ -18,12 +18,6 @@ namespace RealityCollective.ServiceFramework.Tests
     {
         private ServiceManager serviceManager;
 
-        [SetUp]
-        public void SetupServiceManager_GetService_Tests()
-        {
-            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
-        }
-
         /// <summary>
         /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
         /// using it's dedicated interface type <see cref="ITestService1"/> after registering it using said interface type,
@@ -32,6 +26,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_TopInterfaceType_SingleService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
@@ -57,6 +53,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_TopInterfaceType_MultiService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
@@ -83,6 +81,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_BaseInterfaceType_SingleService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+ 
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
@@ -107,6 +107,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_BaseInterfaceType_MultiService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService1>(serviceInstance);
@@ -132,6 +134,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_TopInterfaceType_RegisteredByBaseInterfaceType_SingleService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService>(serviceInstance);
@@ -156,6 +160,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetService_TopInterfaceType_RegisteredByBaseInterfaceType_MultiService()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+
             // Arrange
             var serviceInstance = new TestService1();
             serviceManager.TryRegisterService<ITestService>(serviceInstance);
@@ -174,59 +180,6 @@ namespace RealityCollective.ServiceFramework.Tests
         }
 
         /// <summary>
-        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
-        /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
-        /// was registered using the base interface type <see cref="ITestService"/>. The service is the only registered service in this case.
-        /// </summary>
-        [Test]
-        public void ServiceManager_GetService_BaseInterfaceType_RegisteredByBaseInterfaceType_SingleService()
-        {
-            // Arrange
-            var serviceInstance = new TestService1();
-            serviceManager.TryRegisterService<ITestService>(serviceInstance);
-
-            // Act
-            var retrievedServices = serviceManager.GetServices<ITestService>();
-            var retrievedService = serviceManager.GetService<ITestService>(false);
-
-            // Assert
-            Assert.IsNotNull(retrievedServices, $"Expected return value from {nameof(serviceManager.GetServices)} to not be null.");
-            Assert.IsNotNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to not be null.");
-            Assert.AreEqual(1, retrievedServices.Count, $"Expected {1} service to be returned, but got {retrievedServices.Count} instead.");
-            Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service type does not match expected type {nameof(ITestService)}.");
-            Assert.IsTrue(retrievedServices[0] == serviceInstance, $"Returned service is not the expected instance.");
-            Assert.IsTrue(retrievedService == serviceInstance, $"Returned service is not the expected instance.");
-        }
-
-        /// <summary>
-        /// This test will test whether we can retrieve a service instance of type <see cref="TestService1"/>
-        /// using the base interface type <see cref="ITestService"/> which is valid for all test services. The service instance
-        /// was registered using the base interface type <see cref="ITestService"/>. There is other registered services in this case.
-        /// </summary>
-        [Test]
-        public void ServiceManager_GetService_BaseInterfaceType_RegisteredByBaseInterfaceType_MultiService()
-        {
-            // Arrange
-            var serviceInstance = new TestService1();
-            serviceManager.TryRegisterService<ITestService>(serviceInstance);
-            var secondServiceRegistrationSuccess = serviceManager.TryRegisterService<ITestService>(new TestService2());
-
-            // Act
-            var retrievedServices = serviceManager.GetServices<ITestService>();
-            var retrievedService = serviceManager.GetService<ITestService>(false);
-
-            // Assert
-            Assert.IsFalse(secondServiceRegistrationSuccess, $"Expected {nameof(TestService2)} registration to fail, since {nameof(TestService1)} is already registered using {nameof(ITestService)}.");
-            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, "There is already a ITestService.Test Service 1 registered!");
-            Assert.IsNotNull(retrievedServices, $"Expected return value from {nameof(serviceManager.GetServices)} to not be null.");
-            Assert.IsNotNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to not be null.");
-            Assert.AreEqual(1, retrievedServices.Count, $"Expected {1} service to be returned, but got {retrievedServices.Count} instead.");
-            Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service type does not match expected type {nameof(ITestService)}.");
-            Assert.IsTrue(retrievedServices[0] == serviceInstance, $"Returned service is not the expected instance.");
-            Assert.IsTrue(retrievedService == serviceInstance, $"Returned service is not the expected instance.");
-        }
-
-        /// <summary>
         /// This test will test whether we can retrieve the service instances <see cref="TestService1"/>
         /// and <see cref="TestService2"/> using their respective dedicated interface types <see cref="ITestService1"/>
         /// and <see cref="ITestService2"/>. Additionally the test ensures both service instances can be retrieved
@@ -235,6 +188,8 @@ namespace RealityCollective.ServiceFramework.Tests
         [Test]
         public void ServiceManager_GetServices_BaseInterfaceType()
         {
+            TestUtilities.InitializeServiceManagerScene(ref serviceManager);
+ 
             // Arrange
             var serviceInstance1 = new TestService1();
             serviceManager.TryRegisterService<ITestService1>(serviceInstance1);
@@ -256,14 +211,6 @@ namespace RealityCollective.ServiceFramework.Tests
             Assert.AreEqual(1, retrievedServices2.Count, $"Expected {1} service to be returned, but got {retrievedServices.Count} instead.");
             Assert.IsTrue(retrievedServices2[0] is ITestService2, $"Returned service type does not match expected type {nameof(ITestService2)}.");
             Assert.IsTrue(retrievedServices2[0] == serviceInstance2, $"Returned service is not the expected instance.");
-        }
-
-        [TearDown]
-        public void TearDownServiceManager_GetService_Tests()
-        {
-            serviceManager.Dispose();
-            serviceManager.DestroyAllServices();
-            serviceManager = null;
         }
     }
 }
