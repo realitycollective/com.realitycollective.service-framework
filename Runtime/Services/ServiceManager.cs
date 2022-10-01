@@ -1678,7 +1678,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>True, if the registered service contains the interface type and name.</returns>
         private bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || serviceInstance.Name == serviceName;
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName);
             bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
             return isNameValid && isInstanceValid;
         }
