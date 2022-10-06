@@ -379,7 +379,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
             {
                 serializedObject.ApplyModifiedProperties();
 
-                if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized &&
+                if (ServiceManager.IsActiveAndInitialized &&
                     runtimePlatforms.arraySize > 0 &&
                     systemTypeReference.Type != null)
                 {
@@ -422,7 +422,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
 
-            if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.IsActiveAndInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
@@ -430,7 +430,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
         private void OnElementReorderedCallback(ReorderableList list)
         {
-            if (ServiceManager.Instance != null && ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.IsActiveAndInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }

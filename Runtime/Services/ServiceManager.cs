@@ -191,6 +191,12 @@ namespace RealityCollective.ServiceFramework.Services
         private static ServiceManager instance;
 
         /// <summary>
+        /// Gets whether there is an active <see cref="Instance"/> of the <see cref="ServiceManager"/>
+        /// available and it <see cref="IsInitialized"/>.
+        /// </summary>
+        public static bool IsActiveAndInitialized => Instance != null && Instance.IsInitialized;
+
+        /// <summary>
         /// Lock property for the Service Manager to prevent reinitialization
         /// </summary>
         private readonly object InitializedLock = new object();
