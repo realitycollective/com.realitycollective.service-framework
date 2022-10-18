@@ -13,7 +13,7 @@ namespace RealityCollective.ServiceFramework.Services
     /// </summary>
     public class BaseService : IService
     {
-        private readonly HashSet<IServiceDataProvider> dataProviders = new HashSet<IServiceDataProvider>();
+        private readonly HashSet<Interfaces.IServiceProvider> serviceProviders = new HashSet<Interfaces.IServiceProvider>();
 
         private static bool isDestroying = false;
 
@@ -25,27 +25,27 @@ namespace RealityCollective.ServiceFramework.Services
         public Guid ServiceGuid => guid;
 
         /// <inheritdoc />
-        public virtual IReadOnlyCollection<IServiceDataProvider> DataProviders => dataProviders;
+        public virtual IReadOnlyCollection<Interfaces.IServiceProvider> ServiceProviders => serviceProviders;
 
         /// <inheritdoc />
-        public virtual void RegisterDataProvider(IServiceDataProvider dataProvider)
+        public virtual void RegisterServiceProvider(Interfaces.IServiceProvider serviceProvider)
         {
-            if (!dataProvider.ParentService.IsServiceRegistered)
+            if (!serviceProvider.ParentService.IsServiceRegistered)
             {
-                Debug.LogError($"Cannot register {dataProvider.GetType().Name} as its Parent Service [{dataProvider.ParentService.Name}] is not registered");
+                Debug.LogError($"Cannot register {serviceProvider.GetType().Name} as its Parent Service [{serviceProvider.ParentService.Name}] is not registered");
                 return;
             }
-            dataProviders.Add(dataProvider);
+            serviceProviders.Add(serviceProvider);
         }
 
         /// <inheritdoc />
-        public virtual void UnRegisterDataProvider(IServiceDataProvider dataProvider)
+        public virtual void UnRegisterServiceProvider(Interfaces.IServiceProvider serviceProvider)
         {
-            if (!isDestroying && dataProvider.IsServiceRegistered)
+            if (!isDestroying && serviceProvider.IsServiceRegistered)
             {
-                ServiceManager.Instance?.TryUnregisterService(dataProvider);
+                ServiceManager.Instance?.TryUnregisterService(serviceProvider);
             }
-            dataProviders.Remove(dataProvider);
+            serviceProviders.Remove(serviceProvider);
         }
 
         /// <inheritdoc />
@@ -61,32 +61,32 @@ namespace RealityCollective.ServiceFramework.Services
         public virtual void Initialize() { }
 
         /// <inheritdoc />
-        public virtual void Start() => StartAllDataProviders();
+        public virtual void Start() => StartAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void Reset() => ResetAllDataProviders();
+        public virtual void Reset() => ResetAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void Enable() => EnableAllDataProviders();
+        public virtual void Enable() => EnableAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void Update() => UpdateAllDataProviders();
+        public virtual void Update() => UpdateAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void LateUpdate() => LateUpdateAllDataProviders();
+        public virtual void LateUpdate() => LateUpdateAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void FixedUpdate() => FixedUpdateAllDataProviders();
+        public virtual void FixedUpdate() => FixedUpdateAllServiceProviders();
 
         /// <inheritdoc />
-        public virtual void Disable() => DisableAllDataProviders();
+        public virtual void Disable() => DisableAllServiceProviders();
 
         /// <inheritdoc />
         public virtual void Destroy()
         {
             isDestroying = true;
             IsEnabled = false;
-            DestroyAllDataProviders();
+            DestroyAllServiceProviders();
         }
 
         /// <inheritdoc />
@@ -108,7 +108,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        public virtual bool RegisterDataProviders => true;
+        public virtual bool RegisterServiceProviders => true;
 
         #endregion IService Implementation
 
@@ -145,31 +145,31 @@ namespace RealityCollective.ServiceFramework.Services
         #endregion IDisposable Implementation
 
 
-        private bool NoDataProvidersFound => (dataProviders == null || dataProviders.Count == 0);
+        private bool NoServiceProvidersFound => (serviceProviders == null || serviceProviders.Count == 0);
 
         #region MonoBehaviour Replicators
-        internal void StartAllDataProviders()
+        internal void StartAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Start all data providers
-            foreach (var dataProvider in dataProviders)
+            // Start all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    if (dataProvider.IsEnabled)
+                    if (provider.IsEnabled)
                     {
-                        dataProvider.Start();
+                        provider.Start();
                     }
                 }
                 catch (Exception e)
@@ -179,26 +179,26 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void ResetAllDataProviders()
+        internal void ResetAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Reset all data providers
-            foreach (var dataProvider in dataProviders)
+            // Reset all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    dataProvider.Reset();
+                    provider.Reset();
                 }
                 catch (Exception e)
                 {
@@ -207,28 +207,28 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void EnableAllDataProviders()
+        internal void EnableAllServiceProviders()
         {
             IsEnabled = true;
 
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Enable all data providers
-            foreach (var dataProvider in dataProviders)
+            // Enable all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    dataProvider.Enable();
+                    provider.Enable();
                 }
                 catch (Exception e)
                 {
@@ -237,28 +237,28 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void UpdateAllDataProviders()
+        internal void UpdateAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Update all data providers
-            foreach (var dataProvider in dataProviders)
+            // Update all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    if (dataProvider.IsEnabled)
+                    if (provider.IsEnabled)
                     {
-                        dataProvider.Update();
+                        provider.Update();
                     }
                 }
                 catch (Exception e)
@@ -268,28 +268,28 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void LateUpdateAllDataProviders()
+        internal void LateUpdateAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Late update all data providers
-            foreach (var dataProvider in dataProviders)
+            // Late update all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    if (dataProvider.IsEnabled)
+                    if (provider.IsEnabled)
                     {
-                        dataProvider.LateUpdate();
+                        provider.LateUpdate();
                     }
                 }
                 catch (Exception e)
@@ -299,28 +299,28 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void FixedUpdateAllDataProviders()
+        internal void FixedUpdateAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Fix update all data providers
-            foreach (var dataProvider in dataProviders)
+            // Fix update all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    if (dataProvider.IsEnabled)
+                    if (provider.IsEnabled)
                     {
-                        dataProvider.FixedUpdate();
+                        provider.FixedUpdate();
                     }
                 }
                 catch (Exception e)
@@ -330,28 +330,28 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        public void DisableAllDataProviders()
+        public void DisableAllServiceProviders()
         {
             IsEnabled = false;
 
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            // Disable all data providers
-            foreach (var dataProvider in dataProviders)
+            // Disable all service providers
+            foreach (var provider in serviceProviders)
             {
                 try
                 {
-                    dataProvider.Disable();
+                    provider.Disable();
                 }
                 catch (Exception e)
                 {
@@ -360,30 +360,30 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        public void DestroyAllDataProviders()
+        public void DestroyAllServiceProviders()
         {
-            // If the data providers are being registered in the Service Registry automatically, exit.
-            if (!RegisterDataProviders)
+            // If the service providers are being registered in the Service Registry automatically, exit.
+            if (!RegisterServiceProviders)
             {
                 return;
             }
 
-            // If there are no data providers are configured, exit
-            if (NoDataProvidersFound)
+            // If there are no service providers are configured, exit
+            if (NoServiceProvidersFound)
             {
                 return;
             }
 
-            IServiceDataProvider[] dataProvidersClone = new IServiceDataProvider[dataProviders.Count];
-            dataProviders.CopyTo(dataProvidersClone);
-            dataProviders.Clear();
+            Interfaces.IServiceProvider[] serviceProvidersClone = new Interfaces.IServiceProvider[serviceProviders.Count];
+            serviceProviders.CopyTo(serviceProvidersClone);
+            serviceProviders.Clear();
 
-            // Destroy all data providers
-            foreach (var dataProvider in dataProvidersClone)
+            // Destroy all service providers
+            foreach (var provider in serviceProvidersClone)
             {
                 try
                 {
-                    dataProvider.Destroy();
+                    provider.Destroy();
                 }
                 catch (Exception e)
                 {
@@ -391,12 +391,12 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            // Dispose all data providers
-            foreach (var dataProvider in dataProvidersClone)
+            // Dispose all service providers
+            foreach (var provider in serviceProvidersClone)
             {
                 try
                 {
-                    dataProvider.Dispose();
+                    provider.Dispose();
                 }
                 catch (Exception e)
                 {
@@ -404,7 +404,7 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            dataProviders.Clear();
+            serviceProviders.Clear();
         }
         #endregion MonoBehaviour Replicators
     }

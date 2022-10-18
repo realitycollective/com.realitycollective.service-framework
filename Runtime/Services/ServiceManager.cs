@@ -16,7 +16,7 @@ using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
 // ServiceGenerator - interfacevalidation
-// Limit Service Type lookups for "testing" - Type Service/DataProvider
+// Limit Service Type lookups for "testing" - Type Service/Provider
 
 namespace RealityCollective.ServiceFramework.Services
 {
@@ -27,7 +27,7 @@ namespace RealityCollective.ServiceFramework.Services
         {
             typeof(IService),
             typeof(IEventService),
-            typeof(IServiceDataProvider)
+            typeof(Interfaces.IServiceProvider)
         };
 
         public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
@@ -535,8 +535,8 @@ namespace RealityCollective.ServiceFramework.Services
                 if (TryCreateAndRegisterService(configuration, out var serviceInstance))
                 {
                     if (serviceInstance != null &&
-                        configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
-                        !TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
+                        configuration.Profile is IServiceProfile<Interfaces.IServiceProvider> profile &&
+                        !TryRegisterServiceProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
                     {
                         anyFailed = true;
                     }
@@ -552,13 +552,13 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Registers all the <see cref="IServiceDataProvider"/>s defined in the provided configuration collection.
+        /// Registers all the <see cref="IServiceProvider"/>s defined in the provided configuration collection.
         /// </summary>
-        /// <typeparam name="T">The interface type for the <see cref="IServiceDataProvider"/> to be registered.</typeparam>
+        /// <typeparam name="T">The interface type for the <see cref="IServiceProvider"/> to be registered.</typeparam>
         /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
-        /// <returns>True, if all configurations successfully created and registered their data providers.</returns>
-        public bool TryRegisterDataProviderConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceDataProvider
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceProvider"/> will be assigned to.</param>
+        /// <returns>True, if all configurations successfully created and registered their service providers.</returns>
+        public bool TryRegisterServiceProviderConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : Interfaces.IServiceProvider
         {
             bool anyFailed = false;
 
@@ -566,7 +566,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 var configuration = configurations[i];
 
-                if (!TryCreateAndRegisterDataProvider(configuration, serviceParent))
+                if (!TryCreateAndRegisterServiceProvider(configuration, serviceParent))
                 {
                     Debug.LogError($"Failed to start {configuration.Name}!");
                     anyFailed = true;
@@ -606,13 +606,13 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Creates a new instance of a data provider and registers it to the Service Manager service registry for the specified platform.
+        /// Creates a new instance of a service provider and registers it to the Service Manager service registry for the specified platform.
         /// </summary>
         /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
-        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the data provider.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
+        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the service provider.</param>
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceProvider"/> will be assigned to.</param>
         /// <returns>True, if the service was successfully created and registered.</returns>
-        public bool TryCreateAndRegisterDataProvider<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceDataProvider
+        public bool TryCreateAndRegisterServiceProvider<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : Interfaces.IServiceProvider
         {
             return TryCreateAndRegisterServiceInternal<T>(
                 configuration.InstancedType,
@@ -714,8 +714,8 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError($"Failed to create a valid instance of {concreteType.Name}!");
                 return false;
             }
-            // If a service does not want its data providers registered, then do not add them to the registry.
-            if (args.Length == 4 && !(args[3] as IService).RegisterDataProviders)
+            // If a service does not want its service providers registered, then do not add them to the registry.
+            if (args.Length == 4 && !(args[3] as IService).RegisterServiceProviders)
             {
                 return true;
             }
@@ -843,23 +843,23 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance))
             {
-                var activeDataProviders = GetServices<IServiceDataProvider>();
+                var activeServiceProviders = GetServices<Interfaces.IServiceProvider>();
 
                 bool result = true;
 
-                for (int i = 0; i < activeDataProviders.Count; i++)
+                for (int i = 0; i < activeServiceProviders.Count; i++)
                 {
-                    var dataProvider = activeDataProviders[i];
+                    var serviceProvider = activeServiceProviders[i];
 
-                    if (dataProvider.ParentService.Equals(serviceInstance))
+                    if (serviceProvider.ParentService.Equals(serviceInstance))
                     {
-                        result &= TryUnregisterService(dataProvider);
+                        result &= TryUnregisterService(serviceProvider);
                     }
                 }
 
                 if (!result)
                 {
-                    Debug.LogError($"Failed to unregister all the {nameof(IServiceDataProvider)}s for this {serviceInstance.Name}!");
+                    Debug.LogError($"Failed to unregister all the {nameof(Interfaces.IServiceProvider)}s for this {serviceInstance.Name}!");
                 }
 
                 try
@@ -1107,7 +1107,7 @@ namespace RealityCollective.ServiceFramework.Services
                     }
                 }
             }
-            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Data Provider
+            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Service Provider
             else
             {
                 foreach (var service in activeServices)
@@ -1613,7 +1613,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         private string[] ignoredNamespaces = { "System.IDisposable",
                                                       "RealityCollective.ServiceFramework.Interfaces.IService",
-                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
+                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceProvider"};
 
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.

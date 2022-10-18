@@ -9,11 +9,11 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Tests.Providers
 {
-    public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
+    public class TestServiceProvider2 : BaseServiceProvider, ITestServiceProvider2
     {
-        public const string TestName = "Test Data Provider 2";
+        public const string TestName = "Test Service Provider 2";
 
-        public TestDataProvider2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
+        public TestServiceProvider2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
 

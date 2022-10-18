@@ -23,7 +23,7 @@ namespace RealityCollective.ServiceFramework
         private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
 
         #region Show Inspector Debug View settings prompt
-        private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Data Providers in the inspector view.");
+        private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Service Providers in the inspector view.");
         private static readonly string ShowInspectorDebugViewKey = $"{Application.productName}_RealityCollective_Editor_ShowInspectorDebugView";
         private static bool showInspectorDebugViewPrefLoaded;
         private static bool showInspectorDebugView = false;

@@ -2,6 +2,6 @@
 
 namespace #NAMESPACE#.Interfaces
 {
-    public interface I#NAME# : IServiceDataProvider
+    public interface I#NAME# : IServiceProvider
     {}
 }

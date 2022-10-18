@@ -30,53 +30,53 @@ namespace RealityCollective.ServiceFramework.Tests
         }
 
         [Test]
-        public void Test_TestDataProvider1_Type()
+        public void Test_TestServiceProvider1_Type()
         {
             var testService1 = new TestService1(nameof(TestService1), 0, null);
-            var testDataProvider1 = new TestDataProvider1(nameof(TestDataProvider1), 1, null, testService1);
-            var interfaceType = testDataProvider1.GetType().FindServiceInterfaceType(typeof(ITestDataProvider1));
+            var testServiceProvider1 = new TestServiceProvider1(nameof(TestServiceProvider1), 1, null, testService1);
+            var interfaceType = testServiceProvider1.GetType().FindServiceInterfaceType(typeof(ITestServiceProvider1));
 
-            Assert.AreEqual(typeof(ITestDataProvider1), interfaceType);
+            Assert.AreEqual(typeof(ITestServiceProvider1), interfaceType);
         }
 
         [Test]
-        public void Test_TestDataProvider2_Type()
+        public void Test_TestServiceProvider2_Type()
         {
             var testService2 = new TestService2(nameof(TestService2), 0, null);
-            var testDataProvider2 = new TestDataProvider2(nameof(TestDataProvider2), 1, null, testService2);
-            var interfaceType = testDataProvider2.GetType().FindServiceInterfaceType(typeof(ITestDataProvider2));
+            var testServiceProvider2 = new TestServiceProvider2(nameof(TestServiceProvider2), 1, null, testService2);
+            var interfaceType = testServiceProvider2.GetType().FindServiceInterfaceType(typeof(ITestServiceProvider2));
 
-            Assert.AreEqual(typeof(ITestDataProvider2), interfaceType);
+            Assert.AreEqual(typeof(ITestServiceProvider2), interfaceType);
         }
 
         [Test]
-        public void Test_BaseTestService1DataProvider_Type()
+        public void Test_BaseTestService1ServiceProvider_Type()
         {
             var testService1 = new TestService1(nameof(TestService1), 0, null);
-            var baseTestService1DataProvider = new BaseTestService1DataProvider(nameof(BaseTestService1DataProvider), 1, null, testService1);
-            var interfaceType = baseTestService1DataProvider.GetType().FindServiceInterfaceType(typeof(ITestService1DataProvider));
+            var baseTestService1ServiceProvider = new BaseTestService1ServiceProvider(nameof(BaseTestService1ServiceProvider), 1, null, testService1);
+            var interfaceType = baseTestService1ServiceProvider.GetType().FindServiceInterfaceType(typeof(ITestService1ServiceProvider));
 
-            Assert.AreEqual(typeof(ITestService1DataProvider), interfaceType);
+            Assert.AreEqual(typeof(ITestService1ServiceProvider), interfaceType);
         }
 
         [Test]
-        public void Test_TestService1DataProviderA_Type()
+        public void Test_TestService1ServiceProviderA_Type()
         {
             var testService1 = new TestService1(nameof(TestService1), 0, null);
-            var testService1DataProviderA = new TestService1DataProviderA(nameof(TestService1DataProviderA), 1, null, testService1);
-            var interfaceType = testService1DataProviderA.GetType().FindServiceInterfaceType(typeof(ITestService1DataProviderA));
+            var testService1ServiceProviderA = new TestService1ServiceProviderA(nameof(TestService1ServiceProviderA), 1, null, testService1);
+            var interfaceType = testService1ServiceProviderA.GetType().FindServiceInterfaceType(typeof(ITestService1ServiceProviderA));
 
-            Assert.AreEqual(typeof(ITestService1DataProviderA), interfaceType);
+            Assert.AreEqual(typeof(ITestService1ServiceProviderA), interfaceType);
         }
 
         [Test]
-        public void Test_TestService1DataProviderB_Type()
+        public void Test_TestService1ServiceProviderB_Type()
         {
             var testService1 = new TestService1(nameof(TestService1), 0, null);
-            var testService1DataProviderB = new TestService1DataProviderB(nameof(TestService1DataProviderB), 1, null, testService1);
-            var interfaceType = testService1DataProviderB.GetType().FindServiceInterfaceType(typeof(ITestService1DataProviderB));
+            var testService1ServiceProviderB = new TestService1ServiceProviderB(nameof(TestService1ServiceProviderB), 1, null, testService1);
+            var interfaceType = testService1ServiceProviderB.GetType().FindServiceInterfaceType(typeof(ITestService1ServiceProviderB));
 
-            Assert.AreEqual(typeof(ITestService1DataProviderB), interfaceType);
+            Assert.AreEqual(typeof(ITestService1ServiceProviderB), interfaceType);
         }
     }
 }

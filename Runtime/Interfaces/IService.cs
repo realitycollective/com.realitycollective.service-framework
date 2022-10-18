@@ -12,7 +12,7 @@ namespace RealityCollective.ServiceFramework.Interfaces
     public interface IService : IDisposable
     {
         /// <summary>
-        /// Cached <see cref="Guid"/> Reference for the Service / Data Provider
+        /// Cached <see cref="Guid"/> Reference for the Service / Service Provider
         /// </summary>
         Guid ServiceGuid { get; }
 
@@ -91,22 +91,22 @@ namespace RealityCollective.ServiceFramework.Interfaces
         void OnApplicationPause(bool isPaused);
 
         /// <summary>
-        /// List of Data Providers to be managed by a Service Implementation.
-        /// Not to be used for Data Providers themselves.
+        /// List of Service Providers to be managed by a Service Implementation.
+        /// Not to be used for Service Providers themselves.
         /// </summary>
-        IReadOnlyCollection<IServiceDataProvider> DataProviders { get; }
+        IReadOnlyCollection<IServiceProvider> ServiceProviders { get; }
 
         /// <summary>
-        /// Register a Data Provider with its parent service
+        /// Register a Service Provider with its parent service
         /// </summary>
-        /// <param name="serviceDataProvider"></param>
-        void RegisterDataProvider(IServiceDataProvider serviceDataProvider);
+        /// <param name="serviceProvider"></param>
+        void RegisterServiceProvider(IServiceProvider serviceProvider);
 
         /// <summary>
-        /// UnRegister a Data Provider with its parent service
+        /// UnRegister a Service Provider with its parent service
         /// </summary>
-        /// <param name="serviceDataProvider"></param>
-        void UnRegisterDataProvider(IServiceDataProvider serviceDataProvider);
+        /// <param name="serviceProvider"></param>
+        void UnRegisterServiceProvider(IServiceProvider serviceProvider);
 
         /// <summary>
         /// Is this service currently registered with the Service Manager?
@@ -115,8 +115,8 @@ namespace RealityCollective.ServiceFramework.Interfaces
         bool IsServiceRegistered { get; }
 
         /// <summary>
-        /// Should this services data providers be automatically registered and maintained by the Service Framework, or are they managed internally by the Service itself.
+        /// Should this services Service Providers be automatically registered and maintained by the Service Framework, or are they managed internally by the Service itself.
         /// </summary>
-        bool RegisterDataProviders { get; }
+        bool RegisterServiceProviders { get; }
     }
 }

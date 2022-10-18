@@ -3,17 +3,18 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Providers;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Tests.Providers
 {
-    [System.Runtime.InteropServices.Guid("df746fcc-cf9b-414f-bf7e-0d311cfdd8ac")]
-    public class TestService1DataProviderB : BaseTestService1DataProvider, ITestService1DataProviderB
+    [System.Runtime.InteropServices.Guid("f5309e95-8811-4200-8831-49a8043d6afa")]
+    public class BaseTestService1ServiceProvider : BaseServiceProvider, ITestService1ServiceProvider
     {
-        public new const string TestName = "TestService1DataProviderB";
+        public const string TestName = "BaseTestService1ServiceProvider";
 
-        public TestService1DataProviderB(string name = TestName, uint priority = 1, BaseProfile profile = null, IService parentService = null)
+        public BaseTestService1ServiceProvider(string name = TestName, uint priority = 1, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
 

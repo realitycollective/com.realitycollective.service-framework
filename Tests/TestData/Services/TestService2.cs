@@ -22,6 +22,6 @@ namespace RealityCollective.ServiceFramework.Tests.Services
             Debug.Log($"{TestName} is Initialised");
         }
 
-        public override bool RegisterDataProviders => false;
+        public override bool RegisterServiceProviders => false;
     }
 }

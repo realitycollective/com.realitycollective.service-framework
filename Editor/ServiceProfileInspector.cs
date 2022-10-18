@@ -157,10 +157,10 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 serializedObject.ApplyModifiedProperties();
             }
 
-            DrawDataProviderPropertyDrawer();
+            DrawServiceProviderPropertyDrawer();
         }
 
-        protected void DrawDataProviderPropertyDrawer()
+        protected void DrawServiceProviderPropertyDrawer()
         {
             EditorGUILayout.Space();
             ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
