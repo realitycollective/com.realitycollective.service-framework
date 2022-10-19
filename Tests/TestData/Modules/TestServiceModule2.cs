@@ -11,7 +11,7 @@ namespace RealityCollective.ServiceFramework.Tests.Modules
 {
     public class TestServiceModule2 : BaseServiceModule, ITestServiceModule2
     {
-        public const string TestName = "Test Data Provider 2";
+        public const string TestName = "Test Service Module 2";
 
         public TestServiceModule2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)

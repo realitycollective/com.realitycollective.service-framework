@@ -48,7 +48,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
@@ -60,7 +60,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             var testService1Unregistered = testServiceManager.GetService<ITestService1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService1)} service."));
 
-            // Try and retrieve unregistered Data Provider
+            // Try and retrieve unregistered Service Module
             var testServiceModule1Unregistered = testServiceManager.GetService<ITestServiceModule1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestServiceModule1)} service."));
 
@@ -68,7 +68,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             Assert.IsNotNull(testService1, "Test service was not registered");
             Assert.IsTrue(serviceUnregister, "Service was not unregistered correctly");
             Assert.IsNull(testService1Unregistered, "Service was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule1Unregistered, "Data Provider was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule1Unregistered, "Service Module was found, it should have been unregistered");
             Assert.AreEqual(activeServiceCount, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -79,7 +79,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
@@ -92,7 +92,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             var testService1Unregistered = testServiceManager.GetService<ITestService1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService1)} service."));
 
-            // Try and retrieve unregistered Data Provider
+            // Try and retrieve unregistered Service Module
             var testServiceModule1Unregistered = testServiceManager.GetService<ITestServiceModule1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestServiceModule1)} service."));
             var testServiceModule2Unregistered = testServiceManager.GetService<ITestServiceModule2>();
@@ -103,8 +103,8 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             Assert.IsNotNull(testService1, "Test service was not registered");
             Assert.IsTrue(serviceUnregister, "Service was not unregistered correctly");
             Assert.IsNull(testService1Unregistered, "Service was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule1Unregistered, "Data Provider 1 was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule2Unregistered, "Data Provider 2 was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule1Unregistered, "Service Module 1 was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule2Unregistered, "Service Module 2 was found, it should have been unregistered");
             Assert.AreEqual(activeServiceCount, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -115,7 +115,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
 
@@ -168,7 +168,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
@@ -180,7 +180,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             var testService1Unregistered = testServiceManager.GetService<ITestService1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService1)} service."));
 
-            // Try and retrieve unregistered Data Provider
+            // Try and retrieve unregistered Service Module
             var testServiceModule1Unregistered = testServiceManager.GetService<ITestServiceModule1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestServiceModule1)} service."));
 
@@ -188,7 +188,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             Assert.IsNotNull(testService1, "Test service was not registered");
             Assert.IsTrue(serviceUnregister, "Service was not unregistered correctly");
             Assert.IsNull(testService1Unregistered, "Service was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule1Unregistered, "Data Provider was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule1Unregistered, "Service Module was found, it should have been unregistered");
             Assert.AreEqual(activeServiceCount, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -199,7 +199,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
@@ -212,7 +212,7 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             var testService1Unregistered = testServiceManager.GetService<ITestService1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestService1)} service."));
 
-            // Try and retrieve unregistered Data Provider
+            // Try and retrieve unregistered Service Module
             var testServiceModule1Unregistered = testServiceManager.GetService<ITestServiceModule1>();
             LogAssert.Expect(LogType.Error, new Regex($"Unable to find {nameof(ITestServiceModule1)} service."));
             var testServiceModule2Unregistered = testServiceManager.GetService<ITestServiceModule2>();
@@ -223,8 +223,8 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             Assert.IsNotNull(testService1, "Test service was not registered");
             Assert.IsTrue(serviceUnregister, "Service was not unregistered correctly");
             Assert.IsNull(testService1Unregistered, "Service was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule1Unregistered, "Data Provider 1 was found, it should have been unregistered");
-            Assert.IsNull(testServiceModule2Unregistered, "Data Provider 2 was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule1Unregistered, "Service Module 1 was found, it should have been unregistered");
+            Assert.IsNull(testServiceModule2Unregistered, "Service Module 2 was found, it should have been unregistered");
             Assert.AreEqual(activeServiceCount, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 

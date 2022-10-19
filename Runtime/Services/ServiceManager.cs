@@ -557,7 +557,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the <see cref="IServiceModule"/> to be registered.</typeparam>
         /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
         /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
-        /// <returns>True, if all configurations successfully created and registered their data providers.</returns>
+        /// <returns>True, if all configurations successfully created and registered their service modules.</returns>
         public bool TryRegisterServiceModuleConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceModule
         {
             bool anyFailed = false;
@@ -606,10 +606,10 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Creates a new instance of a data provider and registers it to the Service Manager service registry for the specified platform.
+        /// Creates a new instance of a service module and registers it to the Service Manager service registry for the specified platform.
         /// </summary>
         /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
-        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the data provider.</param>
+        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the service module.</param>
         /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
         /// <returns>True, if the service was successfully created and registered.</returns>
         public bool TryCreateAndRegisterServiceModule<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceModule
@@ -714,7 +714,7 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError($"Failed to create a valid instance of {concreteType.Name}!");
                 return false;
             }
-            // If a service does not want its data providers registered, then do not add them to the registry.
+            // If a service does not want its service modules registered, then do not add them to the registry.
             if (args.Length == 4 && !(args[3] as IService).RegisterServiceModules)
             {
                 return true;
@@ -1107,7 +1107,7 @@ namespace RealityCollective.ServiceFramework.Services
                     }
                 }
             }
-            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Data Provider
+            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Service Module
             else
             {
                 foreach (var service in activeServices)

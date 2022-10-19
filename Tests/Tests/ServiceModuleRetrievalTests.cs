@@ -20,7 +20,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
     {
         private ServiceManager testServiceManager;
 
-        #region Data Provider Retrieval
+        #region Service Module Retrieval
 
         [Test]
         public void Test_05_01_RetrieveSingleServiceModule()
@@ -29,7 +29,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register Service 1 and data provider
+            // Register Service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             var dataProvider1 = new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1);
@@ -39,7 +39,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var dataProvider1Retrieval = testServiceManager.GetService<ITestServiceModule1>();
 
             // Tests
-            Assert.IsNotNull(dataProvider1, "Test data provider not found");
+            Assert.IsNotNull(dataProvider1, "Test service provider not found");
             Assert.AreEqual(dataProvider1.ServiceGuid, dataProvider1Retrieval.ServiceGuid, "Service GUID does not match");
             Assert.AreEqual(activeServiceCount + 2, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
@@ -51,12 +51,12 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var dataProvider2 = new TestServiceModule2(TestServiceModule2.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestServiceModule2>(dataProvider2);
 
@@ -64,7 +64,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var dataProvider2Retrieval = testServiceManager.GetService<ITestServiceModule2>();
 
             // Tests
-            Assert.IsNotNull(dataProvider2, "Test data provider not found");
+            Assert.IsNotNull(dataProvider2, "Test service provider not found");
             Assert.AreEqual(dataProvider2.ServiceGuid, dataProvider2Retrieval.ServiceGuid, "Service GUID does not match");
             Assert.AreEqual(activeServiceCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
@@ -78,7 +78,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
 
             var testService1 = new TestService1();
 
-            // Register service 1 and data providers
+            // Register service 1 and service providers
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
             testServiceManager.TryRegisterService<ITestServiceModule2>(new TestServiceModule2(TestServiceModule2.TestName, 0, null, testService1));
@@ -87,7 +87,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var ServiceModules = testServiceManager.GetServices<IServiceModule>();
 
             // Tests
-            Assert.IsNotEmpty(ServiceModules, "Data Providers were not registered");
+            Assert.IsNotEmpty(ServiceModules, "Service Modules were not registered");
             Assert.AreEqual(activeSystemCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -98,7 +98,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
 
             var activeSystemCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider2
+            // Register service 1 and service provider2
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
@@ -109,8 +109,8 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var ServiceModules = testService.ServiceModules;
 
             // Tests
-            Assert.IsNotEmpty(ServiceModules, "Data Providers were not registered");
-            Assert.AreEqual(ServiceModules.Count, 2, "Could not locate all data providers");
+            Assert.IsNotEmpty(ServiceModules, "Service Modules were not registered");
+            Assert.AreEqual(ServiceModules.Count, 2, "Could not locate all service providers");
             Assert.AreEqual(activeSystemCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -121,12 +121,12 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
 
             var activeSystemCount = testServiceManager.ActiveServices.Count;
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
 
-            // Register service 2 and data provider
+            // Register service 2 and service provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
             testServiceManager.TryRegisterService<ITestServiceModule2>(new TestServiceModule2(TestServiceModule2.TestName, 0, null, testService2));
@@ -135,8 +135,8 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var ServiceModules = testServiceManager.GetServices<IServiceModule>();
 
             // Tests
-            Assert.IsNotEmpty(ServiceModules, "Data Providers were not registered");
-            Assert.AreEqual(ServiceModules.Count, 2, "Could not locate all data providers");
+            Assert.IsNotEmpty(ServiceModules, "Service Modules were not registered");
+            Assert.AreEqual(ServiceModules.Count, 2, "Could not locate all service providers");
             Assert.AreEqual(activeSystemCount + 4, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
@@ -145,17 +145,17 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             var testServiceModule2 = new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(testServiceModule2);
 
-            // Validate non-existent data provider 2
+            // Validate non-existent service provider 2
             var isServiceModuleRegistered = testServiceManager.IsServiceRegistered<ITestServiceModule2>();
 
             // Tests
-            Assert.IsFalse(isServiceModuleRegistered, "Data Provider was found when it was not registered");
+            Assert.IsFalse(isServiceModuleRegistered, "Service Module was found when it was not registered");
         }
 
         [Test]
@@ -163,7 +163,7 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
         {
             // Check logs
             LogAssert.Expect(LogType.Log, new Regex("Test Service 1 is Initialised"));
-            LogAssert.Expect(LogType.Log, new Regex("Test Data Provider 1 is Initialised"));
+            LogAssert.Expect(LogType.Log, new Regex("Test Service Module 1 is Initialised"));
             LogAssert.Expect(LogType.Log, new Regex("Test Service 2 is Initialised"));
             LogAssert.Expect(LogType.Error, new Regex("Unable to find ITestServiceModule2 service."));
 
@@ -190,23 +190,23 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
             var service1Registration = testServiceManager.GetService<ITestService1>();
             var service2Registration = testServiceManager.GetService<ITestService2>();
 
-            // Data Provider 1 should return because its service allows the registration of Data Providers
+            // Service Module 1 should return because its service allows the registration of Service Modules
             var dataProvider1Registration = testServiceManager.GetService<ITestServiceModule1>();
 
-            // Data Provider 2 should NOT return because its service does NOT allow the registration of Data Providers
+            // Service Module 2 should NOT return because its service does NOT allow the registration of Service Modules
             var dataProvider2Registration = testServiceManager.GetService<ITestServiceModule2>();
 
             // Tests
             Assert.IsTrue(result, "Test services were not registered");
             Assert.IsNotNull(service1Registration, "Test Service 1 should be registered but it was not found");
             Assert.IsNotNull(service2Registration, "Test Service 2 should be registered but it was not found");
-            Assert.IsNotNull(dataProvider1Registration, "Data Provider 1 should be registered but it was not found");
-            Assert.IsNull(dataProvider2Registration, "Data Provider 2 should NOT be registered but it was found");
-            Assert.AreEqual(1, service1Registration.ServiceModules.Count, "Test Service 1 Data Provider count did not match, should be 1");
-            Assert.AreEqual(1, service2Registration.ServiceModules.Count, "Test Service 2 Data Provider count did not match, should be 1");
+            Assert.IsNotNull(dataProvider1Registration, "Service Module 1 should be registered but it was not found");
+            Assert.IsNull(dataProvider2Registration, "Service Module 2 should NOT be registered but it was found");
+            Assert.AreEqual(1, service1Registration.ServiceModules.Count, "Test Service 1 Service Module count did not match, should be 1");
+            Assert.AreEqual(1, service2Registration.ServiceModules.Count, "Test Service 2 Service Module count did not match, should be 1");
             Assert.AreEqual(activeServiceCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
-        #endregion Data Provider Retrieval
+        #endregion Service Module Retrieval
     }
 }

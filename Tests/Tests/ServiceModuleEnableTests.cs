@@ -13,7 +13,7 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
     {
         private ServiceManager testServiceManager;
 
-        #region Enable Data Provider
+        #region Enable Service Module
 
         [Test]
         public void Test_11_01_ServiceModuleEnable()
@@ -28,7 +28,7 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             testServiceManager.TryRegisterService<ITestServiceModule1>(dataProvider1);
             dataProvider1.Disable();
 
-            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test service provider was in a enabled state when it was disabled");
 
             // Retrieve
             var dataProvidertest1Retrieval = testServiceManager.GetService<ITestServiceModule1>();
@@ -36,9 +36,9 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             testServiceManager.EnableService<ITestServiceModule1>();
 
             // Tests
-            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
-            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
-            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the service provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test service provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a disabled state when it was enabled after retrieval.");
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             testServiceManager.TryRegisterService<ITestServiceModule1>(dataProvider1);
             dataProvider1.Disable();
 
-            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test service provider was in a enabled state when it was disabled");
 
             // Retrieve
             var dataProvidertest1Retrieval = testServiceManager.GetService<ITestServiceModule1>();
@@ -62,9 +62,9 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             testServiceManager.EnableService<ITestServiceModule1>(TestServiceModule1.TestName);
 
             // Tests
-            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
-            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
-            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the service provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test service provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a disabled state when it was enabled after retrieval.");
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             testServiceManager.TryRegisterService<ITestServiceModule1>(dataProvider1);
             dataProvider1.Disable();
 
-            Assert.IsFalse(dataProvider1.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvider1.IsEnabled, "Test service provider was in a enabled state when it was disabled");
 
             // Retrieve
             var dataProvidertest1Retrieval = testServiceManager.GetService<ITestServiceModule1>();
@@ -88,9 +88,9 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             dataProvidertest1Retrieval.Enable();
 
             // Tests
-            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the data provider was disabled, should still be enabled");
-            Assert.IsTrue(dataProvider1.IsEnabled, "Test data provider was in a disabled state when it was enabled");
-            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(testService1.IsEnabled, "Test service was in a disabled state when the service provider was disabled, should still be enabled");
+            Assert.IsTrue(dataProvider1.IsEnabled, "Test service provider was in a disabled state when it was enabled");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a disabled state when it was enabled after retrieval.");
         }
 
         [Test]
@@ -98,12 +98,12 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
         {
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
-            // Register service 1 and data provider
+            // Register service 1 and service provider
             var testService1 = new TestService1();
             testServiceManager.TryRegisterService<ITestService1>(testService1);
             testServiceManager.TryRegisterService<ITestServiceModule1>(new TestServiceModule1(TestServiceModule1.TestName, 0, null, testService1));
 
-            // Register service 2 and data provider
+            // Register service 2 and service provider
             var testService2 = new TestService2();
             testServiceManager.TryRegisterService<ITestService2>(testService2);
             testServiceManager.TryRegisterService<ITestServiceModule2>(new TestServiceModule2(TestServiceModule2.TestName, 0, null, testService2));
@@ -114,18 +114,18 @@ namespace RealityCollective.ServiceFramework.Tests.K_ServiceModuleEnabling
             var dataProvidertest1Retrieval = testServiceManager.GetService<ITestServiceModule1>();
             var dataProvidertest2Retrieval = testServiceManager.GetService<ITestServiceModule2>();
 
-            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled");
-            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a enabled state when it was disabled");
+            Assert.IsFalse(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a enabled state when it was disabled");
 
             testServiceManager.EnableAllServices();
 
             // Tests
             Assert.IsTrue(testService1.IsEnabled, "Test service 1 was in a disabled state when it was enabled");
             Assert.IsTrue(testService2.IsEnabled, "Test service 2 was in a disabled state when it was enabled");
-            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
-            Assert.IsTrue(dataProvidertest2Retrieval.IsEnabled, "Test data provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(dataProvidertest1Retrieval.IsEnabled, "Test service provider was in a disabled state when it was enabled after retrieval.");
+            Assert.IsTrue(dataProvidertest2Retrieval.IsEnabled, "Test service provider was in a disabled state when it was enabled after retrieval.");
         }
 
-        #endregion Enable Data Provider
+        #endregion Enable Service Module
     }
 }
