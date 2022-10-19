@@ -5,7 +5,7 @@ using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Editor.Utilities;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.ServiceFramework.Providers;
+using RealityCollective.ServiceFramework.Modules;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace RealityCollective.ServiceFramework.Editor
     public class ServiceWizard : EditorWindow
     {
         private const float MIN_VERTICAL_SIZE_SERVICE = 200f;
-        private const float MIN_VERTICAL_SIZE_DATAPROVIDER = 240f;
+        private const float MIN_VERTICAL_SIZE_SERVICEMODULE = 240f;
         private const float MIN_HORIZONTAL_SIZE = 384f;
 
         private const string TABS = "        ";
@@ -36,6 +36,8 @@ namespace RealityCollective.ServiceFramework.Editor
         private const string INTERFACE = "#INTERFACE#";
         private const string IMPLEMENTS = "#IMPLEMENTS#";
         private const string PARENT_INTERFACE = "#PARENT_INTERFACE#";
+        private const string SERVICE_MODULE_NAME = "ServiceModule";
+        private const string SERVICE_NAME = "Service";
 
         private static ServiceWizard window = null;
 
@@ -75,7 +77,7 @@ namespace RealityCollective.ServiceFramework.Editor
         private Type parentInterfaceType = null;
         private bool isServiceType = true;
 
-        private bool IsNameValid => isServiceType ? !instanceName.Equals("Service") : !instanceName.Equals("DataProvider") && !@parentInterfaceName.Equals("IService");
+        private bool IsNameValid => isServiceType ? !instanceName.Equals(SERVICE_NAME) : !instanceName.Equals(SERVICE_MODULE_NAME) && !@parentInterfaceName.Equals("IService");
 
         public static void ShowNewServiceWizard(Type interfaceType)
         {
@@ -98,14 +100,14 @@ namespace RealityCollective.ServiceFramework.Editor
 
             switch (interfaceType)
             {
-                case Type _ when typeof(IServiceDataProvider).IsAssignableFrom(interfaceType):
-                    window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
-                    window.maxSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
-                    window.position = new Rect(0f, 0f, MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_DATAPROVIDER);
+                case Type _ when typeof(IServiceModule).IsAssignableFrom(interfaceType):
+                    window.minSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICEMODULE);
+                    window.maxSize = new Vector2(MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICEMODULE);
+                    window.position = new Rect(0f, 0f, MIN_HORIZONTAL_SIZE, MIN_VERTICAL_SIZE_SERVICEMODULE);
                     window.profileTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}ServiceProfile.txt";
-                    window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}DataProvider.txt";
-                    window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IServiceDataProvider.txt";
-                    window.instanceBaseType = typeof(BaseServiceDataProvider);
+                    window.instanceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}ServiceModule.txt";
+                    window.interfaceTemplatePath = $"{templatePath}{Path.DirectorySeparatorChar}IServiceModule.txt";
+                    window.instanceBaseType = typeof(BaseServiceModule);
                     window.profileBaseType = typeof(BaseProfile);
                     window.isServiceType = false;
                     break;
@@ -146,12 +148,12 @@ namespace RealityCollective.ServiceFramework.Editor
 
             if (string.IsNullOrWhiteSpace(instanceName))
             {
-                instanceName = isServiceType ? "Service" : "DataProvider";
+                instanceName = isServiceType ? SERVICE_NAME : SERVICE_MODULE_NAME;
             }
 
             if (string.IsNullOrWhiteSpace(@parentInterfaceName))
             {
-                @parentInterfaceName = interfaceType.Name.Replace("DataProvider", string.Empty);
+                @parentInterfaceName = interfaceType.Name.Replace(SERVICE_MODULE_NAME, string.Empty);
             }
 
             GUILayout.BeginVertical();
@@ -205,7 +207,7 @@ namespace RealityCollective.ServiceFramework.Editor
                         {
                             CleanNamespace(ref @namespace);
 
-                            if (interfaceType.Name.Contains("DataProvider"))
+                            if (interfaceType.Name.Contains(SERVICE_MODULE_NAME))
                             {
                                 parentInterfaceType = GetType($"{@parentInterfaceName}");
                                 if (parentInterfaceType == null)
@@ -231,7 +233,7 @@ namespace RealityCollective.ServiceFramework.Editor
                                 usingList.Add(interfaceType.Namespace);
                             }
 
-                            if (interfaceType.Name.Contains("DataProvider"))
+                            if (interfaceType.Name.Contains(SERVICE_MODULE_NAME))
                             {
                                 if (parentInterfaceType != null)
                                 {
@@ -278,19 +280,19 @@ namespace RealityCollective.ServiceFramework.Editor
 
                             if (profileBaseTypeName.Contains("`1"))
                             {
-                                var dataProviderInterfaceTypeName = interfaceType.Name
-                                    .Replace("Service", "ServiceDataProvider");
+                                var serviceModuleInterfaceTypeName = interfaceType.Name
+                                    .Replace(SERVICE_NAME, SERVICE_MODULE_NAME);
 
-                                var dataProviderType = GetType(dataProviderInterfaceTypeName);
+                                var serviceModuleType = GetType(serviceModuleInterfaceTypeName);
 
-                                if (dataProviderType != null)
+                                if (serviceModuleType != null)
                                 {
-                                    if (!usingList.Contains(dataProviderType.Namespace))
+                                    if (!usingList.Contains(serviceModuleType.Namespace))
                                     {
-                                        usingList.Add(dataProviderType.Namespace);
+                                        usingList.Add(serviceModuleType.Namespace);
                                     }
 
-                                    var constructors = dataProviderType.GetConstructors();
+                                    var constructors = serviceModuleType.GetConstructors();
 
                                     foreach (var constructorInfo in constructors)
                                     {
@@ -316,7 +318,7 @@ namespace RealityCollective.ServiceFramework.Editor
 
                                 }
 
-                                profileBaseTypeName = profileBaseTypeName.Replace("`1", $"<{dataProviderInterfaceTypeName}>");
+                                profileBaseTypeName = profileBaseTypeName.Replace("`1", $"<{serviceModuleInterfaceTypeName}>");
                             }
 
                             GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
@@ -346,7 +348,7 @@ namespace RealityCollective.ServiceFramework.Editor
                 }
                 else
                 {
-                    GUILayout.Label($"Please enter the Parent Interface name \nand a new Data Provider name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
+                    GUILayout.Label($"Please enter the Parent Interface name \nand a new Service Module name for the new {interfaceStrippedName}", EditorStyles.centeredGreyMiniLabel);
                 }
                 EditorGUILayout.Space();
             }
@@ -587,12 +589,12 @@ namespace RealityCollective.ServiceFramework.Editor
             ServiceWizard.ShowNewServiceWizard(typeof(IService));
         }
 
-        const string createNewDataProviderMenuItemName = ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Create new data provider";
+        const string createNewServiceModuleMenuItemName = ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Create new service module";
 
-        [MenuItem(createNewDataProviderMenuItemName)]
-        private static void CreateNewDataProvider()
+        [MenuItem(createNewServiceModuleMenuItemName)]
+        private static void CreateNewServiceModule()
         {
-            ServiceWizard.ShowNewServiceWizard(typeof(IServiceDataProvider));
+            ServiceWizard.ShowNewServiceWizard(typeof(IServiceModule));
         }
     }
 }

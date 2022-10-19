@@ -1,9 +1,9 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Interfaces;
 
 namespace RealityCollective.ServiceFramework.Tests.Interfaces
 {
-    public interface ITestService1DataProvider : IServiceDataProvider { }
+    public interface ITestServiceModule1 : IServiceModule { }
 }
