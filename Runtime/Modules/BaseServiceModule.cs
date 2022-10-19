@@ -6,24 +6,24 @@ using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
 
-namespace RealityCollective.ServiceFramework.Providers
+namespace RealityCollective.ServiceFramework.Modules
 {
     /// <summary>
-    /// The base data provider implements <see cref="IServiceDataProvider"/> and provides default properties for all data providers.
+    /// The base Service Module implements <see cref="IServiceModule"/> and provides default properties for all Service Modules.
     /// </summary>
-    public abstract class BaseServiceDataProvider : BaseServiceWithConstructor, IServiceDataProvider
+    public abstract class BaseServiceModule : BaseServiceWithConstructor, IServiceModule
     {
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="name">The name of the service.</param>
         /// <param name="priority">The priority of the service.</param>
-        /// <param name="profile">The optional <see cref="BaseProfile"/> for the data provider.</param>
-        /// <param name="parentService">The <see cref="IService"/> that this <see cref="IServiceDataProvider"/> is assigned to.</param>
-        protected BaseServiceDataProvider(string name, uint priority, BaseProfile profile, IService parentService) : base(name, priority)
+        /// <param name="profile">The optional <see cref="BaseProfile"/> for the Service Module.</param>
+        /// <param name="parentService">The <see cref="IService"/> that this <see cref="IServiceModule"/> is assigned to.</param>
+        protected BaseServiceModule(string name, uint priority, BaseProfile profile, IService parentService) : base(name, priority)
         {
             ParentService = parentService ?? throw new ArgumentNullException($"{nameof(parentService)} cannot be null");
-            parentService.RegisterDataProvider(this);
+            parentService.RegisterServiceModule(this);
         }
 
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace RealityCollective.ServiceFramework.Providers
         {
             base.Destroy();
 
-            ParentService?.UnRegisterDataProvider(this);
+            ParentService?.UnRegisterServiceModule(this);
         }
     }
 }

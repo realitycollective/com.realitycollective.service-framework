@@ -3,5 +3,5 @@
 
 namespace RealityCollective.ServiceFramework.Tests.Interfaces
 {
-    public interface ITestService1DataProviderB : ITestService1DataProvider { }
+    public interface ITestService1ServiceModuleB : ITestService1ServiceModule { }
 }

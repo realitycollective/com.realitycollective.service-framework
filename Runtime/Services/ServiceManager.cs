@@ -27,7 +27,7 @@ namespace RealityCollective.ServiceFramework.Services
         {
             typeof(IService),
             typeof(IEventService),
-            typeof(IServiceDataProvider)
+            typeof(IServiceModule)
         };
 
         public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
@@ -535,8 +535,8 @@ namespace RealityCollective.ServiceFramework.Services
                 if (TryCreateAndRegisterService(configuration, out var serviceInstance))
                 {
                     if (serviceInstance != null &&
-                        configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
-                        !TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
+                        configuration.Profile is IServiceProfile<IServiceModule> profile &&
+                        !TryRegisterServiceModuleConfigurations(profile.ServiceConfigurations, serviceInstance))
                     {
                         anyFailed = true;
                     }
@@ -552,13 +552,13 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Registers all the <see cref="IServiceDataProvider"/>s defined in the provided configuration collection.
+        /// Registers all the <see cref="IServiceModule"/>s defined in the provided configuration collection.
         /// </summary>
-        /// <typeparam name="T">The interface type for the <see cref="IServiceDataProvider"/> to be registered.</typeparam>
+        /// <typeparam name="T">The interface type for the <see cref="IServiceModule"/> to be registered.</typeparam>
         /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
         /// <returns>True, if all configurations successfully created and registered their data providers.</returns>
-        public bool TryRegisterDataProviderConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceDataProvider
+        public bool TryRegisterServiceModuleConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceModule
         {
             bool anyFailed = false;
 
@@ -566,7 +566,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 var configuration = configurations[i];
 
-                if (!TryCreateAndRegisterDataProvider(configuration, serviceParent))
+                if (!TryCreateAndRegisterServiceModule(configuration, serviceParent))
                 {
                     Debug.LogError($"Failed to start {configuration.Name}!");
                     anyFailed = true;
@@ -610,9 +610,9 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
         /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the data provider.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
         /// <returns>True, if the service was successfully created and registered.</returns>
-        public bool TryCreateAndRegisterDataProvider<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceDataProvider
+        public bool TryCreateAndRegisterServiceModule<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceModule
         {
             return TryCreateAndRegisterServiceInternal<T>(
                 configuration.InstancedType,
@@ -715,7 +715,7 @@ namespace RealityCollective.ServiceFramework.Services
                 return false;
             }
             // If a service does not want its data providers registered, then do not add them to the registry.
-            if (args.Length == 4 && !(args[3] as IService).RegisterDataProviders)
+            if (args.Length == 4 && !(args[3] as IService).RegisterServiceModules)
             {
                 return true;
             }
@@ -843,13 +843,13 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance))
             {
-                var activeDataProviders = GetServices<IServiceDataProvider>();
+                var activeServiceModules = GetServices<IServiceModule>();
 
                 bool result = true;
 
-                for (int i = 0; i < activeDataProviders.Count; i++)
+                for (int i = 0; i < activeServiceModules.Count; i++)
                 {
-                    var dataProvider = activeDataProviders[i];
+                    var dataProvider = activeServiceModules[i];
 
                     if (dataProvider.ParentService.Equals(serviceInstance))
                     {
@@ -859,7 +859,7 @@ namespace RealityCollective.ServiceFramework.Services
 
                 if (!result)
                 {
-                    Debug.LogError($"Failed to unregister all the {nameof(IServiceDataProvider)}s for this {serviceInstance.Name}!");
+                    Debug.LogError($"Failed to unregister all the {nameof(IServiceModule)}s for this {serviceInstance.Name}!");
                 }
 
                 try

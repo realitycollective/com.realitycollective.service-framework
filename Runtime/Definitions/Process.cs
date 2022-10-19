@@ -6,7 +6,7 @@ namespace RealityCollective.ServiceFramework.Definitions
     public delegate void UpdateMethod(float dt);
 
     /// <summary>
-    /// Proccess description for subscribing to the service manager update loop as a proccess not as a full service or provider.
+    /// Proccess description for subscribing to the service manager update loop as a proccess not as a full service or module.
     /// </summary>
     public class Proccess
     {

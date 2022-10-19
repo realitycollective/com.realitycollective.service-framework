@@ -3,10 +3,10 @@
 
 namespace RealityCollective.ServiceFramework.Interfaces
 {
-    public interface IServiceDataProvider : IService
+    public interface IServiceModule : IService
     {
         /// <summary>
-        /// The <see cref="IService"/> this data provider is registered with.
+        /// The <see cref="IService"/> this <see cref="IServiceModule"/> is registered with.
         /// </summary>
         IService ParentService { get; }
     }

@@ -3,17 +3,17 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.ServiceFramework.Providers;
+using RealityCollective.ServiceFramework.Modules;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using UnityEngine;
 
-namespace RealityCollective.ServiceFramework.Tests.Providers
+namespace RealityCollective.ServiceFramework.Tests.Modules
 {
-    public class TestDataProvider2 : BaseServiceDataProvider, ITestDataProvider2
+    public class TestServiceModule2 : BaseServiceModule, ITestServiceModule2
     {
         public const string TestName = "Test Data Provider 2";
 
-        public TestDataProvider2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
+        public TestServiceModule2(string name = TestName, uint priority = 2, BaseProfile profile = null, IService parentService = null)
             : base(name, priority, profile, parentService)
         { }
 

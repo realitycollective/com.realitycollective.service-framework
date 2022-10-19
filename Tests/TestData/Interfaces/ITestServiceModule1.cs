@@ -5,5 +5,5 @@ using RealityCollective.ServiceFramework.Interfaces;
 
 namespace RealityCollective.ServiceFramework.Tests.Interfaces
 {
-    public interface ITestDataProvider1 : IServiceDataProvider { }
+    public interface ITestServiceModule1 : IServiceModule { }
 }
