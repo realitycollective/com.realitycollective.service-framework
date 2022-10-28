@@ -8,11 +8,11 @@
     "Services",
     "Extensions"
   ],
-  "version": "1.0.0-preview.12",
+  "version": "1.0.0",
   "unity": "2020.3",
   "homepage": "https://realitycollective.io",
   "bugs": {
-    "url": "https://github.com/realitycollective/realitytoolkit.dev/issues"
+    "url": "https://github.com/realitycollective/com.realitycollective.service-framework/issues"
   },
   "license": "MIT",
   "repository": {

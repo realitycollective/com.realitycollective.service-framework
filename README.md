@@ -49,6 +49,8 @@ The service framework has been the foundation behind such toolkits as Microsoft'
 * A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
 * An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
 * A networking service - Utilising multiple endpoints for Lobbys, communication routes and data sharing.
+* [QR Code service to read QR Codes](https://localjoost.github.io/MRTK2-to-MRTK3-migrating-the-QRCode-sample/) (by Joost van Schaik)
+* A Leaderboard management service
 
 The possibilities are almost endless.
 
