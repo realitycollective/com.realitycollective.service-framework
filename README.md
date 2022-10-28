@@ -14,13 +14,11 @@ The Service framework provides a service repository for enabling background serv
 * Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
 
 ## Requirements
-<!-- Fill in list of requirements here -->
 
 - [Unity 2020.3 and above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
 ### OpenUPM
-<!-- Check openUPM links and details -->
 
 [![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
 
