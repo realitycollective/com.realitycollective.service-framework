@@ -1,27 +1,37 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Extensions;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using RealityToolkit.ServiceFramework.Utilities.Async;
+using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
 // ServiceGenerator - interfacevalidation
 // Limit Service Type lookups for "testing" - Type Service/DataProvider
 
-namespace RealityToolkit.ServiceFramework.Services
+namespace RealityCollective.ServiceFramework.Services
 {
     [ExecuteInEditMode]
-    [DisallowMultipleComponent]
     public class ServiceManager : IDisposable
     {
+        private static Type[] serviceInterfaceTypes = new[]
+        {
+            typeof(IService),
+            typeof(IEventService),
+            typeof(IServiceModule)
+        };
+
+        public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
+
         private GameObject serviceManagerInstanceGameObject;
 
         private Guid serviceManagerInstanceGuid;
@@ -80,7 +90,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// When a profile is replaced with a new one, force all services to reset and read the new values
         /// </summary>
         /// <param name="profile"></param>
-        public void ResetProfile(ServiceProvidersProfile profile)
+        public void ResetProfile(ServiceProvidersProfile profile, GameObject instance = null)
         {
             if (Application.isEditor && Application.isPlaying)
             {
@@ -118,7 +128,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 DestroyAllServices();
             }
 
-            InitializeServiceLocator();
+            InitializeServiceLocator(instance);
 
             isResetting = false;
         }
@@ -181,6 +191,12 @@ namespace RealityToolkit.ServiceFramework.Services
         private static ServiceManager instance;
 
         /// <summary>
+        /// Gets whether there is an active <see cref="Instance"/> of the <see cref="ServiceManager"/>
+        /// available and it <see cref="IsInitialized"/>.
+        /// </summary>
+        public static bool IsActiveAndInitialized => Instance != null && Instance.IsInitialized;
+
+        /// <summary>
         /// Lock property for the Service Manager to prevent reinitialization
         /// </summary>
         private readonly object InitializedLock = new object();
@@ -193,8 +209,19 @@ namespace RealityToolkit.ServiceFramework.Services
         /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
         /// </remarks>
         /// <param name="instanceGameObject"></param>
-        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
+        public ServiceManager(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null, Type[] additionalBaseServiceTypes = null)
         {
+            if (additionalBaseServiceTypes != null)
+            {
+                for (int i = additionalBaseServiceTypes.Length - 1; i >= 0; i--)
+                {
+                    if (!serviceInterfaceTypes.Contains(additionalBaseServiceTypes[i]))
+                    {
+                        serviceInterfaceTypes = serviceInterfaceTypes.AddItem(additionalBaseServiceTypes[i]);
+                    }
+                }
+            }
+
             if (instanceGameObject.IsNotNull())
             {
                 Initialize(instanceGameObject, profile);
@@ -234,7 +261,8 @@ namespace RealityToolkit.ServiceFramework.Services
         {
             lock (InitializedLock)
             {
-                if (IsInitialized && instance != this)
+                if (IsInitialized &&
+                    ServiceManager.Instance.ServiceManagerInstanceGuid != this.serviceManagerInstanceGuid)
                 {
                     Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
                     Debug.Log($"Instance [{instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
@@ -321,7 +349,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
         /// </summary>
-        private void InitializeServiceLocator()
+        private void InitializeServiceLocator(GameObject instance = null)
         {
             if (isInitializing)
             {
@@ -333,7 +361,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (!IsInitialized)
             {
-                Initialize();
+                Initialize(instance);
             }
 
             // If the Service Manager is not configured, stop.
@@ -357,15 +385,8 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
-                TryRegisterServiceConfigurations(ActiveProfile?.ServiceConfigurations);
-            }
-
-            var orderedCoreSystems = activeServices.OrderBy(m => m.Value.Priority).ToArray();
-            activeServices.Clear();
-
-            foreach (var service in orderedCoreSystems)
-            {
-                TryRegisterService(service.Key, service.Value);
+                var orderedConfig = ActiveProfile.ServiceConfigurations.OrderBy(s => s.Priority).ToArray();
+                TryRegisterServiceConfigurations(orderedConfig);
             }
 
 #if UNITY_EDITOR
@@ -373,7 +394,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 InitializeAllServices();
             }
-            else if (!ActiveProfile.InitialiseOnPlay)
+            else if (!ActiveProfile.InitializeOnPlay)
             {
                 UnityEditor.EditorApplication.delayCall += InitializeAllServices;
             }
@@ -513,8 +534,9 @@ namespace RealityToolkit.ServiceFramework.Services
 
                 if (TryCreateAndRegisterService(configuration, out var serviceInstance))
                 {
-                    if (configuration.Profile is IServiceProfile<IServiceDataProvider> profile &&
-                        !TryRegisterDataProviderConfigurations(profile.ServiceConfigurations, serviceInstance))
+                    if (serviceInstance != null &&
+                        configuration.Profile is IServiceProfile<IServiceModule> profile &&
+                        !TryRegisterServiceModuleConfigurations(profile.ServiceConfigurations, serviceInstance))
                     {
                         anyFailed = true;
                     }
@@ -530,13 +552,13 @@ namespace RealityToolkit.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Registers all the <see cref="IServiceDataProvider"/>s defined in the provided configuration collection.
+        /// Registers all the <see cref="IServiceModule"/>s defined in the provided configuration collection.
         /// </summary>
-        /// <typeparam name="T">The interface type for the <see cref="IServiceDataProvider"/> to be registered.</typeparam>
+        /// <typeparam name="T">The interface type for the <see cref="IServiceModule"/> to be registered.</typeparam>
         /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
-        /// <returns>True, if all configurations successfully created and registered their data providers.</returns>
-        public bool TryRegisterDataProviderConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceDataProvider
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
+        /// <returns>True, if all configurations successfully created and registered their service modules.</returns>
+        public bool TryRegisterServiceModuleConfigurations<T>(IServiceConfiguration<T>[] configurations, IService serviceParent) where T : IServiceModule
         {
             bool anyFailed = false;
 
@@ -544,7 +566,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 var configuration = configurations[i];
 
-                if (!TryCreateAndRegisterDataProvider(configuration, serviceParent))
+                if (!TryCreateAndRegisterServiceModule(configuration, serviceParent))
                 {
                     Debug.LogError($"Failed to start {configuration.Name}!");
                     anyFailed = true;
@@ -584,13 +606,13 @@ namespace RealityToolkit.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Creates a new instance of a data provider and registers it to the Service Manager service registry for the specified platform.
+        /// Creates a new instance of a service module and registers it to the Service Manager service registry for the specified platform.
         /// </summary>
         /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
-        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the data provider.</param>
-        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceDataProvider"/> will be assigned to.</param>
+        /// <param name="configuration">The <see cref="IServiceConfiguration{T}"/> to use to create and register the service module.</param>
+        /// <param name="serviceParent">The <see cref="IService"/> that the <see cref="IServiceModule"/> will be assigned to.</param>
         /// <returns>True, if the service was successfully created and registered.</returns>
-        public bool TryCreateAndRegisterDataProvider<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceDataProvider
+        public bool TryCreateAndRegisterServiceModule<T>(IServiceConfiguration<T> configuration, IService serviceParent) where T : IServiceModule
         {
             return TryCreateAndRegisterServiceInternal<T>(
                 configuration.InstancedType,
@@ -692,7 +714,11 @@ namespace RealityToolkit.ServiceFramework.Services
                 Debug.LogError($"Failed to create a valid instance of {concreteType.Name}!");
                 return false;
             }
-
+            // If a service does not want its service modules registered, then do not add them to the registry.
+            if (args.Length == 4 && !(args[3] as IService).RegisterServiceModules)
+            {
+                return true;
+            }
             return TryRegisterService(typeof(T), serviceInstance);
         }
 
@@ -726,19 +752,26 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (TryGetService(interfaceType, serviceInstance.Name, out var preExistingService))
             {
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
             }
 
             try
             {
-                activeServices.Add(interfaceType, serviceInstance as IService);
+                activeServices.Add(interfaceType, serviceInstance);
             }
             catch (ArgumentException)
             {
                 preExistingService = GetService(interfaceType, false);
-                Debug.LogError($"There is already a [{interfaceType.Name}.{preExistingService.Name}] registered!");
+                Debug.LogError($"There is already a {interfaceType.Name}.{preExistingService.Name} registered!");
                 return false;
+            }
+
+            // If we have registered at least one event system, we're gonna need the Unity UI event
+            // system to be available.
+            if (typeof(IEventService).IsAssignableFrom(interfaceType))
+            {
+                EnsureEventSystemSetup();
             }
 
             if (!isInitializing)
@@ -810,13 +843,13 @@ namespace RealityToolkit.ServiceFramework.Services
 
             if (TryGetServiceByName(interfaceType, serviceName, out var serviceInstance))
             {
-                var activeDataProviders = GetServices<IServiceDataProvider>();
+                var activeServiceModules = GetServices<IServiceModule>();
 
                 bool result = true;
 
-                for (int i = 0; i < activeDataProviders.Count; i++)
+                for (int i = 0; i < activeServiceModules.Count; i++)
                 {
-                    var dataProvider = activeDataProviders[i];
+                    var dataProvider = activeServiceModules[i];
 
                     if (dataProvider.ParentService.Equals(serviceInstance))
                     {
@@ -826,7 +859,7 @@ namespace RealityToolkit.ServiceFramework.Services
 
                 if (!result)
                 {
-                    Debug.LogError($"Failed to unregister all the {nameof(IServiceDataProvider)}s for this {serviceInstance.Name}!");
+                    Debug.LogError($"Failed to unregister all the {nameof(IServiceModule)}s for this {serviceInstance.Name}!");
                 }
 
                 try
@@ -903,7 +936,11 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public IService GetServiceByName<T>(string serviceName, bool showLogs = true) where T : IService
         {
-            TryGetServiceByName<T>(serviceName, out var serviceInstance, showLogs);
+            if (!TryGetServiceByName<T>(serviceName, out var serviceInstance) && showLogs)
+            {
+                Debug.LogError($"Unable to find {serviceName} service.");
+            }
+
             return serviceInstance;
         }
 
@@ -929,11 +966,10 @@ namespace RealityToolkit.ServiceFramework.Services
         /// </summary>
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public bool TryGetService<T>(out T service, bool showLogs = true) where T : IService
+        public bool TryGetService<T>(out T service) where T : IService
         {
-            service = GetService<T>(showLogs);
+            service = GetService<T>(false);
             return service != null;
         }
 
@@ -970,11 +1006,10 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <param name="serviceName">Name of the specific service to search for.</param>
         /// <param name="service">The instance of the service class that is registered.</param>
-        /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
-        public bool TryGetServiceByName<T>(string serviceName, out T service, bool showLogs = true) where T : IService
+        public bool TryGetServiceByName<T>(string serviceName, out T service) where T : IService
         {
-            service = (T)GetServiceByName(typeof(T), serviceName, showLogs);
+            service = (T)GetServiceByName(typeof(T), serviceName, false);
             return service != null;
         }
 
@@ -1072,7 +1107,7 @@ namespace RealityToolkit.ServiceFramework.Services
                     }
                 }
             }
-            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Data Provider
+            //Get Service by name as there may be multiple instances of this specific interface, e.g. A Service Module
             else
             {
                 foreach (var service in activeServices)
@@ -1132,7 +1167,7 @@ namespace RealityToolkit.ServiceFramework.Services
             {
                 if (IsServiceRegistered<T>())
                 {
-                    if (TryGetService(out service, false))
+                    if (TryGetService(out service))
                     {
                         serviceCache.Add(typeof(T), service);
                     }
@@ -1449,7 +1484,7 @@ namespace RealityToolkit.ServiceFramework.Services
         public void DestroyAllServices()
         {
             // If the Service Manager is not configured, stop.
-            if (activeProfile == null) { return; }
+            if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
             // Destroy all service
             foreach (var service in activeServices)
@@ -1577,8 +1612,8 @@ namespace RealityToolkit.ServiceFramework.Services
         #region Service Utilities
 
         private string[] ignoredNamespaces = { "System.IDisposable",
-                                                      "RealityToolkit.ServiceFramework.Interfaces.IService",
-                                                      "RealityToolkit.ServiceFramework.Interfaces.IServiceDataProvider"};
+                                                      "RealityCollective.ServiceFramework.Interfaces.IService",
+                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
 
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
@@ -1649,7 +1684,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <returns>True, if the registered service contains the interface type and name.</returns>
         private bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || serviceInstance.Name == serviceName;
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName);
             bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
             return isNameValid && isInstanceValid;
         }
@@ -1682,7 +1717,7 @@ namespace RealityToolkit.ServiceFramework.Services
         /// <param name="profile">The profile instance.</param>
         /// <param name="rootProfile">Optional root profile reference.</param>
         /// <returns>True if a <see cref="TSystem"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
-        public bool TryGetSystemProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
+        public bool TryGetServiceProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
             where TService : IService
             where TProfile : BaseProfile
         {
@@ -1766,7 +1801,7 @@ namespace RealityToolkit.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    RealityCollective.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )
@@ -1874,5 +1909,23 @@ namespace RealityToolkit.ServiceFramework.Services
         }
 
         #endregion IDisposable Implementation
+
+        #region Service Dependencies
+
+        private static void EnsureEventSystemSetup()
+        {
+            var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
+            if (eventSystems.Length == 0)
+            {
+                new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
+                Debug.Log($"There was no {nameof(EventSystem)} in the scene. The {nameof(ServiceManager)} requires one for registered {nameof(IEventService)}s to work. An {nameof(EventSystem)} game object was created.");
+            }
+            else if (eventSystems.Length > 1)
+            {
+                Debug.LogError($"There is more than one {nameof(EventSystem)} active in the scene. Please make sure only one instance of it exists as it may cause errors.");
+            }
+        }
+
+        #endregion Service Dependencies
     }
 }

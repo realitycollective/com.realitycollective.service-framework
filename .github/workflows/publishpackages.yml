@@ -1,7 +1,9 @@
 name: Release and Tag package for Release
 
 on:
-  workflow_call:
+  push:
+    branches:
+      - 'development'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -10,7 +12,7 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-# Example flow
+# Development releases will package release then update development to a new release
 
 jobs:
   release-Package:
@@ -18,4 +20,5 @@ jobs:
     if: github.ref == 'refs/heads/development'    
     uses: realitycollective/reusableworkflows/.github/workflows/tagrelease.yml@main
     with:
-      build-target: windows  
+      build-target: windows
+    secrets: inherit

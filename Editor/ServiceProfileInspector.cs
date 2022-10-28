@@ -1,14 +1,15 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
-using RealityToolkit.ServiceFramework.Editor.PropertyDrawers;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Definitions.Utilities;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,16 +17,19 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Profiles
+namespace RealityCollective.ServiceFramework.Editor.Profiles
 {
     [CustomEditor(typeof(BaseServiceProfile<>), true, isFallback = true)]
     public class ServiceProfileInspector : BaseProfileInspector
     {
         private static readonly Type AllPlatformsType = typeof(AllPlatforms);
         private static readonly Guid AllPlatformsGuid = AllPlatformsType.GUID;
+        private readonly GUIContent nameContent = new GUIContent("Name", "The referenced name of the service");
+        private readonly GUIContent instancedTypeContent = new GUIContent("Instanced Type", "The concrete type of the service to instantiate");
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
+        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations)};
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
 
@@ -122,12 +126,45 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             RenderConfigurationOptions();
         }
 
-        protected void RenderConfigurationOptions(bool forceExpanded = false)
+        protected virtual void RenderConfigurationOptions(bool forceExpanded = false)
         {
             if (forceExpanded)
             {
                 configurations.isExpanded = true;
             }
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            SerializedProperty iterator = serializedObject.GetIterator();
+            bool enterChildren = true;
+            while (iterator.NextVisible(enterChildren))
+            {
+                //Interesting side effect of letting the Inspector show all children, you get a debug view of all properties
+                if (!ServiceFrameworkPreferences.ShowInspectorDebugView)
+                {
+                    enterChildren = false;
+                }
+
+                if (!excludedProperties.Contains(iterator.name))
+                {
+                    EditorGUILayout.PropertyField(iterator, true);
+                }
+            }
+
+            if (GUI.changed)
+            {
+                serializedObject.ApplyModifiedProperties();
+            }
+
+            DrawServiceModulePropertyDrawer();
+        }
+
+        protected void DrawServiceModulePropertyDrawer()
+        {
+            EditorGUILayout.Space();
+            ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
+            EditorGUILayout.Space();
 
             configurations.isExpanded = EditorGUILayoutExtensions.FoldoutWithBoldLabel(configurations.isExpanded, new GUIContent($"{ServiceConstraint.Name} Configuration Options"));
 
@@ -247,7 +284,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             if (configurationProperty.isExpanded)
             {
-                EditorGUI.PropertyField(labelRect, nameProperty);
+                EditorGUI.PropertyField(labelRect, nameProperty, nameContent);
                 configurationProperty.isExpanded = EditorGUI.Foldout(dropdownRect, configurationProperty.isExpanded, GUIContent.none, true);
 
                 if (!configurationProperty.isExpanded)
@@ -299,7 +336,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
                 EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(typeRect, instancedType);
+                EditorGUI.PropertyField(typeRect, instancedType, instancedTypeContent);
                 systemTypeReference = new SystemType(instancedType);
 
                 if (EditorGUI.EndChangeCheck())
@@ -342,13 +379,12 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             {
                 serializedObject.ApplyModifiedProperties();
 
-                //TODO
-                //if (ServiceManager.Instance.IsInitialized &&
-                //    runtimePlatforms.arraySize > 0 &&
-                //    systemTypeReference.Type != null)
-                //{
-                //    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
-                //}
+                if (ServiceManager.IsActiveAndInitialized &&
+                    runtimePlatforms.arraySize > 0 &&
+                    systemTypeReference.Type != null)
+                {
+                    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
+                }
             }
 
             EditorGUIUtility.wideMode = lastMode;
@@ -386,7 +422,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
 
-            if (ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.IsActiveAndInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
@@ -394,7 +430,7 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
         private void OnElementReorderedCallback(ReorderableList list)
         {
-            if (ServiceManager.Instance.IsInitialized)
+            if (ServiceManager.IsActiveAndInitialized)
             {
                 EditorApplication.delayCall += () => ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
             }
@@ -402,6 +438,9 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
         internal void RenderSystemFields()
         {
+            EditorGUILayout.LabelField($"Platform Target Selection", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"Changing the 'Platform Target Selection' dropdown will automatically change the platform the project is currently targetting.  Automating the 'Switch Targets' selection in the Build Settings Window.", EditorStyles.helpBox);
+
             var currentPlatform = ServiceFrameworkPreferences.CurrentPlatformTarget;
 
             for (var i = 0; i < Platforms.Count; i++)
@@ -450,6 +489,5 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
 
             serializedObject.ApplyModifiedProperties();
         }
-
     }
 }

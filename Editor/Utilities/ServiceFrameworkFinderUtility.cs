@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Extensions;
+using RealityCollective.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Utilities
+namespace RealityCollective.ServiceFramework.Editor.Utilities
 {
     /// <summary>
     /// Interface to implement on a <see cref="ScriptableObject"/> to make it easier to find relative/absolute folder paths using the <see cref="PathFinderUtility"/>.

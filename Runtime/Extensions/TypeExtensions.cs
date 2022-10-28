@@ -1,176 +1,18 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Extensions
+namespace RealityCollective.ServiceFramework.Extensions
 {
     public static class TypeExtensions
     {
-        private static void BuildTypeCache()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                var types = assembly.GetTypes();
-                foreach (var type in types)
-                {
-                    if (type.IsClass && !type.IsAbstract)
-                    {
-                        try
-                        {
-                            var guid = type.GUID;
-                            if (!typeCache.ContainsKey(guid))
-                            {
-                                typeCache.Add(guid, type);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // In some cases at runtime in a player build built using
-                            // IL2CPP accessing Type.GUID throws an unsupported exception crashing the application.
-                            // Tests have shown that catching the exception prevents the app from crashing
-                            // without actually breaking functionality of the application.
-                            // TODO: Why are some types causing these exceptions?
-                            Debug.LogError($"Failed to add {type.Name} to type cache.");
-                            Debug.LogException(ex);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static readonly Dictionary<Guid, Type> typeCache = new Dictionary<Guid, Type>();
-
-        private static Dictionary<Guid, Type> TypeCache
-        {
-            get
-            {
-                if (typeCache.Count == 0)
-                {
-                    BuildTypeCache();
-                }
-
-                return typeCache;
-            }
-        }
-
-        /// <summary>
-        /// Attempts to resolve the type using the class <see cref="Guid"/>.
-        /// </summary>
-        /// <param name="guid">Class <see cref="Guid"/> reference.</param>
-        /// <param name="resolvedType">The resolved <see cref="Type"/>.</param>
-        /// <returns>True if the <see cref="resolvedType"/> was successfully obtained from or added to the <see cref="TypeCache"/>, otherwise false.</returns>
-        public static bool TryResolveType(Guid guid, out Type resolvedType)
-        {
-            resolvedType = null;
-
-            if (guid == Guid.Empty ||
-                !TypeCache.TryGetValue(guid, out resolvedType))
-            {
-                return false;
-            }
-
-            if (resolvedType != null && !resolvedType.IsAbstract)
-            {
-                if (!TypeCache.ContainsKey(guid))
-                {
-                    TypeCache.Add(guid, resolvedType);
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Attempts to resolve the type using a the <see cref="System.Type.AssemblyQualifiedName"/> or <see cref="Type.GUID"/> as <see cref="string"/>.
-        /// </summary>
-        /// <param name="typeRef">The <see cref="Type.GUID"/> or <see cref="System.Type.AssemblyQualifiedName"/> as <see cref="string"/>.</param>
-        /// <param name="resolvedType">The resolved <see cref="Type"/>.</param>
-        /// <returns>True if the <see cref="resolvedType"/> was successfully obtained from or added to the <see cref="TypeCache"/>, otherwise false.</returns>
-        public static bool TryResolveType(string typeRef, out Type resolvedType)
-        {
-            resolvedType = null;
-
-            if (string.IsNullOrEmpty(typeRef)) { return false; }
-
-            if (Guid.TryParse(typeRef, out var guid))
-            {
-                return TryResolveType(guid, out resolvedType);
-            }
-
-            resolvedType = Type.GetType(typeRef);
-
-            if (resolvedType != null)
-            {
-                if (resolvedType.GUID != Guid.Empty)
-                {
-                    return TryResolveType(guid, out resolvedType);
-                }
-
-                if (!resolvedType.IsAbstract)
-                {
-                    Debug.LogWarning($"{resolvedType.Name} is missing a {nameof(GuidAttribute)}. This extension has been upgraded to use System.Type.GUID instead of System.Type.AssemblyQualifiedName");
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Recursively looks for generic type arguments in type hierarchy, starting with the
-        /// root type provided. If no generic type arguments are found on a type, it's base
-        /// type is checked.
-        /// </summary>
-        /// <param name="root">Root type to start looking for generic type arguments at.</param>
-        /// <param name="maxRecursionDepth">The maximum recursion depth until execution gets canceled even if no results found.</param>
-        /// <returns>Found generic type arguments array or null, if none found.</returns>
-        public static Type[] FindTopmostGenericTypeArguments(this Type root, int maxRecursionDepth = 5)
-        {
-            var genericTypeArgs = root?.GenericTypeArguments;
-
-            if (genericTypeArgs != null && genericTypeArgs.Length > 0)
-            {
-                return genericTypeArgs;
-            }
-
-            if (maxRecursionDepth > 0 && root != null)
-            {
-                return FindTopmostGenericTypeArguments(root.BaseType, --maxRecursionDepth);
-            }
-
-            Debug.LogError($"{nameof(FindTopmostGenericTypeArguments)} - Maximum recursion depth reached without finding generic type arguments.");
-            return null;
-        }
-
-        /// <summary>
-        /// Checks if the <see cref="IMixedRealityService"/> has any valid implementations.
-        /// </summary>
-        /// <typeparam name="T">The specific <see cref="IMixedRealityService"/> interface to check.</typeparam>
-        /// <returns>True, if the project contains valid implementations of <see cref="T"/>.</returns>
-        public static bool HasValidImplementations<T>() where T : IService
-        {
-            var concreteTypes = TypeCache
-                .Select(pair => pair.Value)
-                .Where(type => typeof(T).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
-
-            var isValid = concreteTypes.Any();
-
-            if (!isValid)
-            {
-                Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
-            }
-
-            return isValid;
-        }
+        private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
 
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
         {
@@ -192,11 +34,10 @@ namespace RealityToolkit.ServiceFramework.Extensions
                         return returnType;
                     }
 
-                    var types = serviceType.GetInterfaces();
-
-                    for (int i = 0; i < types.Length; i++)
+                    var allInterfaces = FindCandidateInterfaceTypes(serviceType);
+                    foreach (var typeInterface in allInterfaces)
                     {
-                        if (IsValidServiceType(types[i], out returnType))
+                        if (IsValidServiceType(typeInterface, out returnType))
                         {
                             break;
                         }
@@ -209,7 +50,71 @@ namespace RealityToolkit.ServiceFramework.Extensions
             return returnType;
         }
 
-        private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
+        private static HashSet<Type> FindCandidateInterfaceTypes(Type serviceType)
+        {
+            var derivedTypeInterfaces = new HashSet<Type>(serviceType.GetInterfaces());
+
+            if (serviceType.BaseType != null)
+            {
+                var baseInterfaces = new HashSet<Type>(serviceType.BaseType.GetInterfaces());
+
+                // If interfaces on the base type and most derived type match exactly, that means
+                // that both declare the same set of interfaces, if we were to filter the base types out
+                // now, we'd end up having nothing, because 1 - 1 = 0.
+                // In this case we don't worry about filtering the base types because the next filter will
+                // make sure interface inheritance is filtered out.
+                if (!baseInterfaces.SequenceEqual(derivedTypeInterfaces))
+                {
+                    // Remove all the interfaces implemented by the base class, so that now only
+                    // interfaces implemented by the most derived class and interfaces implemented by those
+                    // (interfaces of the most derived class) remain.
+                    derivedTypeInterfaces.ExceptWith(baseInterfaces);
+                }
+            }
+
+            // We want to remove interfaces that are implemented by other interfaces
+            // i.e
+            // public interface A : B {}
+            // public interface B {}
+            // public class Top : A {} → We only want to dump interface A so interface B must be removed
+
+            // Considering class A given above allInterfaces contains A and B now.
+            var toRemove = new HashSet<Type>();
+            foreach (var implementedByMostDerivedClass in derivedTypeInterfaces)
+            {
+                // For interface A this will only contain single element, namely B
+                // For interface B this will an empty array
+                foreach (var implementedByOtherInterfaces in implementedByMostDerivedClass.GetInterfaces())
+                {
+                    toRemove.Add(implementedByOtherInterfaces);
+                }
+            }
+
+            // Finally remove the interfaces that do not belong to the most derived class.
+            derivedTypeInterfaces.ExceptWith(toRemove);
+            return derivedTypeInterfaces;
+        }
+
+        /// <summary>
+        /// Checks if the <see cref="IService"/> has any valid implementations.
+        /// </summary>
+        /// <typeparam name="T">The specific <see cref="IService"/> interface to check.</typeparam>
+        /// <returns>True, if the project contains valid implementations of <typeparamref name="T"/>.</returns>
+        internal static bool HasValidImplementations<T>() where T : IService
+        {
+            var concreteTypes = TypeCache.Current
+                .Select(pair => pair.Value)
+                .Where(type => typeof(T).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
+
+            var isValid = concreteTypes.Any();
+
+            if (!isValid)
+            {
+                UnityEngine.Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
+            }
+
+            return isValid;
+        }
 
         private static bool IsValidServiceType(Type inputType, out Type returnType)
         {
@@ -220,8 +125,7 @@ namespace RealityToolkit.ServiceFramework.Extensions
                 return false;
             }
 
-            if (inputType != typeof(IService) &&
-                inputType != typeof(IServiceDataProvider))
+            if (!ServiceManager.ServiceInterfaceTypes.Contains(inputType))
             {
                 returnType = inputType;
                 return true;

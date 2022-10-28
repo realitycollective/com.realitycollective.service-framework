@@ -1,12 +1,12 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-namespace RealityToolkit.ServiceFramework.Definitions
+namespace RealityCollective.ServiceFramework.Definitions
 {
     public delegate void UpdateMethod(float dt);
 
     /// <summary>
-    /// Proccess description for subscribing to the service manager update loop as a proccess not as a full service or provider.
+    /// Proccess description for subscribing to the service manager update loop as a proccess not as a full service or module.
     /// </summary>
     public class Proccess
     {

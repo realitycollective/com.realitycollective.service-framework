@@ -1,11 +1,15 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Services;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace RealityCollective.ServiceFramework
 {
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
@@ -22,7 +26,7 @@ namespace RealityToolkit.ServiceFramework
         /// <summary>
         /// Check to see if the Service Manager is available and a profile is available to apply
         /// </summary>
-        private bool isServiceManagerConfigured => serviceManagerInstance != null && serviceProvidersProfile != null;
+        private bool isServiceManagerInstanceConfigured => serviceManagerInstance != null && serviceProvidersProfile != null;
 
         /// <summary>
         /// All the additional non-required systems, features, and managers registered with the Service Manager.
@@ -42,11 +46,21 @@ namespace RealityToolkit.ServiceFramework
             serviceManagerInstance = serviceManager;
         }
 
-        internal void InitialiseServiceManager()
+        /// <summary>
+        /// Initializes the <see cref="ServiceManager"/> associcated with this instance.
+        /// </summary>
+        public void InitialiseServiceManager()
         {
             if (serviceManagerInstance == null)
             {
                 serviceManagerInstance = new ServiceManager(this.gameObject, serviceProvidersProfile);
+
+                // If there is a profile and the DontDestroyServiceManagerOnLoad setting is enabled, ensure that the ServiceManager persists between scene changes.
+                var doNotDestroyServiceManagerOnLoad = ServiceProvidersProfile != null ? ServiceProvidersProfile.DoNotDestroyServiceManagerOnLoad : false;
+                if (Application.isPlaying && doNotDestroyServiceManagerOnLoad)
+                {
+                    DontDestroyOnLoad(transform.root);
+                }
             }
         }
 
@@ -54,9 +68,25 @@ namespace RealityToolkit.ServiceFramework
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (isServiceManagerConfigured && 
-                (serviceManagerInstance?.ActiveProfile == null || 
-                serviceManagerInstance?.ActiveProfile != serviceProvidersProfile))
+            var unityEditorRunState = EditorPrefs.GetBool(ServiceFrameworkStatus.UnityEditorRunStateKey);
+            if (unityEditorRunState || !gameObject.activeInHierarchy || !enabled)
+            {
+                return;
+            }
+
+            if (GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+            {
+                Debug.LogError($"There are multiple instances of the {nameof(ServiceManagerInstance)} in the Scene, this is not supported");
+            }
+
+            if (serviceManagerInstance == null)
+            {
+                InitialiseServiceManager();
+            }
+
+            if (isServiceManagerInstanceConfigured &&
+                (serviceManagerInstance.ActiveProfile == null ||
+                serviceManagerInstance.ActiveProfile != serviceProvidersProfile))
             {
                 serviceManagerInstance.ResetProfile(serviceProvidersProfile);
             }
@@ -66,7 +96,7 @@ namespace RealityToolkit.ServiceFramework
 
         private void Awake()
         {
-            if (Application.isPlaying)
+            if (Application.isPlaying && gameObject.activeInHierarchy && enabled)
             {
                 InitialiseServiceManager();
             }
@@ -77,7 +107,7 @@ namespace RealityToolkit.ServiceFramework
 
         private void Start() => serviceManagerInstance?.Start();
 
-        private void Update() =>serviceManagerInstance?.Update();
+        private void Update() => serviceManagerInstance?.Update();
 
         private void LateUpdate() => serviceManagerInstance?.LateUpdate();
 

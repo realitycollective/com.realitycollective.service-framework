@@ -1,0 +1,18 @@
+{
+    "name": "RealityCollective.ServiceFramework.TestData",
+    "rootNamespace": "",
+    "references": [
+        "GUID:13703f41b24bb904cb2305abe6317e3d"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

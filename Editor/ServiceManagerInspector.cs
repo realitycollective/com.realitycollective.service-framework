@@ -1,16 +1,16 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
-using RealityToolkit.ServiceFramework.Editor.Profiles;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Profiles;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Services;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor
+namespace RealityCollective.ServiceFramework.Editor
 {
     [CustomEditor(typeof(ServiceManagerInstance))]
     public class ServiceManagerInspector : UnityEditor.Editor
@@ -21,7 +21,6 @@ namespace RealityToolkit.ServiceFramework.Editor
         private SerializedProperty serviceProvidersProfile;
 
         private int currentPickerWindow = -1;
-        private bool checkChange;
 
         private UnityEditor.Editor profileInspector;
 
@@ -37,7 +36,6 @@ namespace RealityToolkit.ServiceFramework.Editor
         {
             serviceProvidersProfile = serializedObject.FindProperty(nameof(serviceProvidersProfile));
             currentPickerWindow = -1;
-            checkChange = serviceProvidersProfile.objectReferenceValue.IsNull();
             profileInspector.Destroy();
         }
 
@@ -57,11 +55,11 @@ namespace RealityToolkit.ServiceFramework.Editor
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.LabelField(new GUIContent("Reality Toolkit Configuration Profile", "This profile is the configuration for the entire Reality Toolkit."));
+            EditorGUILayout.LabelField(new GUIContent("Service Framework Configuration Profile", "This profile is the configuration for the Service Framework."));
 
             EditorGUILayout.PropertyField(serviceProvidersProfile, GUIContent.none);
 
-            if (serviceProvidersProfile.objectReferenceValue != null)
+            if (serviceProvidersProfile.objectReferenceValue.IsNull())
             {
                 if (GUILayout.Button("Create a new configuration profile"))
                 {
@@ -74,18 +72,18 @@ namespace RealityToolkit.ServiceFramework.Editor
             var commandName = Event.current.commandName;
             var rootProfiles = ScriptableObjectExtensions.GetAllInstances<ServiceProvidersProfile>();
 
-            if (serviceProvidersProfile.objectReferenceValue.IsNull() &&
-                currentPickerWindow == -1 && checkChange)
+            if (rootProfiles.Length == 0 &&
+                currentPickerWindow == -1)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.HelpBox("No service manager configuration profiles found in project.\n\nCreate a new one using the '+' button above.", MessageType.Warning);
+            }
+            // If there is no profile configured, try to automatically find one, if only one found use it, else put up a prompt to select one
+            else if (serviceProvidersProfile.objectReferenceValue.IsNull() &&
+                currentPickerWindow == -1)
             {
                 switch (rootProfiles.Length)
                 {
-                    case 0:
-                        EditorGUIUtility.PingObject(target);
-                        EditorApplication.delayCall += () =>
-                        {
-                            EditorUtility.DisplayDialog("Attention!", "No root profile for the Reality Toolkit was found.\n\nYou'll need to create a new one.", "OK");
-                        };
-                        break;
                     case 1:
                         var rootProfilePath = AssetDatabase.GetAssetPath(rootProfiles[0]);
 
@@ -95,18 +93,20 @@ namespace RealityToolkit.ServiceFramework.Editor
                             var rootProfile = AssetDatabase.LoadAssetAtPath<ServiceProvidersProfile>(rootProfilePath);
                             Debug.Assert(rootProfile != null);
                             serviceProvidersProfile.objectReferenceValue = rootProfile;
-                            EditorGUIUtility.PingObject(rootProfile);
-                            Selection.activeObject = rootProfile;
+                            serializedObject.ApplyModifiedProperties();
                             ServiceManager.Instance?.ResetProfile(rootProfile);
                         };
                         break;
                     default:
-                        currentPickerWindow = GUIUtility.GetControlID(FocusType.Passive);
-                        EditorGUIUtility.ShowObjectPicker<ServiceProvidersProfile>(null, false, string.Empty, currentPickerWindow);
+                        try
+                        {
+                            currentPickerWindow = GUIUtility.GetControlID(FocusType.Passive);
+                            EditorGUIUtility.ShowObjectPicker<ServiceProvidersProfile>(null, false, string.Empty, currentPickerWindow);
+                        }
+                        catch { }
+
                         break;
                 }
-
-                checkChange = false;
             }
 
             if (EditorGUIUtility.GetObjectPickerControlID() == currentPickerWindow)
@@ -121,11 +121,6 @@ namespace RealityToolkit.ServiceFramework.Editor
                         serviceProvidersProfile.objectReferenceValue = EditorGUIUtility.GetObjectPickerObject();
                         currentPickerWindow = -1;
                         changed = true;
-                        EditorApplication.delayCall += () =>
-                        {
-                            EditorGUIUtility.PingObject(serviceProvidersProfile.objectReferenceValue);
-                            Selection.activeObject = serviceProvidersProfile.objectReferenceValue;
-                        };
                         break;
                 }
             }

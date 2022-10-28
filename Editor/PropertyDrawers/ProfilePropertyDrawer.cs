@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Services;
 using System;
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Services;
 using UnityEditor;
 using UnityEngine;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
 
-namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
+namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 {
     [CustomPropertyDrawer(typeof(BaseProfile), true)]
     public class ProfilePropertyDrawer : PropertyDrawer
@@ -80,7 +80,12 @@ namespace RealityToolkit.ServiceFramework.Editor.PropertyDrawers
 
             EditorGUI.BeginChangeCheck();
 
-            var selectedProfile = EditorGUI.ObjectField(objectRect, propertyLabel, profile, profileType, false) as BaseProfile;
+            BaseProfile selectedProfile = null;
+            try
+            {
+                selectedProfile = EditorGUI.ObjectField(objectRect, propertyLabel, profile, profileType, false) as BaseProfile;
+            }
+            catch { }
 
             if (EditorGUI.EndChangeCheck())
             {

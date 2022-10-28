@@ -5,10 +5,10 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using RealityToolkit.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Interfaces;
 #endif
 
-namespace RealityToolkit.ServiceFramework.Definitions.Platforms
+namespace RealityCollective.ServiceFramework.Definitions.Platforms
 {
     /// <summary>
     /// Used by the Service Framework to signal that the feature is only available when the current built target matches the platform target.

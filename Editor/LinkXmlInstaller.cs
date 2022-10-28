@@ -7,7 +7,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 
-namespace RealityToolkit.ServiceFramework.Editor
+namespace RealityCollective.ServiceFramework.Editor
 {
     public class LinkXmlInstaller : IUnityLinkerProcessor
     {
@@ -24,8 +24,7 @@ namespace RealityToolkit.ServiceFramework.Editor
             return Path.GetFullPath(assetPath);
         }
 
-#if UNITY_2021_1_OR_NEWER
-#else
+#if !UNITY_2021_1_OR_NEWER
         void IUnityLinkerProcessor.OnBeforeRun(BuildReport report, UnityLinkerBuildPipelineData data)
         {
         }

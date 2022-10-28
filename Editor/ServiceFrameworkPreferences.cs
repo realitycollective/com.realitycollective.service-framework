@@ -1,22 +1,51 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions.Platforms;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
-using RealityToolkit.ServiceFramework.Interfaces;
-using RealityToolkit.ServiceFramework.Services;
+using RealityCollective.Editor.Utilities;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework
+namespace RealityCollective.ServiceFramework
 {
     public static class ServiceFrameworkPreferences
     {
-        public const string Editor_Menu_Keyword = "Reality Toolkit";
+        public const string Editor_Menu_Keyword = "Reality Collective";
+
+        public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework"; 
+
+        private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
+
+        #region Show Inspector Debug View settings prompt
+        private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Modules in the inspector view.");
+        private static readonly string ShowInspectorDebugViewKey = $"{Application.productName}_RealityCollective_Editor_ShowInspectorDebugView";
+        private static bool showInspectorDebugViewPrefLoaded;
+        private static bool showInspectorDebugView = false;
+
+        /// <summary>
+        /// Should the settings prompt show on startup?
+        /// </summary>
+        public static bool ShowInspectorDebugView
+        {
+            get
+            {
+                if (!showInspectorDebugViewPrefLoaded)
+                {
+                    showInspectorDebugView = EditorPrefs.GetBool(ShowInspectorDebugViewKey, false);
+                    showInspectorDebugViewPrefLoaded = true;
+                }
+
+                return showInspectorDebugView;
+            }
+            set => EditorPrefs.SetBool(ShowInspectorDebugViewKey, showInspectorDebugView = value);
+        }
+        #endregion Show Inspector Debug View settings prompt
 
         #region Current Platform Target
 
@@ -109,5 +138,36 @@ namespace RealityToolkit.ServiceFramework
         }
 
         #endregion Current Platform Target
+
+        [SettingsProvider]
+        private static SettingsProvider Preferences()
+        {
+            return new SettingsProvider("Preferences/ServiceFramework", SettingsScope.User, Package_Keywords)
+            {
+                label = "Service Framework",
+                guiHandler = OnPreferencesGui,
+                keywords = new HashSet<string>(Package_Keywords)
+            };
+        }
+
+        private static void OnPreferencesGui(string searchContext)
+        {
+            var prevLabelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 200f;
+
+            #region Show Inspector Debug View Setting Preference
+
+            EditorGUI.BeginChangeCheck();
+            showInspectorDebugView = EditorGUILayout.Toggle(ShowInspectorDebugViewContent, ShowInspectorDebugView);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                ShowInspectorDebugView = showInspectorDebugView;
+            }
+
+            #endregion  Show Inspector Debug View Setting Preference
+
+            EditorGUIUtility.labelWidth = prevLabelWidth;
+        }
     }
 }

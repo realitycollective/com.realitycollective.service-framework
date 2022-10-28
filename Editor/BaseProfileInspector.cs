@@ -1,15 +1,15 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityToolkit.ServiceFramework.Definitions;
-using RealityToolkit.ServiceFramework.Editor.Extensions;
-using RealityToolkit.ServiceFramework.Editor.Utilities;
-using RealityToolkit.ServiceFramework.Extensions;
+using RealityCollective.Editor.Extensions;
+using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace RealityToolkit.ServiceFramework.Editor.Profiles
+namespace RealityCollective.ServiceFramework.Editor.Profiles
 {
     /// <summary>
     /// Base class for all <see cref="BaseProfile"/> Inspectors to inherit from.
@@ -80,14 +80,12 @@ namespace RealityToolkit.ServiceFramework.Editor.Profiles
             }
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField($"{ThisProfile.name.ToProperCase()} Settings", EditorStyles.boldLabel);
+            ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
 
             if (isOverrideHeader)
             {
                 EditorGUILayout.HelpBox(infoBoxText, MessageType.Info);
             }
-
-            EditorGUILayout.Space();
         }
 
         [MenuItem("CONTEXT/BaseProfile/Create Clone from Profile Values", false, 0)]
