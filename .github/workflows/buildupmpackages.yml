@@ -34,7 +34,7 @@ jobs:
   # Run Unity unit tests defined in the package
   Run-Unit-Tests:
     name: Run Unity Unit Tests
-    needs: [Setup-Unity, Install-Unity-Editor]
+    needs: Setup-Unity
     uses: realitycollective/reusableworkflows/.github/workflows/rununityunittests.yml@main
     with:
       build-target: windows
