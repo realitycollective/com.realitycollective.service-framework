@@ -31,15 +31,6 @@ jobs:
       build-target: windows
       unityversion: ${{ needs.validate-environment.outputs.unityversion }}
 
-  Install-Unity-Editor:
-    if: ${{ needs.Setup-Unity.outputs.unityeditorinstalled }}  == '0'
-    needs: Setup-Unity
-    uses: realitycollective/reusableworkflows/.github/workflows/installunityeditor.yml@main
-    name: Install Unity Editor
-    with:
-      build-target: windows
-      unityversion: ${{ needs.Setup-Unity.outputs.unityeditorversion }}
-
   # Run Unity unit tests defined in the package
   Run-Unit-Tests:
     name: Run Unity Unit Tests
