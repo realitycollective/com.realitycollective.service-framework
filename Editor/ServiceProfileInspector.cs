@@ -335,6 +335,9 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 };
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
+                ICollection<Type> GetExcludedTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateServices;
+                TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedTypeCollection;
+
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(typeRect, instancedType, instancedTypeContent);
                 systemTypeReference = new SystemType(instancedType);

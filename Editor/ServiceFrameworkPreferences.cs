@@ -18,9 +18,15 @@ namespace RealityCollective.ServiceFramework
     {
         public const string Editor_Menu_Keyword = "Reality Collective";
 
-        public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework"; 
+        public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework";
 
-        private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality","ServiceFramework" };
+        private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality", "ServiceFramework" };
+
+        public static readonly HashSet<Type> ExcludedTemplateServices = new HashSet<Type>
+        {
+            typeof(BaseService),
+            typeof(TemplateService)
+        };
 
         #region Show Inspector Debug View settings prompt
         private static readonly GUIContent ShowInspectorDebugViewContent = new GUIContent("Show services debug properties", "Enables the debug view for Service Profiles and Modules in the inspector view.");
