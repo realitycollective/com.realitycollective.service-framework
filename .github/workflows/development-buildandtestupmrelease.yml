@@ -1,9 +1,10 @@
-name: Build UPM
+name: Build and test UPM packages for platforms, all branches except main
 
 on:
   pull_request:
-    branches:
-      - '*'
+    branches-ignore:    
+      - 'main'
+  # Ignore PRs targeting main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -12,21 +13,19 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-# Example flow
-
 jobs:
-  # Check Unity version requird by the package
+  # Check Unity version required by the package
   validate-environment:
     name: Get Unity Version from UPM package
-    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@main
+    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@v2-beta
     with:
-      build-target: windows
+      build-host: ubuntu-latest
 
   # Check Unity Hub and Editor Environment
-  Setup-Unity:
+  Validate-Unity:
     name: Validate Unity Install
     needs: validate-environment
-    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@main
+    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@v2-beta
     with:
       build-target: windows
       unityversion: ${{ needs.validate-environment.outputs.unityversion }}
@@ -34,12 +33,9 @@ jobs:
   # Run Unity unit tests defined in the package
   Run-Unit-Tests:
     name: Run Unity Unit Tests
-    needs: Setup-Unity
-    uses: realitycollective/reusableworkflows/.github/workflows/rununityunittests.yml@main
+    needs: Validate-Unity
+    uses: realitycollective/reusableworkflows/.github/workflows/rununityUPMbuild.yml@v2-beta
     with:
-      build-target: windows
-      unityversion: ${{ needs.Setup-Unity.outputs.unityeditorversion }}
+      unityversion: ${{ needs.Validate-Unity.outputs.unityeditorversion }}
       dependencies: '[{"development": "github.com/realitycollective/com.realitycollective.buildtools.git"},{"development": "github.com/realitycollective/com.realitycollective.utilities.git"}]'
-    secrets:
-      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
-      GIT_PAT: ${{ secrets.GIT_PAT }}      
+    secrets: inherit
