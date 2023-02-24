@@ -1,0 +1,41 @@
+name: Build and test UPM packages for platforms, all branches except main
+
+on:
+  pull_request:
+    branches-ignore:    
+      - 'main'
+  # Ignore PRs targeting main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Check Unity version required by the package
+  validate-environment:
+    name: Get Unity Version from UPM package
+    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@v2-beta
+    with:
+      build-host: ubuntu-latest
+
+  # Check Unity Hub and Editor Environment
+  Validate-Unity:
+    name: Validate Unity Install
+    needs: validate-environment
+    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@v2-beta
+    with:
+      build-target: windows
+      unityversion: ${{ needs.validate-environment.outputs.unityversion }}
+
+  # Run Unity unit tests defined in the package
+  Run-Unit-Tests:
+    name: Run Unity Unit Tests
+    needs: Validate-Unity
+    uses: realitycollective/reusableworkflows/.github/workflows/rununityUPMbuild.yml@v2-beta
+    with:
+      unityversion: ${{ needs.Validate-Unity.outputs.unityeditorversion }}
+      dependencies: '[{"development": "github.com/realitycollective/com.realitycollective.buildtools.git"},{"development": "github.com/realitycollective/com.realitycollective.utilities.git"}]'
+    secrets: inherit
