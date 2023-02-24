@@ -8,10 +8,10 @@ The Service Framework package components for the [Reality Collective](https://re
 
 The Service framework provides a service repository for enabling background services to run efficiently in a Unity project, it features capabilities such as:
 
-* Platform specific operation - choose which platforms your service runs on.
-* Zero Latency from Unity operations - services are fully c# based with no Unity overhead.
-* Ability to host several sub-services (data providers) as part of a service, automatically maintained by a parent service and also platform aware.
-* Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
+- Platform specific operation - choose which platforms your service runs on.
+- Zero Latency from Unity operations - services are fully c# based with no Unity overhead.
+- Ability to host several sub-services (data providers) as part of a service, automatically maintained by a parent service and also platform aware.
+- Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
 
 ## Requirements
 <!-- Fill in list of requirements here -->
@@ -26,7 +26,7 @@ The Service framework provides a service repository for enabling background serv
 
 The simplest way to getting started using the utilities package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
 
-```
+```text
 `openupm add com.realitycollective.service-framework`
 ```
 
@@ -44,11 +44,11 @@ The simplest way to getting started using the utilities package in your project 
 
 ## Use cases
 
-The service framework has been the foundation behind such toolkits as Microsoft's MRTK and open source projects like the XRTK and newly formed Reality Toolkit.  These utilise the framework to enable such use cases as:
+The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed Reality Toolkit.  These utilise the framework to enable such use cases as:
 
-* A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
-* An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
-* A networking service - Utilising multiple endpoints for Lobbys, communication routes and data sharing.
+- A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
+- An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
+- A networking service - Utilising multiple endpoints for Lobbys, communication routes and data sharing.
 
 The possibilities are almost endless.
 
@@ -60,9 +60,9 @@ The possibilities are almost endless.
 
 A fully featured "Service Generator" is included with the Service Framework to get you quickly started, by simply giving a service a name and a namespace with which to run from, the generator will quickly create:
 
-* An interface to identify your service to the Service Framework (all services are identified by their parent interface)
-* A configuration profile - to customise to the needs of your service (optional, delete if not required)
-* The Service Implementation - You service to do with as you wish.
+- An interface to identify your service to the Service Framework (all services are identified by their parent interface)
+- A configuration profile - to customise to the needs of your service (optional, delete if not required)
+- The Service Implementation - You service to do with as you wish.
 
 Additionally, the generator can also create additional data providers (sub services) for your service to maintain, these require you to specify the parent services interface when generating to ensure they are appropriately bound in creation.  Data Providers are automatically started with a parent service provided their platforms match the current operating environment.
 
@@ -111,19 +111,20 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 
 There are some fringe areas of the framework which are still under development and improvement, these include:
 
-* In Unity 2021, the inspector for selecting Service Framework Profiles is a little inconsistent due to 2021 changes.  No issues found in Unity 2020 or below
-* The Lookups for Service Types and Data Providers types include all services and providers the toolkit can see, this includes base types and testing data. These will be filtered out later.
-* We resolved a critical issue where some data types (such as delegates) can cause Unity to crash when used, this is a known Unity issue and has been logged.  Several workarounds have been implemented to handle these edge cases but there could possibly be more on different platforms (because Unity...)
-* More documentation is needed for the Service Framework, including examples (currently the Reality Toolkit is the best set of examples).  These will be improved over time.
+- In Unity 2021, the inspector for selecting Service Framework Profiles is a little inconsistent due to 2021 changes.  No issues found in Unity 2020 or below
+- The Lookups for Service Types and Data Providers types include all services and providers the toolkit can see.
+- We resolved a critical issue where some data types (such as delegates) can cause Unity to crash when used, this is a known Unity issue and has been logged.  Several workarounds have been implemented to handle these edge cases but there could possibly be more on different platforms (because Unity...)
+- More documentation is needed for the Service Framework, including examples (currently the Reality Toolkit is the best set of examples).  These will be improved over time.
 
 ---
 
 ## Related Articles
 
-* [Welcome to the Service Framework](https://service-framework.realitycollective.io/docs/get-started)
-* [Introduction](https://service-framework.realitycollective.io/docs/basics/introduction)
-* [Creating your first service](https://service-framework.realitycollective.io/docs/basics/getting_started)
-* [Roadmap](https://service-framework.realitycollective.io/docs/basics/roadmap)
+- [Welcome to the Service Framework](https://service-framework.realitycollective.io/docs/get-started)
+- [Introduction](https://service-framework.realitycollective.io/docs/basics/introduction)
+- [Creating your first service](https://service-framework.realitycollective.io/docs/basics/getting_started)
+- [Roadmap](https://service-framework.realitycollective.io/docs/basics/roadmap)
+
 ---
 
 ## Raise an Information Request
