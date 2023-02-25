@@ -19,7 +19,7 @@ jobs:
   release_on_merge:
     if: github.event.pull_request.merged == true
     name: Tag and Publish UPM package
-    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       build-type: pre-release

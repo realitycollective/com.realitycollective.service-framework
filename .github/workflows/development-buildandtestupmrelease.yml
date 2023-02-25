@@ -17,7 +17,7 @@ jobs:
   # Check Unity version required by the package
   validate-environment:
     name: Get Unity Version from UPM package
-    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/getunityversionfrompackage.yml@v2
     with:
       build-host: ubuntu-latest
 
@@ -25,7 +25,7 @@ jobs:
   Validate-Unity:
     name: Validate Unity Install
     needs: validate-environment
-    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/validateunityinstall.yml@v2
     with:
       build-target: windows
       unityversion: ${{ needs.validate-environment.outputs.unityversion }}
@@ -34,7 +34,7 @@ jobs:
   Run-Unit-Tests:
     name: Run Unity Unit Tests
     needs: Validate-Unity
-    uses: realitycollective/reusableworkflows/.github/workflows/rununityUPMbuild.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/rununityUPMbuild.yml@v2
     with:
       unityversion: ${{ needs.Validate-Unity.outputs.unityeditorversion }}
       dependencies: '[{"development": "github.com/realitycollective/com.realitycollective.buildtools.git"},{"development": "github.com/realitycollective/com.realitycollective.utilities.git"}]'
