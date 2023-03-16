@@ -93,12 +93,5 @@ namespace RealityCollective.ServiceFramework.Definitions
 
             ServiceConfigurations = newConfigs;
         }
-
-        /// <summary>
-        /// Adds the <paramref name="configuration"/> to the <paramref name="profile"/>.
-        /// </summary>
-        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
-        public static void AddConfiguration(BaseServiceProfile<TService> profile, IServiceConfiguration<TService> configuration)
-         => profile.AddConfiguration(configuration);
     }
 }
