@@ -8,6 +8,7 @@ using RealityCollective.ServiceFramework.Attributes;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Editor.Profiles;
 using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
+using RealityCollective.ServiceFramework.Packages;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,12 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace RealityCollective.ServiceFramework.Editor
+namespace RealityCollective.ServiceFramework.Editor.Packages
 {
-    [CustomEditor(typeof(PackageServiceConfigurationProfile))]
-    public class PackageServiceConfigurationProfileInspector : BaseProfileInspector
+    [CustomEditor(typeof(PackageInstallerProfile))]
+    public class PackageInstallerProfileInspector : BaseProfileInspector
     {
-        private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
+        private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this package.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
 
@@ -86,7 +87,7 @@ namespace RealityCollective.ServiceFramework.Editor
             {
                 if (!(ServiceManager.Instance is null) && ServiceManager.Instance.HasActiveProfile)
                 {
-                    EditorApplication.delayCall += () => PackageInstaller.InstallConfiguration(target as PackageServiceConfigurationProfile, ServiceManager.Instance.ActiveProfile);
+                    EditorApplication.delayCall += () => PackageInstaller.InstallPackage(target as PackageInstallerProfile, ServiceManager.Instance.ActiveProfile);
                 }
                 else
                 {

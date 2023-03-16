@@ -71,6 +71,10 @@ namespace RealityCollective.ServiceFramework.Definitions
             }
         }
 
+        /// <summary>
+        /// Adds the <paramref name="configuration"/> to the profile.
+        /// </summary>
+        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
         public void AddConfiguration(IServiceConfiguration<TService> configuration)
         {
             var newConfigs = new IServiceConfiguration<TService>[ServiceConfigurations.Length + 1];
@@ -89,5 +93,12 @@ namespace RealityCollective.ServiceFramework.Definitions
 
             ServiceConfigurations = newConfigs;
         }
+
+        /// <summary>
+        /// Adds the <paramref name="configuration"/> to the <paramref name="profile"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
+        public static void AddConfiguration(BaseServiceProfile<TService> profile, IServiceConfiguration<TService> configuration)
+         => profile.AddConfiguration(configuration);
     }
 }
