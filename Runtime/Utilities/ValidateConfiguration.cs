@@ -16,7 +16,7 @@ namespace RealityCollective.ServiceFramework
 {
     public static class ValidateConfiguration
     {
-        private const string IgnoreKey = "_MixedRealityToolkit_Editor_IgnoreControllerMappingsPrompts";
+        private const string IgnoreKey = "_RealityToolkit_Editor_IgnorePrompts";
 
         /// <summary>
         /// </summary>
