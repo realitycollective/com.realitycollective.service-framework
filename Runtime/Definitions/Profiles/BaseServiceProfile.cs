@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Interfaces;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
@@ -72,23 +73,14 @@ namespace RealityCollective.ServiceFramework.Definitions
         }
 
         /// <inheritdoc />
-        public void AddConfiguration(IServiceConfiguration<TService> configuration)
+        public void AddConfiguration(IServiceConfiguration<IService> configuration)
         {
-            var newConfigs = new IServiceConfiguration<TService>[ServiceConfigurations.Length + 1];
-
-            for (int i = 0; i < newConfigs.Length; i++)
+            var listConfig = new List<IServiceConfiguration<IService>>
             {
-                if (i != newConfigs.Length - 1)
-                {
-                    newConfigs[i] = ServiceConfigurations[i];
-                }
-                else
-                {
-                    newConfigs[i] = configuration;
-                }
-            }
-
-            ServiceConfigurations = newConfigs;
+                ServiceConfigurations as IServiceConfiguration<IService>,
+                configuration
+            };
+            ServiceConfigurations = listConfig.ToArray() as IServiceConfiguration<TService>[];
         }
     }
 }
