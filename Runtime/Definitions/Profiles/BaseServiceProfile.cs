@@ -71,10 +71,7 @@ namespace RealityCollective.ServiceFramework.Definitions
             }
         }
 
-        /// <summary>
-        /// Adds the <paramref name="configuration"/> to the profile.
-        /// </summary>
-        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
+        /// <inheritdoc />
         public void AddConfiguration(IServiceConfiguration<TService> configuration)
         {
             var newConfigs = new IServiceConfiguration<TService>[ServiceConfigurations.Length + 1];

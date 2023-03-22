@@ -70,7 +70,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                                 {
                                     // Looks like we have all we need. Last thing to ensure is that the service module we want to install, is not already installed.
                                     var parentServiceProvidersProfile = parentServiceConfiguration.Profile as IServiceProfile<IServiceModule>;
-                                    var serviceConfiguration = new ServiceConfiguration<IService>(configurationType, configuration.Name, configuration.Priority, configuration.RuntimePlatforms, configuration.Profile);
+                                    var serviceConfiguration = new ServiceConfiguration<IServiceModule>(configurationType, configuration.Name, configuration.Priority, configuration.RuntimePlatforms, configuration.Profile);
                                     if (parentServiceProvidersProfile.ServiceConfigurations.All(sc => sc.InstancedType.Type != serviceConfiguration.InstancedType.Type))
                                     {
                                         // Bada bing bada boom, install the service module to the parent service profile.
