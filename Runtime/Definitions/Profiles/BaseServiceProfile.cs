@@ -75,16 +75,20 @@ namespace RealityCollective.ServiceFramework.Definitions
         /// <inheritdoc />
         public void AddConfiguration(IServiceConfiguration<IService> configuration)
         {
-            var listConfig = ServiceConfigurations != null && ServiceConfigurations.Length > 0 ? new List<IServiceConfiguration<IService>>
-            {
-                ServiceConfigurations as IServiceConfiguration<IService>,
-                configuration
-            } : new List<IServiceConfiguration<IService>>
-            {
-                configuration
-            };
+            // If no configuration is passed to add, do nothing.
+            if (configuration is null) return;
 
-            ServiceConfigurations = listConfig.ToArray() as IServiceConfiguration<TService>[];
+            var serviceConfigurations = new List<IServiceConfiguration<IService>>();
+
+            // If there are existing Service Configurations, import them.
+            if (ServiceConfigurations != null && ServiceConfigurations.Length > 0)
+            {
+                serviceConfigurations.AddRange(ServiceConfigurations as IServiceConfiguration<IService>[]);
+            }
+
+            serviceConfigurations.Add(configuration);
+
+            ServiceConfigurations = serviceConfigurations.ToArray() as IServiceConfiguration<TService>[];
         }
     }
 }
