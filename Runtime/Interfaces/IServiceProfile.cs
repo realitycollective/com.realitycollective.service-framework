@@ -3,27 +3,11 @@
 
 namespace RealityCollective.ServiceFramework.Interfaces
 {
-    /// <summary>
-    /// Generic interface for loading different types of <see cref="IService"/>.
-    /// </summary>
-    /// <typeparam name="TService">The type of <see cref="IService"/>s configured in the profile.</typeparam>
-    public interface IServiceProfile<out TService> : IServiceProfile where TService : IService
+    public interface IServiceProfile<out TService> where TService : IService
     {
         /// <summary>
         /// The <see cref="IServiceConfiguration"/>s registered for this profile.
         /// </summary>
         IServiceConfiguration<TService>[] ServiceConfigurations { get; }
-    }
-
-    /// <summary>
-    /// The interface definition for a profile that can be populated with service configurations.
-    /// </summary>  
-    public interface IServiceProfile
-    {
-        /// <summary>
-        /// Adds the <paramref name="configuration"/> to the profile.
-        /// </summary>
-        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
-        void AddConfiguration(IServiceConfiguration<IService> configuration);
     }
 }
