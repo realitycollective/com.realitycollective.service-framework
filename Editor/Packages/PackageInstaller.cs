@@ -4,7 +4,6 @@
 using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.ServiceFramework.Packages;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;
@@ -25,6 +24,12 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
 
         public static string ProjectRootPath => Directory.GetParent(Application.dataPath).FullName.BackSlashes();
 
+        /// <summary>
+        /// Registers a <see cref="IPackageModulesInstaller"/> with the package installer. The <see cref="IPackageModulesInstaller"/>
+        /// will be consulted by the packgae installer whenever a <see cref="IServiceModule"/> needs to be installed into its parent service
+        /// profile.
+        /// </summary>
+        /// <param name="modulesInstaller"></param>
         public static void RegisterModulesInstaller(IPackageModulesInstaller modulesInstaller)
             => modulesInstallers.EnsureListItem(modulesInstaller);
 
@@ -90,6 +95,10 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                             EditorUtility.SetDirty(rootProfile);
                             didInstallConfigurations = true;
                             Debug.Log($"Installed {serviceConfiguration.Name}.");
+                        }
+                        else
+                        {
+                            Debug.Log($"Skipped installing {serviceConfiguration.Name}. Already installed.");
                         }
                     }
                 }

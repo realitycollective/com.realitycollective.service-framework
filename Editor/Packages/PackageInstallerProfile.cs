@@ -4,7 +4,7 @@
 using RealityCollective.ServiceFramework.Definitions;
 using UnityEngine;
 
-namespace RealityCollective.ServiceFramework.Packages
+namespace RealityCollective.ServiceFramework.Editor.Packages
 {
     /// <summary>
     /// A package profile defines services and modules that the package has to offer and may be installed

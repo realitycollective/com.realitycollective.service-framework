@@ -45,7 +45,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="destinationPath">The destination path, typically inside the projects "Assets" directory.</param>
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
-        /// <returns>Returns true if the profiles were successfully copied, installed, and added to the <see cref="MixedRealityToolkitRootProfile"/>.</returns>
+        /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
         public static bool TryInstallAssets(string sourcePath, string destinationPath, bool regenerateGuids = false, bool skipDialog = false)
             => TryInstallAssets(new Dictionary<string, string> { { sourcePath, destinationPath } }, regenerateGuids, skipDialog);
 
@@ -55,7 +55,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="installationPaths">The assets paths to be installed. Key is the source path of the assets to be installed. This should typically be from a hidden upm package folder marked with a "~". Value is the destination.</param>
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
-        /// <returns>Returns true if the profiles were successfully copied, installed, and added to the <see cref="MixedRealityToolkitRootProfile"/>.</returns>
+        /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
         public static bool TryInstallAssets(Dictionary<string, string> installationPaths, bool regenerateGuids = false, bool skipDialog = false)
         {
             var anyFail = false;

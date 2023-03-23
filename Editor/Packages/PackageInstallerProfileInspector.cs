@@ -8,7 +8,6 @@ using RealityCollective.ServiceFramework.Attributes;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Editor.Profiles;
 using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
-using RealityCollective.ServiceFramework.Packages;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Collections.Generic;

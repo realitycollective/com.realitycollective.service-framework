@@ -4,7 +4,6 @@
 using RealityCollective.Editor.Extensions;
 using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
-using RealityCollective.ServiceFramework.Packages;
 using RealityCollective.ServiceFramework.Services;
 using System.Collections.Generic;
 using System.Linq;
