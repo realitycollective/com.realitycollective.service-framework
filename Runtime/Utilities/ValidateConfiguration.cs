@@ -100,7 +100,7 @@ namespace RealityCollective.ServiceFramework
                                 {
                                     if (!typesValidated[i])
                                     {
-                                        profile.AddConfiguration(providerDefaultConfiguration[i] as IServiceConfiguration<IService>);
+                                        profile.AddConfiguration(providerDefaultConfiguration[i]);
                                     }
                                 }
 
