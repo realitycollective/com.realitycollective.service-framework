@@ -7,6 +7,7 @@ using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Packages;
 using RealityCollective.ServiceFramework.Services;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,11 +17,25 @@ using UnityEngine;
 namespace RealityCollective.ServiceFramework.Editor.Packages
 {
     /// <summary>
-    /// Installs a service framework plugin package to the active <see cref="ServiceProvidersProfile"/>.
+    /// Installs a service framework plugin package's <see cref="IService"/>s and <see cref="IServiceModule"/>s
+    /// to a <see cref="ServiceProvidersProfile"/>.
     /// </summary>
     public static class PackageInstaller
     {
+        private static Dictionary<Type, IPackageModulesInstaller<IServiceModule>> modulesInstallers = new Dictionary<Type, IPackageModulesInstaller<IServiceModule>>();
+
         public static string ProjectRootPath => Directory.GetParent(Application.dataPath).FullName.BackSlashes();
+
+        public static void RegisterModulesInstaller<TModule>(IPackageModulesInstaller<TModule> modulesInstaller)
+            where TModule : IServiceModule
+        {
+            if (modulesInstallers.TryGetValue(modulesInstaller.SupportedServiceModuleType, out _))
+            {
+                return;
+            }
+
+            modulesInstallers.Add(modulesInstaller.SupportedServiceModuleType, modulesInstaller);
+        }
 
         /// <summary>
         /// Installs the <see cref="IService"/>s contained in the <see cref="PackageInstallerProfile"/> to the provided <see cref="ServiceProvidersProfile"/>.
