@@ -72,23 +72,28 @@ namespace RealityCollective.ServiceFramework.Definitions
             }
         }
 
-        /// <inheritdoc />
-        public void AddConfiguration(IServiceConfiguration<IService> configuration)
+        /// <summary>
+        /// Adds the <paramref name="configuration"/> to the profile.
+        /// </summary>
+        /// <param name="configuration">The <see cref="IServiceConfiguration"/> to add.</param>
+        public void AddConfiguration(IServiceConfiguration<TService> configuration)
         {
             // If no configuration is passed to add, do nothing.
-            if (configuration is null) return;
+            if (configuration is null)
+            {
+                return;
+            }
 
-            var serviceConfigurations = new List<IServiceConfiguration<IService>>();
+            var serviceConfigurations = new List<IServiceConfiguration<TService>>();
 
             // If there are existing Service Configurations, import them.
             if (ServiceConfigurations != null && ServiceConfigurations.Length > 0)
             {
-                serviceConfigurations.AddRange(ServiceConfigurations as IServiceConfiguration<IService>[]);
+                serviceConfigurations.AddRange(ServiceConfigurations);
             }
 
             serviceConfigurations.Add(configuration);
-
-            ServiceConfigurations = serviceConfigurations.ToArray() as IServiceConfiguration<TService>[];
+            ServiceConfigurations = serviceConfigurations.ToArray();
         }
     }
 }
