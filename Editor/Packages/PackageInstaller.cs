@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,20 +21,12 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
     /// </summary>
     public static class PackageInstaller
     {
-        private static Dictionary<Type, IPackageModulesInstaller<IServiceModule>> modulesInstallers = new Dictionary<Type, IPackageModulesInstaller<IServiceModule>>();
+        private static List<IPackageModulesInstaller> modulesInstallers = new List<IPackageModulesInstaller>();
 
         public static string ProjectRootPath => Directory.GetParent(Application.dataPath).FullName.BackSlashes();
 
-        public static void RegisterModulesInstaller<TModule>(IPackageModulesInstaller<TModule> modulesInstaller)
-            where TModule : IServiceModule
-        {
-            if (modulesInstallers.TryGetValue(modulesInstaller.SupportedServiceModuleType, out _))
-            {
-                return;
-            }
-
-            modulesInstallers.Add(modulesInstaller.SupportedServiceModuleType, modulesInstaller);
-        }
+        public static void RegisterModulesInstaller(IPackageModulesInstaller modulesInstaller)
+            => modulesInstallers.EnsureListItem(modulesInstaller);
 
         /// <summary>
         /// Installs the <see cref="IService"/>s contained in the <see cref="PackageInstallerProfile"/> to the provided <see cref="ServiceProvidersProfile"/>.
@@ -54,82 +45,53 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
             var didInstallConfigurations = false;
             foreach (var configuration in packageInstallerProfile.Configurations)
             {
-                var configurationType = configuration.InstancedType.Type;
-
-                if (configurationType == null)
+                try
                 {
-                    Debug.LogError($"Failed to find a valid {nameof(configuration.InstancedType)} for {configuration.Name}!");
-                    continue;
-                }
+                    var configurationType = configuration.InstancedType.Type;
 
-                // If the service to install is a service module, we have to lookup the parent service and profile
-                // for that to work.
-                if (typeof(IServiceModule).IsAssignableFrom(configurationType))
-                {
-                    try
+                    if (configurationType == null)
                     {
-                        // Use the default contructor found on all service modules to identify the parent service type.
-                        var didFindParentService = false;
-                        var constructors = configurationType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
-                        foreach (var constructor in constructors)
-                        {
-                            var parameters = constructor.GetParameters();
-                            if (parameters.Length == 4)
-                            {
-                                var parentTypeParameter = parameters[3];
-                                var parentServiceConfiguration = rootProfile.ServiceConfigurations.FirstOrDefault(sc => parentTypeParameter.ParameterType.IsAssignableFrom(sc.InstancedType.Type));
+                        Debug.LogError($"Failed to find a valid {nameof(configuration.InstancedType)} for {configuration.Name}!");
+                        continue;
+                    }
 
-                                // If we have found the parent service type, we can then lookup its profile because that's where we want to install to.
-                                if (parentServiceConfiguration != null &&
-                                    typeof(IServiceProfile<IServiceModule>).IsAssignableFrom(parentServiceConfiguration.Profile.GetType()))
-                                {
-                                    // Looks like we have all we need. Last thing to ensure is that the service module we want to install, is not already installed.
-                                    var parentServiceProvidersProfile = parentServiceConfiguration.Profile as IServiceProfile<IServiceModule>;
-                                    var serviceConfiguration = new ServiceConfiguration<IServiceModule>(configurationType, configuration.Name, configuration.Priority, configuration.RuntimePlatforms, configuration.Profile);
-                                    if (parentServiceProvidersProfile.ServiceConfigurations.All(sc => sc.InstancedType.Type != serviceConfiguration.InstancedType.Type))
-                                    {
-                                        // Bada bing bada boom, install the service module to the parent service profile.
-                                        parentServiceProvidersProfile.AddConfiguration(serviceConfiguration);
-                                        EditorUtility.SetDirty((UnityEngine.Object)parentServiceProvidersProfile);
-                                        didInstallConfigurations = true;
-                                        didFindParentService = true;
-                                        Debug.Log($"Installed {configuration.Name} to {parentServiceConfiguration.Profile.name}");
-                                    }
-                                }
+                    // If the service to install is a service module, we have to lookup the parent service and profile
+                    // for that to work.
+                    if (typeof(IServiceModule).IsAssignableFrom(configurationType))
+                    {
+                        foreach (var modulesInstaller in modulesInstallers)
+                        {
+                            if (modulesInstaller.Install(configuration))
+                            {
+                                Debug.Log($"Installed {configuration.Name} to {rootProfile.name}");
+                                continue;
                             }
                         }
 
-                        if (!didFindParentService)
-                        {
-                            Debug.LogError("Unable to install configuration as the corresponding parent service was not available or its profile was invalid.");
-                        }
+                        Debug.LogError($"Unable to install {configurationType.Name}. Installation was denied by the installer or no module installer was available for type {configurationType.Name}.");
                     }
-                    catch (Exception ex)
+                    // If the service is a top level service, we only need to make sure that the service is not already installed.
+                    // in the target profile.
+                    else if (typeof(IService).IsAssignableFrom(configurationType))
                     {
-                        Debug.LogException(ex);
-                        Debug.LogError($"Failed to install {configuration.Name} to {rootProfile.name}.");
-                    }
-                }
-                // If the service is a top level service, we only need to make sure that the service is not already installed.
-                else if (typeof(IService).IsAssignableFrom(configurationType))
-                {
-                    try
-                    {
+                        // Setup the configuration.
                         var serviceConfiguration = new ServiceConfiguration<IService>(configurationType, configuration.Name, configuration.Priority, configuration.RuntimePlatforms, configuration.Profile);
+
+                        // Make sure it's not already in the target profile.
                         if (rootProfile.ServiceConfigurations.All(sc => sc.InstancedType.Type != serviceConfiguration.InstancedType.Type))
                         {
-                            // Bada bing bada boom, install the service to the root profile.
+                            // Bada bing bada boom, install the service to the target profile.
                             rootProfile.AddConfiguration(serviceConfiguration);
                             EditorUtility.SetDirty(rootProfile);
                             didInstallConfigurations = true;
                             Debug.Log($"Installed {configuration.Name} to {rootProfile.name}");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Debug.LogException(ex);
-                        Debug.LogError($"Failed to install {configuration.Name} to {rootProfile.name}.");
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                    Debug.LogError($"Failed to install {configuration.Name}.");
                 }
             }
 
