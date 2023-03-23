@@ -45,7 +45,7 @@ namespace RealityCollective.ServiceFramework.Definitions
         /// <param name="instancedType">The concrete type for the <see cref="IService"/>.</param>
         /// <param name="name">The simple, human readable name for the <see cref="IService"/>.</param>
         /// <param name="priority">The priority this <see cref="IService"/> will be initialized in.</param>
-        /// <param name="profile">The <see cref="BaseServiceProfile"/> for <see cref="IService"/>.</param>
+        /// <param name="profile">The <see cref="BaseProfile"/> for <see cref="IService"/>.</param>
         public ServiceConfiguration(SystemType instancedType, string name, uint priority, IReadOnlyList<IPlatform> runtimePlatforms, BaseProfile profile)
         {
             this.instancedType = instancedType;
