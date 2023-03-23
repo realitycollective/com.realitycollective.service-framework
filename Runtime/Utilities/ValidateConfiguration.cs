@@ -16,7 +16,7 @@ namespace RealityCollective.ServiceFramework
 {
     public static class ValidateConfiguration
     {
-        private const string IgnoreKey = "_RealityToolkit_Editor_IgnorePrompts";
+        private const string IgnoreKey = "_ServiceFramework_Editor_IgnorePrompts";
 
         /// <summary>
         /// </summary>
@@ -34,7 +34,7 @@ namespace RealityCollective.ServiceFramework
             }
 #endif //UNITY_EDITOR
 
-            if (ServiceManager.Instance != null && ServiceManager.Instance.HasActiveProfile)
+            if (ServiceManager.IsActiveAndInitialized && ServiceManager.Instance.HasActiveProfile)
             {
                 var errorsFound = false;
 
@@ -76,7 +76,7 @@ namespace RealityCollective.ServiceFramework
                     if (errorsFound)
                     {
                         var errorDescription = new StringBuilder();
-                        errorDescription.AppendLine("The following service modules were not found in the current Reality Toolkit Configuration profile:\n");
+                        errorDescription.AppendLine($"The following service modules were not found in the current {nameof(ServiceProvidersProfile)}:\n");
 
                         for (int i = 0; i < typesValidated.Length; i++)
                         {
