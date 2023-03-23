@@ -87,7 +87,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
             {
                 if (!(ServiceManager.Instance is null) && ServiceManager.Instance.HasActiveProfile)
                 {
-                    EditorApplication.delayCall += () => PackageInstaller.InstallPackage(target as PackageInstallerProfile, ServiceManager.Instance.ActiveProfile);
+                    EditorApplication.delayCall += () => PackageInstaller.InstallPackage(target as PackageInstallerProfile);
                 }
                 else
                 {

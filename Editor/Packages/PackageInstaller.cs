@@ -32,8 +32,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// Installs the <see cref="IService"/>s contained in the <see cref="PackageInstallerProfile"/> to the provided <see cref="ServiceProvidersProfile"/>.
         /// </summary>
         /// <param name="packageInstallerProfile">The <see cref="PackageInstallerProfile"/> to install.</param>
-        /// <param name="rootProfile">The root profile to install the <paramref name="packageInstallerProfile"/> to.</param>
-        public static void InstallPackage(PackageInstallerProfile packageInstallerProfile, ServiceProvidersProfile rootProfile)
+        public static void InstallPackage(PackageInstallerProfile packageInstallerProfile)
         {
             if (ServiceManager.Instance == null ||
                 ServiceManager.Instance.ActiveProfile.IsNull())
@@ -42,6 +41,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                 return;
             }
 
+            var rootProfile = ServiceManager.Instance.ActiveProfile;
             var didInstallConfigurations = false;
             foreach (var configuration in packageInstallerProfile.Configurations)
             {
@@ -55,20 +55,25 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                         continue;
                     }
 
-                    // If the service to install is a service module, we have to lookup the parent service and profile
-                    // for that to work.
+                    // If the service to install is a service module, we have to lookup the service module installer
+                    // for that specific module type and ask it to install the module.
                     if (typeof(IServiceModule).IsAssignableFrom(configurationType))
                     {
+                        // Check with all registered module installers, whether the module is a fit.
+                        var didInstallServiceModule = false;
                         foreach (var modulesInstaller in modulesInstallers)
                         {
-                            if (modulesInstaller.Install(configuration))
+                            didInstallServiceModule = modulesInstaller.Install(configuration);
+                            if (didInstallServiceModule)
                             {
-                                Debug.Log($"Installed {configuration.Name} to {rootProfile.name}");
-                                continue;
+                                break;
                             }
                         }
 
-                        Debug.LogError($"Unable to install {configurationType.Name}. Installation was denied by the installer or no module installer was available for type {configurationType.Name}.");
+                        if (!didInstallServiceModule)
+                        {
+                            Debug.LogError($"Unable to install {configurationType.Name}. Installation was denied by the installer or no module installer was available for type {configurationType.Name}.");
+                        }
                     }
                     // If the service is a top level service, we only need to make sure that the service is not already installed.
                     // in the target profile.
@@ -84,7 +89,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                             rootProfile.AddConfiguration(serviceConfiguration);
                             EditorUtility.SetDirty(rootProfile);
                             didInstallConfigurations = true;
-                            Debug.Log($"Installed {configuration.Name} to {rootProfile.name}");
+                            Debug.Log($"Installed {serviceConfiguration.Name}.");
                         }
                     }
                 }

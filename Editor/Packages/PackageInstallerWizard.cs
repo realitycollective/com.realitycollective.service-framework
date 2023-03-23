@@ -77,7 +77,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                     "Yes!",
                     "later"))
                 {
-                    PackageInstaller.InstallPackage(packageInstallerProfile, rootProfile);
+                    PackageInstaller.InstallPackage(packageInstallerProfile);
                 }
             }
         }
