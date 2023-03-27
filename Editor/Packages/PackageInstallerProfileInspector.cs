@@ -84,7 +84,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
 
             if (GUILayout.Button("Install Package Service Configuration"))
             {
-                if (!(ServiceManager.Instance is null) && ServiceManager.Instance.HasActiveProfile)
+                if (ServiceManager.IsActiveAndInitialized && ServiceManager.Instance.HasActiveProfile)
                 {
                     EditorApplication.delayCall += () => PackageInstaller.InstallPackage(target as PackageInstallerProfile);
                 }
