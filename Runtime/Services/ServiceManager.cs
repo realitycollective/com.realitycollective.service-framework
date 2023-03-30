@@ -1486,8 +1486,10 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
+            var destroyingActiveServices = activeServices.ToArray();
+
             // Destroy all service
-            foreach (var service in activeServices)
+            foreach (var service in destroyingActiveServices)
             {
                 try
                 {
@@ -1500,7 +1502,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Dispose all service
-            foreach (var service in activeServices)
+            foreach (var service in destroyingActiveServices)
             {
                 try
                 {
