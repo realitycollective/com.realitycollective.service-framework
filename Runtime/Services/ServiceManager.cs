@@ -202,7 +202,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// The <see cref="ServiceManager"/> <see cref="Instance"/> has finished initialzing.
         /// </summary>
-        public static event Action Initialized;
+        public static event Action<ServiceManager> Initialized;
 
         /// <summary>
         /// Constructor
@@ -258,7 +258,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             InitializeInstance(profile);
-            Initialized?.Invoke();
+            Initialized?.Invoke(Instance);
         }
 
         private void InitializeInstance(ServiceProvidersProfile profile)
