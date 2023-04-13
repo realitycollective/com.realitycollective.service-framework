@@ -345,13 +345,17 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         public void InitializeServiceManager() => InitializeServiceLocator();
 
-        public static async Task WaitUntilInitializedAsync()
+        /// <summary>
+        /// Waits for the <see cref="ServiceManager"/> to initialize until
+        /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
+        /// </summary>
+        /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
+        public static async Task WaitUntilInitializedAsync(float timeout = 10f)
         {
-            var timeout = 0f;
-            while (!IsActiveAndInitialized && timeout <= 10f)
+            while (!IsActiveAndInitialized && timeout > 0f)
             {
                 await Task.Yield();
-                timeout += Time.deltaTime;
+                timeout -= Time.deltaTime;
             }
         }
 
