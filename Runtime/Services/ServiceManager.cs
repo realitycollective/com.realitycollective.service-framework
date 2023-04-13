@@ -345,6 +345,16 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         public void InitializeServiceManager() => InitializeServiceLocator();
 
+        public static async Task WaitUntilInitializedAsync()
+        {
+            var timeout = 0f;
+            while (!IsActiveAndInitialized && timeout <= 10f)
+            {
+                await Task.Yield();
+                timeout += Time.deltaTime;
+            }
+        }
+
         /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
         /// This ensures all services can reference each other once started.
