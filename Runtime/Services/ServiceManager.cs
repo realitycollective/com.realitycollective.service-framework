@@ -200,6 +200,11 @@ namespace RealityCollective.ServiceFramework.Services
         private readonly object InitializedLock = new object();
 
         /// <summary>
+        /// The <see cref="ServiceManager"/> <see cref="Instance"/> has finished initialzing.
+        /// </summary>
+        public static event Action Initialized;
+
+        /// <summary>
         /// Constructor
         /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="ServiceManagerInstance"/> will be created for you.
         /// </summary>
@@ -253,6 +258,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             InitializeInstance(profile);
+            Initialized?.Invoke();
         }
 
         private void InitializeInstance(ServiceProvidersProfile profile)
@@ -355,19 +361,6 @@ namespace RealityCollective.ServiceFramework.Services
                 await Task.Yield();
                 timeout -= Time.deltaTime;
             }
-        }
-
-        /// <summary>
-        /// Waits for the <see cref="ServiceManager"/> to initialize until
-        /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
-        /// </summary>
-        /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
-        /// <param name="onComplete">Completion callback run when <see cref="IsActiveAndInitialized"/>.</param>
-        [Obsolete("Use " + nameof(WaitUntilInitializedAsync) + " instead.")]
-        public static async void EnsureIsInitialized(float timeout, Action onComplete)
-        {
-            await WaitUntilInitializedAsync(timeout);
-            onComplete?.Invoke();
         }
 
         /// <summary>
