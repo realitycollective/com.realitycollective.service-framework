@@ -184,11 +184,9 @@ namespace RealityCollective.ServiceFramework.Services
         #region Instance Management
 
         /// <summary>
-        /// Returns the Singleton instance of the classes type.
+        /// Returns the singleton instance of the <see cref="ServiceManager"/>.
         /// </summary>
-        public static ServiceManager Instance => instance;
-
-        private static ServiceManager instance;
+        public static ServiceManager Instance { get; private set; }
 
         /// <summary>
         /// Gets whether there is an active <see cref="Instance"/> of the <see cref="ServiceManager"/>
@@ -230,7 +228,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         public void Initialize(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
         {
-            instance = null;
+            Instance = null;
             serviceManagerInstanceGuid = Guid.NewGuid();
 
             ServiceManagerInstance serviceManagerInstance;
@@ -265,12 +263,12 @@ namespace RealityCollective.ServiceFramework.Services
                     ServiceManager.Instance.ServiceManagerInstanceGuid != this.serviceManagerInstanceGuid)
                 {
                     Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
-                    Debug.Log($"Instance [{instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
+                    Debug.Log($"Instance [{Instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
                 }
 
                 if (IsInitialized) { return; }
 
-                instance = this;
+                Instance = this;
                 activeProfile = profile;
 
                 Application.quitting += () =>
@@ -328,14 +326,14 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Returns whether the instance has been initialized or not.
         /// </summary>
-        public bool IsInitialized => instance != null && serviceManagerInstanceGameObject.IsNotNull();
+        public bool IsInitialized => Instance != null && serviceManagerInstanceGameObject.IsNotNull();
 
         /// <summary>
         /// function to determine if the <see cref="ServiceManager"/> class has been initialized or not.
         /// </summary>
         public bool ConfirmInitialized()
         {
-            var access = instance;
+            var access = Instance;
             Debug.Assert(IsInitialized.Equals(access != null));
             return IsInitialized;
         }
@@ -357,6 +355,19 @@ namespace RealityCollective.ServiceFramework.Services
                 await Task.Yield();
                 timeout -= Time.deltaTime;
             }
+        }
+
+        /// <summary>
+        /// Waits for the <see cref="ServiceManager"/> to initialize until
+        /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
+        /// </summary>
+        /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
+        /// <param name="onComplete">Completion callback run when <see cref="IsActiveAndInitialized"/>.</param>
+        [Obsolete("Use " + nameof(WaitUntilInitializedAsync) + " instead.")]
+        public static async void EnsureIsInitialized(float timeout, Action onComplete)
+        {
+            await WaitUntilInitializedAsync(timeout);
+            onComplete?.Invoke();
         }
 
         /// <summary>
@@ -1918,9 +1929,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         private void OnDispose(bool finalizing)
         {
-            if (instance == this)
+            if (Instance == this)
             {
-                instance = null;
+                Instance = null;
             }
         }
 
