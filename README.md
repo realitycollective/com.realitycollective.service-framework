@@ -1,8 +1,11 @@
 # Service Framework
 
-The Service Framework package components for the [Reality Collective](https://realityCollective.io). This package an extensible service framework to build highly performant components for your Unity projects.
+The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
 
 [![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
+[![Discord](https://img.shields.io/discord/597064584980987924.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/hF7TtRCFmB)
+[![Publish development branch on Merge](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/development-publish.yml/badge.svg)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/development-publish.yml)
+[![Build and test UPM packages for platforms, all branches except main](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/development-buildandtestupmrelease.yml/badge.svg)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/development-buildandtestupmrelease.yml)
 
 ## Overview
 
@@ -10,41 +13,25 @@ The Service framework provides a service repository for enabling background serv
 
 - Platform specific operation - choose which platforms your service runs on.
 - Zero Latency from Unity operations - services are fully c# based with no Unity overhead.
-- Ability to host several sub-services (data providers) as part of a service, automatically maintained by a parent service and also platform aware.
+- Ability to host several sub-services (service modules) as part of a service, automatically maintained by a parent service and also platform aware.
 - Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
 
 ## Requirements
-<!-- Fill in list of requirements here -->
 
-- [Unity 2020.3 and above](https://unity.com/)
+- [Unity 2020.3 or above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
 ### OpenUPM
-<!-- Check openUPM links and details -->
-
-[![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
 
 The simplest way to getting started using the utilities package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
 
 ```text
-`openupm add com.realitycollective.service-framework`
+    openupm add com.realitycollective.service-framework
 ```
-
-> For more details on using [OpenUPM CLI, check the docs here](https://github.com/openupm/openupm-cli#installation).
-
-## Build Status
-<!-- Check build status links and details -->
-
-| branch | build status |
-| --- | --- |
-| main | [![main](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml/badge.svg?branch=main)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml) |
-| development | [![development](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml/badge.svg?branch=development)](https://github.com/realitycollective/com.realitycollective.service-framework/actions/workflows/buildupmpackages.yml) |
-
----
 
 ## Use cases
 
-The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed Reality Toolkit.  These utilise the framework to enable such use cases as:
+The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed [Reality Toolkit](https://www.realitytoolkit.io/).  These utilise the framework to enable such use cases as:
 
 - A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
 - An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
@@ -70,7 +57,7 @@ Additionally, the generator can also create additional data providers (sub servi
 
 With your service created, it will need to be registered with an active "Service Manager" in a scene, this can either use the provided "Service Manager Instance" component on a GameObject, or uitilised as a private property on a class of your own.
 
-> Note, at this time, only a single Service Framework Manager can be active in the scene at a time.  If you are intending to use the Framework with toolkit's such as the Reality Toolkit which already has an instance of the Service Framework embedded, then you will need to use the toolkit's endpoints to communicate with the Service Framework.
+> Note, at this time, only a single Service Framework Manager can be active in the scene at a time.
 
 Simply create an empty GameObject and add the **ServiceManagerInstance** component to it to begin.  From there it is simply a matter of creating a Profile for the Service Manager and then adding your services to it.
 
@@ -94,27 +81,9 @@ Alternatively, there are also TryGet versions of the Service endpoints which ret
 
 ---
 
-## Final notes
-
-The Service Framework is robustly tested and confirmed to be working in most versions of Unity, including Unity 2021 LTS.  However, it is still classed as a preview while the rest of the Reality Toolkit is going through active development.
-It is being used in production solutions by the Reality Collective team, but it will be up to you as a developer how you choose to consume and operate the framework in your solutions.
-
----
-
 ## Feedback
 
-Please feel free to provide feedback via the [Reality Toolkit dev channel here](https://github.com/realitycollective/realitytoolkit.dev/issues), all feedback. suggestions and fixes are welcome.
-
----
-
-## Known Issues
-
-There are some fringe areas of the framework which are still under development and improvement, these include:
-
-- In Unity 2021, the inspector for selecting Service Framework Profiles is a little inconsistent due to 2021 changes.  No issues found in Unity 2020 or below
-- The Lookups for Service Types and Data Providers types include all services and providers the toolkit can see.
-- We resolved a critical issue where some data types (such as delegates) can cause Unity to crash when used, this is a known Unity issue and has been logged.  Several workarounds have been implemented to handle these edge cases but there could possibly be more on different platforms (because Unity...)
-- More documentation is needed for the Service Framework, including examples (currently the Reality Toolkit is the best set of examples).  These will be improved over time.
+Please feel free to provide feedback via the [Reality Toolkit dev channel here](https://github.com/realitycollective/com.realitycollective.service-framework/issues), all feedback. suggestions and fixes are welcome.
 
 ---
 
@@ -129,6 +98,6 @@ There are some fringe areas of the framework which are still under development a
 
 ## Raise an Information Request
 
-If there is anything not mentioned in this document or you simply want to know more, raise an [RFI (Request for Information) request here](https://github.com/realitycollective/realitytoolkit.dev/issues/new?assignees=&labels=question&template=request_for_information.md&title=).
+If there is anything not mentioned in this document or you simply want to know more, raise an [RFI (Request for Information) request here](https://github.com/realitycollective/com.realitycollective.service-framework/issues/new?assignees=&labels=question&template=request_for_information.md).
 
 Or simply [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you
