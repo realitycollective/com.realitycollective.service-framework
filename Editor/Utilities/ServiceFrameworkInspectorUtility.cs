@@ -174,7 +174,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <summary>
         /// Render the Mixed Reality Toolkit Logo.
         /// </summary>
-        public static void RenderMixedRealityToolkitLogo()
+        public static void RenderLogo()
         {
             RenderInspectorHeader(EditorGUIUtility.isProSkin ? DarkThemeLogo : LightThemeLogo);
         }

@@ -66,7 +66,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             if (image.IsNull())
             {
-                ServiceFrameworkInspectorUtility.RenderMixedRealityToolkitLogo();
+                ServiceFrameworkInspectorUtility.RenderLogo();
             }
             else
             {
