@@ -51,7 +51,7 @@ namespace RealityCollective.ServiceFramework.Editor
 
         public override void OnInspectorGUI()
         {
-            ServiceFrameworkInspectorUtility.RenderMixedRealityToolkitLogo();
+            ServiceFrameworkInspectorUtility.RenderLogo();
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();

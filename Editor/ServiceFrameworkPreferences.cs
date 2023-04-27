@@ -20,7 +20,7 @@ namespace RealityCollective.ServiceFramework
 
         public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework";
 
-        private static readonly string[] Package_Keywords = { "RealityCollective", "Mixed", "Reality", "ServiceFramework" };
+        private static readonly string[] Package_Keywords = { "Reality", "Collective", "Mixed", "Reality", "Service", "Framework" };
 
         public static readonly HashSet<Type> ExcludedTemplateServices = new HashSet<Type>
         {
@@ -60,7 +60,7 @@ namespace RealityCollective.ServiceFramework
         private static IPlatform currentPlatformTarget = null;
 
         /// <summary>
-        /// The current <see cref="IMixedRealityPlatform"/> target.
+        /// The current <see cref="IPlatform"/> target.
         /// </summary>
         public static IPlatform CurrentPlatformTarget
         {

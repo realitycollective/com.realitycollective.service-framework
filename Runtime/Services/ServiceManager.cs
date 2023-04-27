@@ -184,11 +184,9 @@ namespace RealityCollective.ServiceFramework.Services
         #region Instance Management
 
         /// <summary>
-        /// Returns the Singleton instance of the classes type.
+        /// Returns the singleton instance of the <see cref="ServiceManager"/>.
         /// </summary>
-        public static ServiceManager Instance => instance;
-
-        private static ServiceManager instance;
+        public static ServiceManager Instance { get; private set; }
 
         /// <summary>
         /// Gets whether there is an active <see cref="Instance"/> of the <see cref="ServiceManager"/>
@@ -200,6 +198,11 @@ namespace RealityCollective.ServiceFramework.Services
         /// Lock property for the Service Manager to prevent reinitialization
         /// </summary>
         private readonly object InitializedLock = new object();
+
+        /// <summary>
+        /// The <see cref="ServiceManager"/> <see cref="Instance"/> has finished initialzing.
+        /// </summary>
+        public static event Action<ServiceManager> Initialized;
 
         /// <summary>
         /// Constructor
@@ -230,7 +233,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         public void Initialize(GameObject instanceGameObject = null, ServiceProvidersProfile profile = null)
         {
-            instance = null;
+            Instance = null;
             serviceManagerInstanceGuid = Guid.NewGuid();
 
             ServiceManagerInstance serviceManagerInstance;
@@ -255,6 +258,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             InitializeInstance(profile);
+            Initialized?.Invoke(Instance);
         }
 
         private void InitializeInstance(ServiceProvidersProfile profile)
@@ -265,12 +269,12 @@ namespace RealityCollective.ServiceFramework.Services
                     ServiceManager.Instance.ServiceManagerInstanceGuid != this.serviceManagerInstanceGuid)
                 {
                     Debug.LogWarning($"There are multiple instances of the {nameof(ServiceManager)} in this project, is this expected?");
-                    Debug.Log($"Instance [{instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
+                    Debug.Log($"Instance [{Instance.ServiceManagerInstanceGuid}] - This [{this.ServiceManagerInstanceGuid}]");
                 }
 
                 if (IsInitialized) { return; }
 
-                instance = this;
+                Instance = this;
                 activeProfile = profile;
 
                 Application.quitting += () =>
@@ -328,14 +332,14 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Returns whether the instance has been initialized or not.
         /// </summary>
-        public bool IsInitialized => instance != null && serviceManagerInstanceGameObject.IsNotNull();
+        public bool IsInitialized => Instance != null && serviceManagerInstanceGameObject.IsNotNull();
 
         /// <summary>
         /// function to determine if the <see cref="ServiceManager"/> class has been initialized or not.
         /// </summary>
         public bool ConfirmInitialized()
         {
-            var access = instance;
+            var access = Instance;
             Debug.Assert(IsInitialized.Equals(access != null));
             return IsInitialized;
         }
@@ -344,6 +348,20 @@ namespace RealityCollective.ServiceFramework.Services
         /// Initialize the Service Framework configured services.
         /// </summary>
         public void InitializeServiceManager() => InitializeServiceLocator();
+
+        /// <summary>
+        /// Waits for the <see cref="ServiceManager"/> to initialize until
+        /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
+        /// </summary>
+        /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
+        public static async Task WaitUntilInitializedAsync(float timeout = 10f)
+        {
+            while (!IsActiveAndInitialized && timeout > 0f)
+            {
+                await Task.Yield();
+                timeout -= Time.deltaTime;
+            }
+        }
 
         /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
@@ -381,7 +399,7 @@ namespace RealityCollective.ServiceFramework.Services
 
             Debug.Assert(ActiveServices.Count == 0);
 
-            ClearSystemCache();
+            ClearServiceCache();
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
@@ -482,7 +500,7 @@ namespace RealityCollective.ServiceFramework.Services
         internal void OnDestroy()
         {
             DestroyAllServices();
-            ClearSystemCache();
+            ClearServiceCache();
             Dispose();
         }
 
@@ -493,9 +511,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var system in activeServices)
+            foreach (var service in activeServices)
             {
-                system.Value.OnApplicationFocus(focus);
+                service.Value.OnApplicationFocus(focus);
             }
         }
 
@@ -506,9 +524,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var system in activeServices)
+            foreach (var service in activeServices)
             {
-                system.Value.OnApplicationPause(pause);
+                service.Value.OnApplicationPause(pause);
             }
         }
 
@@ -767,8 +785,7 @@ namespace RealityCollective.ServiceFramework.Services
                 return false;
             }
 
-            // If we have registered at least one event system, we're gonna need the Unity UI event
-            // system to be available.
+            // If we have registered at least one event Service, we're gonna need the Unity UI event Service to be available.
             if (typeof(IEventService).IsAssignableFrom(interfaceType))
             {
                 EnsureEventSystemSetup();
@@ -817,7 +834,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Remove services from the Service Manager active service registry for a given type and name
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be removed.  E.G. InputSystem, BoundarySystem</param>
+        /// <param name="interfaceType">The interface type for the Service to be removed.  E.G. InputService, BoundaryService</param>
         /// <param name="serviceName">The name of the service to be removed. (Only for runtime services) </param>
         private bool TryUnregisterService<T>(Type interfaceType, string serviceName) where T : IService
         {
@@ -916,12 +933,12 @@ namespace RealityCollective.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetServiceAsync<T>(int timeout = 10) where T : IService
-            => await GetService<T>().WaitUntil(system => system != null, timeout);
+            => await GetService<T>().WaitUntil(service => service != null, timeout);
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by type.
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.</param>
         /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public IService GetService(Type interfaceType, bool showLogs = true)
@@ -930,7 +947,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
@@ -947,7 +964,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/>.
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="showLogs">Should the logs show when services cannot be found?</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
@@ -1043,7 +1060,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve all services from the active service registry for a given type and an optional name
         /// </summary>
-        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be retrieved.  E.G. IStorageService.</typeparam>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the Service to be retrieved.  E.G. IStorageService.</typeparam>
         /// <returns>An array of services that meet the search criteria</returns>
         public List<T> GetServices<T>() where T : IService
         {
@@ -1053,7 +1070,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve all services from the active service registry for a given type and an optional name
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.  E.G. Storage Service.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.  E.G. Storage Service.</param>
         /// <returns>An array of services that meet the search criteria</returns>
         public List<T> GetServices<T>(Type interfaceType) where T : IService
         {
@@ -1063,7 +1080,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve all services from the active service registry for a given type and name
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.  Storage Service.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.  Storage Service.</param>
         /// <param name="serviceName">Name of the specific service</param>
         /// <returns>An array of services that meet the search criteria</returns>
         public List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
@@ -1078,7 +1095,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve all services from the active service registry for a given type and name
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be retrieved.  Storage Service.</param>
+        /// <param name="interfaceType">The interface type for the Service to be retrieved.  Storage Service.</param>
         /// <param name="serviceName">Name of the specific service</param>
         /// <returns>An array of services that meet the search criteria</returns>
         public bool TryGetServices<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
@@ -1145,12 +1162,12 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Retrieve a cached refernece of an <see cref="IService"/> from the <see cref="ActiveSystems"/>.
+        /// Retrieve a cached refernece of an <see cref="IService"/> from the <see cref="ActiveServices"/>.
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
+        /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         /// <remarks>
-        /// Internal function used for high performant systems or components, not to be overused.
+        /// Internal function used for high performant services or components, not to be overused.
         /// </remarks>
         public T GetServiceCached<T>() where T : IService
         {
@@ -1189,7 +1206,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
+        /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetSystemCachedAsync<T>(int timeout = 10) where T : IService
@@ -1198,8 +1215,8 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be retrieved.</typeparam>
-        /// <param name="service">The instance of the system class that is registered.</param>
+        /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
+        /// <param name="service">The instance of the Service class that is registered.</param>
         /// <returns>Returns true if the <see cref="IMiIServiceedRealitySystem"/> was found, otherwise false.</returns>
         public bool TryGetServiceCached<T>(out T service) where T : IService
         {
@@ -1214,7 +1231,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Enables a services in the active service registry for a given name.
         /// </summary>
-        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
         /// <param name="serviceName"></param>
         public void EnableService<T>(string serviceName) where T : IService
         {
@@ -1224,7 +1241,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Enable services in the active service registry for a given type
         /// </summary>
-        /// <typeparam name="T">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <typeparam name="T">The <see cref="IService"/> interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
         public void EnableService<T>() where T : IService
         {
             EnableAllServicesByTypeAndName(typeof(T), string.Empty);
@@ -1233,7 +1250,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Enable all services in the active service registry for a given type and name
         /// </summary>
-        /// <param name="interfaceType">The <see cref="IService"/> interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</param>
+        /// <param name="interfaceType">The <see cref="IService"/> interface type for the Service to be enabled.  E.G. InputService, BoundaryService</param>
         /// <param name="serviceName">Name of the specific service</param>
         private void EnableAllServicesByTypeAndName(Type interfaceType, string serviceName)
         {
@@ -1265,7 +1282,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Disable services in the active service registry for a given type
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <typeparam name="T">The interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
         public void DisableService<T>() where T : IService
         {
             DisableAllServicesByTypeAndName(typeof(T), string.Empty);
@@ -1274,7 +1291,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// DDisable services in the active service registry for a given name.
         /// </summary>
-        /// <typeparam name="T">The interface type for the system to be enabled.  E.G. InputSystem, BoundarySystem</typeparam>
+        /// <typeparam name="T">The interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
         /// <param name="serviceName">Name of the specific service</param>
         public void DisableService<T>(string serviceName) where T : IService
         {
@@ -1284,7 +1301,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <summary>
         /// Disable all services in the Mixed Reality Toolkit active service registry for a given type and name
         /// </summary>
-        /// <param name="interfaceType">The interface type for the system to be disabled.  E.G. InputSystem, BoundarySystem</param>
+        /// <param name="interfaceType">The interface type for the Service to be disabled.  E.G. InputService, BoundaryService</param>
         /// <param name="serviceName">Name of the specific service</param>
         private void DisableAllServicesByTypeAndName(Type interfaceType, string serviceName)
         {
@@ -1486,8 +1503,10 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
+            var destroyingActiveServices = activeServices.ToArray();
+
             // Destroy all service
-            foreach (var service in activeServices)
+            foreach (var service in destroyingActiveServices)
             {
                 try
                 {
@@ -1500,7 +1519,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Dispose all service
-            foreach (var service in activeServices)
+            foreach (var service in destroyingActiveServices)
             {
                 try
                 {
@@ -1611,7 +1630,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         #region Service Utilities
 
-        private string[] ignoredNamespaces = { "System.IDisposable",
+        private string[] ignoredNamespaces = { "Service.IDisposable",
                                                       "RealityCollective.ServiceFramework.Interfaces.IService",
                                                       "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
 
@@ -1712,11 +1731,11 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Try to get the <see cref="TProfile"/> of the <see cref="TSystem"/>
+        /// Try to get the <see cref="TProfile"/> of the <see cref="TService"/>
         /// </summary>
         /// <param name="profile">The profile instance.</param>
         /// <param name="rootProfile">Optional root profile reference.</param>
-        /// <returns>True if a <see cref="TSystem"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
+        /// <returns>True if a <see cref="TService"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
         public bool TryGetServiceProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
             where TService : IService
             where TProfile : BaseProfile
@@ -1745,7 +1764,7 @@ namespace RealityCollective.ServiceFramework.Services
         private readonly Dictionary<Type, IService> serviceCache = new Dictionary<Type, IService>();
         private readonly HashSet<Type> searchedServiceTypes = new HashSet<Type>();
 
-        private void ClearSystemCache()
+        private void ClearServiceCache()
         {
             serviceCache.Clear();
             searchedServiceTypes.Clear();
@@ -1902,9 +1921,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         private void OnDispose(bool finalizing)
         {
-            if (instance == this)
+            if (Instance == this)
             {
-                instance = null;
+                Instance = null;
             }
         }
 

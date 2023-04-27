@@ -12,7 +12,7 @@ jobs:
   validate-environment:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver')
     name: Get Version from UPM package
-    uses: realitycollective/reusableworkflows/.github/workflows/getpackageversionfrompackage.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/getpackageversionfrompackage.yml@v2
     with:
       build-host: ubuntu-latest
 
@@ -20,7 +20,7 @@ jobs:
   release-Package-only:
     needs: validate-environment
     name: Release package only, no upversion
-    uses: realitycollective/reusableworkflows/.github/workflows/tagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/tagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       version: ${{ needs.validate-environment.outputs.packageversion }}
@@ -30,7 +30,7 @@ jobs:
   upversion-major-Package:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'major-release')
     name: Major Version package and release
-    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       build-type: major
@@ -40,7 +40,7 @@ jobs:
   upversion-minor-Package:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'minor-release')
     name: Minor Version package and release
-    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       build-type: minor
@@ -50,7 +50,7 @@ jobs:
   upversion-patch-Package:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'minor-release') == false && contains(github.event.pull_request.title, 'major-release') == false
     name: Patch Version package and release
-    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       build-type: patch-release
@@ -70,7 +70,7 @@ jobs:
     if: ${{ always() }}
     needs: [release-Complete]
     name: Refresh development branch
-    uses: realitycollective/reusableworkflows/.github/workflows/refreshbranch.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/refreshbranch.yml@v2
     with:
       build-host: ubuntu-latest
       target-branch: development
@@ -82,7 +82,7 @@ jobs:
     if: ${{ always() }}
     needs: [refresh-development]
     name: UpVersion the development branch for the next release
-    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2-beta
+    uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
       build-host: ubuntu-latest
       build-type: patch
