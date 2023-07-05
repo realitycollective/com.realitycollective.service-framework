@@ -358,7 +358,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Multiply square handle to match other types
-            var fmh_363_68_638240818065617089 = Quaternion.identity; Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 0.8f, Vector3.zero, Handles.RectangleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 0.8f, Vector3.zero, Handles.RectangleHandleCap);
 
             if (recordUndo && position != newPosition)
             {
