@@ -534,7 +534,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         private static Vector3 GetFreeMoveHandle(Vector3 position, float handleSize, Vector3 snap, CapFunction capFunction)
         {
 #if UNITY_2022_1_OR_NEWER
-            Vector3 newPosition = Handles.FreeMoveHandle(position, handleSize, snap, capFunction);
+            return Handles.FreeMoveHandle(position, handleSize, snap, capFunction);
 #else
             return Handles.FreeMoveHandle(position, Quaternion.identity, handleSize, snap, capFunction);
 #endif
