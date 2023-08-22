@@ -46,8 +46,8 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
         /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
-        public static bool TryInstallAssets(string sourcePath, string destinationPath, bool regenerateGuids = false, bool skipDialog = false)
-            => TryInstallAssets(new Dictionary<string, string> { { sourcePath, destinationPath } }, regenerateGuids, skipDialog);
+        public static bool TryInstallAssets(string sourcePath, string destinationPath, bool regenerateGuids = false, bool skipDialog = false, bool onlyUnityAssets = false)
+            => TryInstallAssets(new Dictionary<string, string> { { sourcePath, destinationPath } }, regenerateGuids, skipDialog, onlyUnityAssets);
 
         /// <summary>
         /// Attempt to copy any assets found in the source path into the project.
@@ -56,7 +56,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
         /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
-        public static bool TryInstallAssets(Dictionary<string, string> installationPaths, bool regenerateGuids = false, bool skipDialog = false)
+        public static bool TryInstallAssets(Dictionary<string, string> installationPaths, bool regenerateGuids = false, bool skipDialog = false, bool onlyUnityAssets = false)
         {
             var anyFail = false;
             var newInstall = true;
@@ -74,7 +74,14 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                     newInstall = false;
                     EditorUtility.DisplayProgressBar("Verifying assets...", $"{sourcePath} -> {destinationPath}", 0);
 
-                    installedAssets.AddRange(UnityFileHelper.GetUnityAssetsAtPath(destinationPath));
+                    if (onlyUnityAssets)
+                    {
+                        installedAssets.AddRange(UnityFileHelper.GetUnityAssetsAtPath(destinationPath));
+                    }
+                    else
+                    {
+                        installedAssets.AddRange(UnityFileHelper.GetAllFilesAtPath(destinationPath));
+                    }
 
                     for (int i = 0; i < installedAssets.Count; i++)
                     {
@@ -97,7 +104,16 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
 
                     EditorUtility.DisplayProgressBar("Copying assets...", $"{sourcePath} -> {destinationPath}", 0);
 
-                    var copiedAssets = UnityFileHelper.GetUnityAssetsAtPath(sourcePath);
+                    var copiedAssets = new List<string>();
+
+                    if (onlyUnityAssets)
+                    {
+                        copiedAssets = UnityFileHelper.GetUnityAssetsAtPath(destinationPath);
+                    }
+                    else
+                    {
+                        copiedAssets = UnityFileHelper.GetAllFilesAtPath(sourcePath);
+                    }
 
                     for (var i = 0; i < copiedAssets.Count; i++)
                     {
