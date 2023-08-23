@@ -6,6 +6,7 @@ using RealityCollective.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -160,6 +161,11 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
             if (newInstall && regenerateGuids)
             {
                 GuidRegenerator.RegenerateGuids(installedDirectories);
+            }
+
+            if (installedAssets.Where(asset => asset.Contains(".mat")).Any())
+            {
+                EditorUtility.DisplayDialog("Attention!", $"Materials were included in the Asset bundle copied to\n[{installationPaths.Values.First()}]\n\n If you are using URP or HDRP, we recommend you upgrade the shaders for these materials for use with URP/HDRP using Unity's tool found under\n  Window > Rendering > Render Pipeline Converter.", "OK");
             }
 
             EditorUtility.ClearProgressBar();
