@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using static UnityEditor.Handles;
 using Object = UnityEngine.Object;
 
 namespace RealityCollective.ServiceFramework.Editor.Utilities
@@ -143,7 +144,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (darkThemeLogo == null)
                 {
-                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
+                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo_DarkTheme.png", typeof(Texture2D));
                 }
 
                 return darkThemeLogo;
@@ -158,7 +159,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (lightThemeLogo == null)
                 {
-                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
+                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo_LightTheme.png", typeof(Texture2D));
                 }
 
                 return lightThemeLogo;
@@ -166,6 +167,8 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         }
 
         private static Texture2D lightThemeLogo = null;
+        private const float maxInspectorLogoHeight = 100f;
+        private const float inspectorLogoSpacing = 12;
 
         private static GUIStyle centeredGuiStyle;
 
@@ -185,8 +188,9 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <param name="image"></param>
         public static void RenderInspectorHeader(Texture2D image)
         {
-            GUILayout.Label(image, CenteredGuiStyle, GUILayout.MaxHeight(128f));
-            GUILayout.Space(12f);
+            GUILayout.Space(inspectorLogoSpacing);
+            GUILayout.Label(image, CenteredGuiStyle, GUILayout.MaxHeight(maxInspectorLogoHeight));
+            GUILayout.Space(inspectorLogoSpacing);
         }
 
         #endregion Logos
@@ -283,7 +287,8 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
 
             Handles.DrawDottedLine(origin, position, DottedLineScreenSpace);
             Handles.ArrowHandleCap(0, position, Quaternion.LookRotation(direction), handleSize * 2, EventType.Repaint);
-            Vector3 newPosition = Handles.FreeMoveHandle(position, Quaternion.identity, handleSize, Vector3.zero, Handles.CircleHandleCap);
+
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, Handles.CircleHandleCap);
 
             if (recordUndo)
             {
@@ -320,7 +325,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
                 handleSize = Mathf.Lerp(handleSize, HandleUtility.GetHandleSize(position) * handleSize, 0.75f);
             }
 
-            Vector3 newPosition = Handles.FreeMoveHandle(position, Quaternion.identity, handleSize, Vector3.zero, Handles.CircleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, Handles.CircleHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -356,7 +361,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Multiply square handle to match other types
-            Vector3 newPosition = Handles.FreeMoveHandle(position, Quaternion.identity, handleSize * 0.8f, Vector3.zero, Handles.RectangleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 0.8f, Vector3.zero, Handles.RectangleHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -392,7 +397,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Multiply sphere handle size to match other types
-            Vector3 newPosition = Handles.FreeMoveHandle(position, Quaternion.identity, handleSize * 2, Vector3.zero, Handles.SphereHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 2, Vector3.zero, Handles.SphereHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -460,7 +465,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
                 rotation = Quaternion.LookRotation(vector);
             }
 
-            Vector3 newPosition = Handles.FreeMoveHandle(handlePosition, rotation, handleSize, Vector3.zero, Handles.DotHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(handlePosition, handleSize, Vector3.zero, Handles.DotHandleCap);
 
             if (recordUndo && handlePosition != newPosition)
             {
@@ -527,5 +532,16 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         }
 
         #endregion Handles
+
+        #region Utilities
+        private static Vector3 GetFreeMoveHandle(Vector3 position, float handleSize, Vector3 snap, CapFunction capFunction)
+        {
+#if UNITY_2022_1_OR_NEWER
+            return Handles.FreeMoveHandle(position, handleSize, snap, capFunction);
+#else
+            return Handles.FreeMoveHandle(position, Quaternion.identity, handleSize, snap, capFunction);
+#endif
+        }
+        #endregion Utilities
     }
 }

@@ -18,7 +18,7 @@ The Service framework provides a service repository for enabling background serv
 
 ## Requirements
 
-- [Unity 2020.3 or above](https://unity.com/)
+- [Unity 2021.3 or above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
 ### OpenUPM
