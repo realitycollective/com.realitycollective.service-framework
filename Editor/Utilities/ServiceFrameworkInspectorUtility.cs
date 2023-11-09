@@ -144,7 +144,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (darkThemeLogo == null)
                 {
-                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
+                    darkThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo_DarkTheme.png", typeof(Texture2D));
                 }
 
                 return darkThemeLogo;
@@ -159,7 +159,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             {
                 if (lightThemeLogo == null)
                 {
-                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo.png", typeof(Texture2D));
+                    lightThemeLogo = (Texture2D)AssetDatabase.LoadAssetAtPath($"{ServiceFrameworkFinderUtility.RelativeFolderPath}/Runtime/StandardAssets/RealityCollective_InspectorLogo_LightTheme.png", typeof(Texture2D));
                 }
 
                 return lightThemeLogo;
@@ -167,6 +167,8 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         }
 
         private static Texture2D lightThemeLogo = null;
+        private const float maxInspectorLogoHeight = 100f;
+        private const float inspectorLogoSpacing = 12;
 
         private static GUIStyle centeredGuiStyle;
 
@@ -186,8 +188,9 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <param name="image"></param>
         public static void RenderInspectorHeader(Texture2D image)
         {
-            GUILayout.Label(image, CenteredGuiStyle, GUILayout.MaxHeight(128f));
-            GUILayout.Space(12f);
+            GUILayout.Space(inspectorLogoSpacing);
+            GUILayout.Label(image, CenteredGuiStyle, GUILayout.MaxHeight(maxInspectorLogoHeight));
+            GUILayout.Space(inspectorLogoSpacing);
         }
 
         #endregion Logos
