@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
 // ServiceGenerator - interfacevalidation
@@ -458,6 +459,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         internal void Start()
         {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+
             if (Application.isPlaying)
             {
                 StartAllServices();
@@ -1946,5 +1950,18 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         #endregion Service Dependencies
+
+        #region Scene Management
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            // Handle the loaded scene here
+            Debug.Log($"Scene {scene.name} has been loaded.");
+        }
+
+        private void OnSceneUnloaded(Scene scene)
+        {
+            Debug.Log($"Scene {scene.name} has been unloaded.");
+        }        
+        #endregion Scene Management
     }
 }
