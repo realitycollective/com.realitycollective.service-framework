@@ -27,5 +27,14 @@ namespace RealityCollective.ServiceFramework.Definitions
         /// Ensure that the Service Manager Instance is not destroyed on scene change.
         /// </summary>
         public bool DoNotDestroyServiceManagerOnLoad => doNotDestroyServiceManagerOnLoad;
+
+        [SerializeField]
+        [Tooltip("The scene based service configuration.")]
+        private SceneServiceConfiguration[] sceneServiceConfiguration;
+
+        /// <summary>
+        /// The selected scene based service configuration.
+        /// </summary>
+        public SceneServiceConfiguration[] SceneServiceConfiguration => sceneServiceConfiguration;
     }
 }
