@@ -1541,9 +1541,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         #endregion Service Management
 
-        #region Proccess Management
+        #region Process Management
 
-        private static readonly List<Proccess> activeProcess = new List<Proccess>();
+        private static readonly List<Process> activeProcess = new List<Process>();
         private float durationToleranceMs = 10;
         private bool doNotRemoveIfTooLong = false;
 
@@ -1555,10 +1555,10 @@ namespace RealityCollective.ServiceFramework.Services
         {
             if (onUpdate == null)
                 return;
-            foreach (Proccess currSub in activeProcess)
+            foreach (Process currSub in activeProcess)
                 if (currSub.updateMethod.Equals(onUpdate))
                     return;
-            activeProcess.Add(new Proccess(onUpdate, period));
+            activeProcess.Add(new Process(onUpdate, period));
         }
 
         /// <summary>
@@ -1630,7 +1630,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        #endregion Proccess Management
+        #endregion Process Management
 
         #region Service Utilities
 

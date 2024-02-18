@@ -6,15 +6,15 @@ namespace RealityCollective.ServiceFramework.Definitions
     public delegate void UpdateMethod(float dt);
 
     /// <summary>
-    /// Proccess description for subscribing to the service manager update loop as a proccess not as a full service or module.
+    /// Process description for subscribing to the service manager update loop as a process not as a full service or module.
     /// </summary>
-    public class Proccess
+    public class Process
     {
         public UpdateMethod updateMethod;
         public readonly float period;
         public float periodCurrent;
 
-        public Proccess(UpdateMethod updateMethod, float period)
+        public Process(UpdateMethod updateMethod, float period)
         {
             this.updateMethod = updateMethod;
             this.period = period;
