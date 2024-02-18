@@ -18,7 +18,7 @@ namespace RealityCollective.ServiceFramework
     {
         public const string Editor_Menu_Keyword = "Reality Collective";
 
-        public const string Service_Framework_Editor_Menu_Keyword = Editor_Menu_Keyword + "/Service Framework";
+        public const string Service_Framework_Editor_Menu_Keyword = "Tools/Service Framework";
 
         private static readonly string[] Package_Keywords = { "Reality", "Collective", "Mixed", "Reality", "Service", "Framework" };
 
@@ -145,6 +145,15 @@ namespace RealityCollective.ServiceFramework
 
         #endregion Current Platform Target
 
+        #region Menu Redirect
+                /// <summary>
+        /// Simple scene helper to create the beginnings of a scene, creating the scene root and a floor.
+        /// </summary>
+        [MenuItem(ServiceFrameworkPreferences.Editor_Menu_Keyword + "/Service Framework/Moved to Tools-Service Framework", false, 1)]
+        public static void RedirectNotice()
+        {
+        }
+        #endregion
         [SettingsProvider]
         private static SettingsProvider Preferences()
         {
