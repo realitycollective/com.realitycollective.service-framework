@@ -1166,7 +1166,7 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Retrieve a cached refernece of an <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// Retrieve a cached reference of an <see cref="IService"/> from the <see cref="ActiveServices"/>.
         /// </summary>
         /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
@@ -1221,7 +1221,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <param name="service">The instance of the Service class that is registered.</param>
-        /// <returns>Returns true if the <see cref="IMiIServiceedRealitySystem"/> was found, otherwise false.</returns>
+        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
         public bool TryGetServiceCached<T>(out T service) where T : IService
         {
             service = GetServiceCached<T>();
