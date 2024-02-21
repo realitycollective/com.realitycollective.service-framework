@@ -1,5 +1,10 @@
 # Service Framework
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_White.png">
+  <img alt="Shows an illustrated sun in light color mode and a moon with stars in dark color mode." src="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_Black.png">
+</picture>
+
 The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
 
 [![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
