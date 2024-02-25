@@ -58,9 +58,9 @@ namespace RealityCollective.ServiceFramework.Tests.B_ServiceRegistration
         [Test]
         public void Test_02_03_TryRegisterServiceTwice()
         {
-            LogAssert.Expect(LogType.Error, new Regex("There is already a ITestService1.Test Service 1 registered!"));
-
             TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            LogAssert.Expect(LogType.Error, new Regex("There is already a ITestService1.Test Service 1 registered!"));
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 
