@@ -16,9 +16,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
-// ServiceGenerator - interfacevalidation
-// Limit Service Type lookups for "testing" - Type Service/DataProvider
-
 namespace RealityCollective.ServiceFramework.Services
 {
     [ExecuteInEditMode]
@@ -97,7 +94,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 // The application is running in editor play mode, can't
                 // reset profiles in this state as it will cause destruction
-                // and reinitialization of services in use.
+                // and re-initialization of services in use.
                 return;
             }
 
@@ -821,11 +818,11 @@ namespace RealityCollective.ServiceFramework.Services
         #region Unregister Services
 
         /// <summary>
-        /// Registers all the <see cref="IService"/>s defined in the provided configuration collection.
+        /// Removed all the <see cref="IService"/>s from active the active runtime, defined in the provided configuration collection.
         /// </summary>
-        /// <typeparam name="T">The interface type for the <see cref="IService"/> to be registered.</typeparam>
+        /// <typeparam name="T">The interface type for the <see cref="IService"/> to be removed.</typeparam>
         /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
-        /// <returns>True, if all configurations successfully created and registered their services.</returns>
+        /// <returns>True, if all active instances have been successfully removed.</returns>
         public bool TryUnRegisterServiceConfigurations<T>(IServiceConfiguration<T>[] configurations) where T : IService
         {
             bool anyFailed = false;
@@ -833,27 +830,26 @@ namespace RealityCollective.ServiceFramework.Services
             for (var i = 0; i < configurations?.Length; i++)
             {
                 var configuration = configurations[i];
-                // TryGetService<configuration.InstancedType.GetType()>(out var serviceInstance);
-
-                //  if (TryUnregisterServicesOfType(configuration.InstancedType))
-                //  {}
-            //     {
-            //         if (serviceInstance != null &&
-            //             configuration.Profile is IServiceProfile<IServiceModule> profile &&
-            //             !TryRegisterServiceModuleConfigurations(profile.ServiceConfigurations, serviceInstance))
-            //         {
-            //             anyFailed = true;
-            //         }
-            //     }
-            //     else
-            //     {
-            //         Debug.LogError($"Failed to start {configuration.Name}!");
-            //         anyFailed = true;
-            //     }
+                var interfaces = configuration.InstancedType.Type.GetInterfaces();
+                if (interfaces != null &&
+                    interfaces.Length > 0 &&
+                    interfaces[0] != null &&
+                    TryGetService(interfaces[0], configuration.Name, out var serviceInstance))
+                {
+                    if (!TryUnregisterService(serviceInstance))
+                    {
+                        anyFailed = true;
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Failed to find {configuration.Name}!");
+                    anyFailed = true;
+                }
             }
 
             return !anyFailed;
-        }        
+        }
 
         /// <summary>
         /// Remove all services from the Service Manager active service registry for a given type
@@ -907,11 +903,11 @@ namespace RealityCollective.ServiceFramework.Services
 
                 for (int i = 0; i < activeServiceModules.Count; i++)
                 {
-                    var dataProvider = activeServiceModules[i];
+                    var serviceModule = activeServiceModules[i];
 
-                    if (dataProvider.ParentService.Equals(serviceInstance))
+                    if (serviceModule.ParentService.Equals(serviceInstance))
                     {
-                        result &= TryUnregisterService(dataProvider);
+                        result &= TryUnregisterService(serviceModule);
                     }
                 }
 
@@ -1178,6 +1174,27 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             return serviceCache.Count > 0;
+        }
+
+        public bool TryGetService(IService service, out IService serviceInstance)
+        {
+            serviceInstance = null;
+
+            if (service == null)
+            {
+                return false;
+            }
+
+            if (activeServices.TryGetValue(service.GetType(), out var activeService))
+            {
+                if (activeService.Equals(service))
+                {
+                    serviceInstance = activeService;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1673,7 +1690,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         private string[] ignoredNamespaces = { "Service.IDisposable",
                                                       "RealityCollective.ServiceFramework.Interfaces.IService",
-                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
+                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceModule"};
 
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
@@ -1992,7 +2009,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         private void LoadServicesForScene(string SceneName)
         {
-            if(string.IsNullOrEmpty(SceneName))
+            if (string.IsNullOrEmpty(SceneName))
             {
                 Debug.LogError("Selected Scene name to load is null or empty.");
                 return;
@@ -2016,6 +2033,26 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
+        private void UnloadServicesForScene(string SceneName)
+        {
+            if (ActiveProfile?.SceneServiceConfiguration != null)
+            {
+                var sceneServiceConfig = ActiveProfile.SceneServiceConfiguration;
+                for (int i = 0; i < sceneServiceConfig.Length; i++)
+                {
+                    if (sceneServiceConfig[i] == null || sceneServiceConfig[i].Profile.IsNull())
+                    {
+                        continue;
+                    }
+                    var sceneConfig = sceneServiceConfig[i];
+                    if (sceneConfig.Profile.SceneName == SceneName)
+                    {
+                        TryUnRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
+                    }
+                }
+            }
+        }
+
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             LoadServicesForScene(scene.name);
@@ -2025,6 +2062,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         private void OnSceneUnloaded(Scene scene)
         {
+            UnloadServicesForScene(scene.name);
             Debug.Log($"Scene {scene.name} has been unloaded.");
         }
         #endregion Scene Management
