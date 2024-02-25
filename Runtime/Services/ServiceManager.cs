@@ -833,9 +833,9 @@ namespace RealityCollective.ServiceFramework.Services
                 var interfacesList = GetInterfacesFromType(configuration.InstancedType.Type);
                 if (interfacesList != null && interfacesList.Length > 0)
                 {
-                    for(int j = 0; j < interfacesList.Length; j++)
+                    for (int j = 0; j < interfacesList.Length; j++)
                     {
-                        if(interfacesList.Length > 1 && interfacesList.Length > j+1 && interfacesList[j].IsAssignableFrom(interfacesList[j+1]))
+                        if (interfacesList.Length > 1 && interfacesList.Length > j + 1 && interfacesList[j].IsAssignableFrom(interfacesList[j + 1]))
                         {
                             continue;
                         }
@@ -2029,8 +2029,13 @@ namespace RealityCollective.ServiceFramework.Services
 
         #region Scene Management
 
-        private void LoadServicesForScene(string SceneName)
+        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new();
+        private readonly List<string> sceneServiceLoaded = new();
+
+        public void LoadServicesForScene(string SceneName)
         {
+            bool sceneLoaded = false;
+
             if (string.IsNullOrEmpty(SceneName))
             {
                 Debug.LogError("Selected Scene name to load is null or empty.");
@@ -2049,13 +2054,24 @@ namespace RealityCollective.ServiceFramework.Services
                     var sceneConfig = sceneServiceConfig[i];
                     if (sceneConfig.Profile.SceneName == SceneName)
                     {
-                        TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
+                        sceneLoaded = TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
+                    }
+                }
+            }
+
+            if(!sceneLoaded && !sceneServiceLoaded.Contains(SceneName))
+            {
+                if (sceneServiceConfigurations.TryGetValue(SceneName, out var serviceConfigurations))
+                {
+                    if(TryRegisterServiceConfigurations(serviceConfigurations))
+                    {
+                        sceneServiceLoaded.Add(SceneName);
                     }
                 }
             }
         }
 
-        private void UnloadServicesForScene(string SceneName)
+        public void UnloadServicesForScene(string SceneName)
         {
             if (ActiveProfile?.SceneServiceConfiguration != null)
             {
@@ -2072,7 +2088,33 @@ namespace RealityCollective.ServiceFramework.Services
                         TryUnRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
                     }
                 }
+
+                if (sceneServiceConfigurations.TryGetValue(SceneName, out var serviceConfigurations))
+                {
+                    if(TryUnRegisterServiceConfigurations(serviceConfigurations))
+                    {
+                        sceneServiceConfigurations.Remove(SceneName);
+                        sceneServiceLoaded.Remove(SceneName);
+                    }
+                }
             }
+        }
+
+        public void AddServiceConfigurationForScene(string SceneName, IServiceConfiguration<IService>[] serviceConfigurations)
+        {
+            if (string.IsNullOrEmpty(SceneName))
+            {
+                Debug.LogError("Selected Scene name to load is null or empty.");
+                return;
+            }
+
+            if (serviceConfigurations == null || serviceConfigurations.Length == 0)
+            {
+                Debug.LogError("Selected Service Configurations to load are null or empty.");
+                return;
+            }
+
+            sceneServiceConfigurations.TryAdd(SceneName, serviceConfigurations);
         }
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
