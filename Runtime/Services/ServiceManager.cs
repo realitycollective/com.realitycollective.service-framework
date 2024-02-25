@@ -830,15 +830,22 @@ namespace RealityCollective.ServiceFramework.Services
             for (var i = 0; i < configurations?.Length; i++)
             {
                 var configuration = configurations[i];
-                var interfaces = configuration.InstancedType.Type.GetInterfaces();
-                if (interfaces != null &&
-                    interfaces.Length > 0 &&
-                    interfaces[0] != null &&
-                    TryGetService(interfaces[0], configuration.Name, out var serviceInstance))
+                var interfacesList = GetInterfacesFromType(configuration.InstancedType.Type);
+                if (interfacesList != null && interfacesList.Length > 0)
                 {
-                    if (!TryUnregisterService(serviceInstance))
+                    for(int j = 0; j < interfacesList.Length; j++)
                     {
-                        anyFailed = true;
+                        if(interfacesList.Length > 1 && interfacesList.Length > j+1 && interfacesList[j].IsAssignableFrom(interfacesList[j+1]))
+                        {
+                            continue;
+                        }
+                        if (TryGetService(interfacesList[j], configuration.Name, out var serviceInstance))
+                        {
+                            if (!TryUnregisterService(serviceInstance))
+                            {
+                                anyFailed = true;
+                            }
+                        }
                     }
                 }
                 else
@@ -1688,7 +1695,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         #region Service Utilities
 
-        private string[] ignoredNamespaces = { "Service.IDisposable",
+        private string[] ignoredNamespaces = { "System.IDisposable",
                                                       "RealityCollective.ServiceFramework.Interfaces.IService",
                                                       "RealityCollective.ServiceFramework.Interfaces.IServiceModule"};
 
@@ -1826,6 +1833,21 @@ namespace RealityCollective.ServiceFramework.Services
         {
             serviceCache.Clear();
             searchedServiceTypes.Clear();
+        }
+
+        private Type[] GetInterfacesFromType(Type objectType)
+        {
+            var interfaces = objectType.GetInterfaces();
+            var interfaceCount = interfaces.Length;
+            List<Type> detectedInterfaces = new List<Type>();
+
+            for (int i = 0; i < interfaceCount; i++)
+            {
+                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
+
+                detectedInterfaces.Add(interfaces[i]);
+            }
+            return detectedInterfaces.ToArray();
         }
 
         private Type[] GetInterfacesFromType(object concreteObject)
