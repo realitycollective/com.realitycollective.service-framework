@@ -1,5 +1,8 @@
 namespace RealityCollective.ServiceFramework
 {
+    /// <summary>
+    /// Runtime service framework preferences, editor helpers for organizing where options appear in the Unity Editor.
+    /// </summary>
     public static class RuntimeServiceFrameworkPreferences
     {
         public const string Editor_Menu_Keyword = "Reality Collective";

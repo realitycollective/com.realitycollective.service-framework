@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
+    /// <summary>
+    /// Base profile for service configuration.
+    /// </summary>
+    /// <remarks>
+    /// Used for when a service does not require a profile or external configuration at design time.
+    /// </remarks>
     public abstract class BaseProfile : ScriptableObject
     {
         /// <summary>

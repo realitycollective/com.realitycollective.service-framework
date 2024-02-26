@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
+    /// <summary>
+    /// Runtime platform entry, for loading services for specific platforms.
+    /// </summary>
     [Serializable]
     public class RuntimePlatformEntry
     {

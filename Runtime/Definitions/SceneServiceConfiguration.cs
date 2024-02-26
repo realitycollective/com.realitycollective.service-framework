@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
+    /// <summary>
+    /// Scene service configuration definition, for loading services only for a specific scene.
+    /// </summary>
     [System.Serializable]
     public class SceneServiceConfiguration
     {

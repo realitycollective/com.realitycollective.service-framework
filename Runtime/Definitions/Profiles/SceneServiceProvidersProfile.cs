@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
+    /// <summary>
+    /// Scene base service configuration profile, for loading services only for a specific scene.
+    /// </summary>
     [CreateAssetMenu(menuName = RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Scene Service Providers Profile", fileName = "SceneServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
     public class SceneServiceProvidersProfile : BaseServiceProfile<IService>
     {
