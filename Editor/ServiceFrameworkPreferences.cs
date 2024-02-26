@@ -146,13 +146,12 @@ namespace RealityCollective.ServiceFramework
         #endregion Current Platform Target
 
         #region Menu Redirect
-                /// <summary>
-        /// Simple scene helper to create the beginnings of a scene, creating the scene root and a floor.
+        /// <summary>
+        /// Redirect to highlight existing users to the new location, to be removed on Release.
         /// </summary>
         [MenuItem(ServiceFrameworkPreferences.Editor_Menu_Keyword + "/Service Framework/Moved to Tools-Service Framework", false, 1)]
         public static void RedirectNotice()
-        {
-        }
+        { }
         #endregion
         [SettingsProvider]
         private static SettingsProvider Preferences()

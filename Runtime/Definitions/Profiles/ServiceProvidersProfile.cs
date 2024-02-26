@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
-    [CreateAssetMenu(menuName = "Reality Collective/Service Framework/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
+    [CreateAssetMenu(menuName = RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
     public class ServiceProvidersProfile : BaseServiceProfile<IService>
     {
         [SerializeField]
@@ -33,7 +33,7 @@ namespace RealityCollective.ServiceFramework.Definitions
         private SceneServiceConfiguration[] sceneServiceConfiguration;
 
         /// <summary>
-        /// The selected scene based service configuration.
+        /// The scene based service configuration.
         /// </summary>
         public SceneServiceConfiguration[] SceneServiceConfiguration => sceneServiceConfiguration;
     }

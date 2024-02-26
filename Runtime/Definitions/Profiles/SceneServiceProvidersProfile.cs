@@ -6,13 +6,16 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
-    [CreateAssetMenu(menuName = "Reality Collective/Service Framework/Scene Service Providers Profile", fileName = "SceneServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
+    [CreateAssetMenu(menuName = RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Scene Service Providers Profile", fileName = "SceneServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
     public class SceneServiceProvidersProfile : BaseServiceProfile<IService>
     {
         [SerializeField]
         [Tooltip("The selected scene name to load the services for.")]
         private string sceneName;
 
+        /// <summary>
+        /// The selected scene name to load the services for.
+        /// </summary>
         public string SceneName => sceneName;
     }
 }
