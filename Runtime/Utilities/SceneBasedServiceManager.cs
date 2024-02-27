@@ -36,7 +36,7 @@ namespace RealityCollective.ServiceFramework
             }
             else
             {
-                Debug.LogWarning($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
+                Debug.LogError($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
             }
         }
 
