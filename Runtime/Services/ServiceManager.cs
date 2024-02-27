@@ -2029,8 +2029,8 @@ namespace RealityCollective.ServiceFramework.Services
 
         #region Scene Management
 
-        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new();
-        private readonly List<string> sceneServiceLoaded = new();
+        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new  Dictionary<string, IServiceConfiguration<IService>[]>();
+        private readonly List<string> sceneServiceLoaded = new List<string>();
 
         /// <summary>
         /// Load services for a specific scene.
