@@ -13,6 +13,7 @@ namespace RealityCollective.ServiceFramework
     /// <remarks>
     /// This component is used to manage the services for a scene. It will register the services with the Service Manager when the scene is loaded and unregister them when the scene is unloaded.
     /// This includes when the component is enabled and disabled, which will load and unload the services respectively.
+    /// Additionally, the component can ONLY run if there is a `Service Manager Instance` present or loaded in the project, it cannot currently run standalone
     /// </remarks>
     [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Scene Based Service Manager")]
     [ExecuteInEditMode]
@@ -36,7 +37,11 @@ namespace RealityCollective.ServiceFramework
             }
             else
             {
-                Debug.LogError($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
+                // A Service Manager Instance MUST be loaded in the project prior to this scene loading for this component to work
+                if (Application.isPlaying)
+                {
+                    Debug.LogError($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
+                }
             }
         }
 
