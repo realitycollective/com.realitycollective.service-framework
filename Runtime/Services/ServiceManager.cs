@@ -2126,8 +2126,11 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError("Selected Service Configurations to load are null or empty.");
                 return;
             }
-
+#if UNITY_2021_1_OR_NEWER
             sceneServiceConfigurations.TryAdd(sceneName, serviceConfigurations);
+#else
+            sceneServiceConfigurations.EnsureDictionaryItem(sceneName, serviceConfigurations);
+#endif
         }
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
