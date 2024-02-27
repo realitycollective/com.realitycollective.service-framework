@@ -34,6 +34,10 @@ namespace RealityCollective.ServiceFramework
                 ServiceManager.Instance.AddServiceConfigurationForScene(sceneName, serviceProvidersProfile.ServiceConfigurations);
                 ServiceManager.Instance.LoadServicesForScene(sceneName);
             }
+            else
+            {
+                Debug.LogWarning($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
+            }
         }
 
         private void OnDisable()
