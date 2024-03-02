@@ -24,14 +24,6 @@ namespace RealityCollective.ServiceFramework.Editor
 
         private UnityEditor.Editor profileInspector;
 
-        private void Awake()
-        {
-            if (target.name != nameof(ServiceManagerInstance))
-            {
-                target.name = nameof(ServiceManagerInstance);
-            }
-        }
-
         private void OnEnable()
         {
             serviceProvidersProfile = serializedObject.FindProperty(nameof(serviceProvidersProfile));
