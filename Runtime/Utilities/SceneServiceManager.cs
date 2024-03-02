@@ -15,10 +15,10 @@ namespace RealityCollective.ServiceFramework
     /// This includes when the component is enabled and disabled, which will load and unload the services respectively.
     /// Additionally, the component can ONLY run if there is a `Service Manager Instance` present or loaded in the project, it cannot currently run standalone
     /// </remarks>
-    [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Scene Based Service Manager")]
+    [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Scene Service Manager")]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class SceneBasedServiceManager : MonoBehaviour
+    public class SceneServiceManager : MonoBehaviour
     {
         private string sceneName = null;
 
@@ -30,7 +30,7 @@ namespace RealityCollective.ServiceFramework
         private void OnEnable()
         {
             sceneName = gameObject.scene.name;
-            if (ServiceManager.IsActiveAndInitialized)
+            if (ServiceManager.IsActiveAndInitialized && serviceProvidersProfile != null && !string.IsNullOrEmpty(sceneName))
             {
                 ServiceManager.Instance.AddServiceConfigurationForScene(sceneName, serviceProvidersProfile.ServiceConfigurations);
                 ServiceManager.Instance.LoadServicesForScene(sceneName);
@@ -44,6 +44,17 @@ namespace RealityCollective.ServiceFramework
                 }
             }
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (ServiceManager.IsActiveAndInitialized && serviceProvidersProfile != null && !string.IsNullOrEmpty(sceneName))
+            {
+                ServiceManager.Instance.AddServiceConfigurationForScene(sceneName, serviceProvidersProfile.ServiceConfigurations);
+                ServiceManager.Instance.LoadServicesForScene(sceneName);
+            }
+        }
+#endif
 
         private void OnDisable()
         {

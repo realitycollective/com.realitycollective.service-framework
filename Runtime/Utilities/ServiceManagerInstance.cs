@@ -11,7 +11,7 @@ using UnityEditor;
 
 namespace RealityCollective.ServiceFramework
 {
-    [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Global Service Manager Instance")]
+    [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Global Service Manager")]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
     public class ServiceManagerInstance : MonoBehaviour
