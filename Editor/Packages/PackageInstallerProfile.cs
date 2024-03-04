@@ -10,7 +10,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
     /// A package profile defines services and modules that the package has to offer and may be installed
     /// to a <see cref="ServiceProvidersProfile"/> to register those services and modules with the service container.
     /// </summary>
-    [CreateAssetMenu(menuName = "Reality Collective/Service Framework/" + nameof(PackageInstallerProfile), fileName = nameof(PackageInstallerProfile), order = (int)CreateProfileMenuItemIndices.Configuration)]
+    [CreateAssetMenu(menuName = RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Packaging/" + nameof(PackageInstallerProfile), fileName = nameof(PackageInstallerProfile), order = (int)CreateProfileMenuItemIndices.Configuration)]
     public class PackageInstallerProfile : BaseProfile
     {
         [SerializeField, Tooltip("The platforms the package can run on.")]

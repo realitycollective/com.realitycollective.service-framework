@@ -7,6 +7,7 @@ using RealityCollective.ServiceFramework.Editor.Utilities;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using UnityEditor;
+using UnityEditor.SearchService;
 using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
@@ -93,7 +94,8 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
                 property.serializedObject.ApplyModifiedProperties();
 
                 if (!(selectedProfile is null) &&
-                    !(selectedProfile is ServiceProvidersProfile))
+                    !(selectedProfile is ServiceProvidersProfile) &&
+                    !(selectedProfile is SceneServiceProvidersProfile))
                 {
                     Debug.Assert(!parent.IsNull(), $"Failed to find a valid parent profile for {selectedProfile.name}");
                     selectedProfile.ParentProfile = parent;

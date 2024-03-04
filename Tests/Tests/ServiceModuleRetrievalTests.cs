@@ -161,13 +161,13 @@ namespace RealityCollective.ServiceFramework.Tests.E_ServiceModuleRetrieval
         [Test]
         public void Test_05_07_RetrieveRegisterServiceConfigurationsWithServiceModules()
         {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
             // Check logs
             LogAssert.Expect(LogType.Log, new Regex("Test Service 1 is Initialised"));
             LogAssert.Expect(LogType.Log, new Regex("Test Service Module 1 is Initialised"));
             LogAssert.Expect(LogType.Log, new Regex("Test Service 2 is Initialised"));
             LogAssert.Expect(LogType.Error, new Regex("Unable to find ITestServiceModule2 service."));
-
-            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
 
             var activeServiceCount = testServiceManager.ActiveServices.Count;
 

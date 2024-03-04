@@ -1,9 +1,13 @@
 // Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
+using RealityCollective.ServiceFramework.Definitions;
+using RealityCollective.ServiceFramework.Definitions.Platforms;
+using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using RealityCollective.ServiceFramework.Tests.Modules;
+using RealityCollective.ServiceFramework.Tests.Profiles;
 using RealityCollective.ServiceFramework.Tests.Services;
 using RealityCollective.ServiceFramework.Tests.Utilities;
 using System.Text.RegularExpressions;
@@ -258,6 +262,37 @@ namespace RealityCollective.ServiceFramework.Tests.F_ServiceUnRegistration
             Assert.AreEqual(activeServiceCount + 1, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
         }
 
+        [Test]
+        public void Test_06_09_UnRegisterServiceConfigurations()
+        {
+            TestUtilities.InitializeServiceManagerScene(ref testServiceManager);
+
+            var activeServiceCount = testServiceManager.ActiveServices.Count;
+
+            var configurations = new ServiceConfiguration<IService>[2];
+
+
+            var testService1Profile = (TestService1Profile)ScriptableObject.CreateInstance(typeof(TestService1Profile));
+            var dataProvider1Configuration = new ServiceConfiguration<ITestServiceModule1>(typeof(TestServiceModule1), TestServiceModule1.TestName, 1, AllPlatforms.Platforms, null);
+            testService1Profile.AddConfiguration(dataProvider1Configuration);
+
+            var testService2Profile = (TestService2Profile)ScriptableObject.CreateInstance(typeof(TestService2Profile));
+            var dataProvider2Configuration = new ServiceConfiguration<ITestServiceModule2>(typeof(TestServiceModule2), TestServiceModule2.TestName, 1, AllPlatforms.Platforms, null);
+            testService2Profile.AddConfiguration(dataProvider2Configuration);
+
+            configurations[0] = new ServiceConfiguration<IService>(typeof(TestService1), TestService1.TestName, 1, AllPlatforms.Platforms, testService1Profile);
+            configurations[1] = new ServiceConfiguration<IService>(typeof(TestService2), TestService2.TestName, 1, AllPlatforms.Platforms, testService2Profile);
+
+            var result = testServiceManager.TryRegisterServiceConfigurations(configurations);
+
+            // Tests
+            Assert.IsTrue(result, "Test services were not registered");
+            Assert.AreEqual(activeServiceCount + 3, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+
+            var unregisterResult = testServiceManager.TryUnRegisterServiceConfigurations(configurations);
+            Assert.IsTrue(result, "Test services were successfully unregistered");
+            Assert.AreEqual(0, testServiceManager.ActiveServices.Count, "More or less services found than was expected");
+        }
         #endregion Service unRegistration
     }
 }

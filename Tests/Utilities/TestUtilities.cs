@@ -6,9 +6,11 @@ using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Services;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace RealityCollective.ServiceFramework.Tests.Utilities
 {
@@ -31,6 +33,10 @@ namespace RealityCollective.ServiceFramework.Tests.Utilities
 
         public static void InitializeServiceManagerScene(ref ServiceManager serviceManager, bool useDefaultProfile = false)
         {
+#if UNITY_2022_1_OR_NEWER
+            LogAssert.Expect(LogType.Error, new Regex("Selected Scene name to load is null or empty."));
+#endif
+
             // Setup
             serviceManager = null;
             CleanupScene();

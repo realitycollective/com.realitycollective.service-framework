@@ -19,7 +19,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
             {
-                serviceManagerGO = new GameObject("ServiceManagerInstance");
+                serviceManagerGO = new GameObject("GlobalServiceManager");
                 serviceManagerGO.AddComponent<ServiceManagerInstance>();
             }
             else

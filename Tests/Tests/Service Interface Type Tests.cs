@@ -7,7 +7,7 @@ using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using RealityCollective.ServiceFramework.Tests.Modules;
 
-namespace RealityCollective.ServiceFramework.Tests
+namespace RealityCollective.ServiceFramework.Tests.L_ServiceInterfaceType
 {
     internal class ServiceInterfaceTypeTests
     {
