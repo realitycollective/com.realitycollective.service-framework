@@ -6,7 +6,6 @@ using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
