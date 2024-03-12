@@ -52,6 +52,12 @@ namespace RealityCollective.ServiceFramework.Extensions
         }
 
         /// <summary>
+        /// Replaces all back slashes in the string with forward slashes.
+        /// </summary>
+        public static string ForwardSlashes(this string value)
+            => value.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        /// <summary>
         /// Replaces all forward slashes in the string with back slashes.
         /// </summary>
         public static string BackSlashes(this string value)
