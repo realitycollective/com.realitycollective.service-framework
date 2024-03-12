@@ -1,13 +1,11 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Definitions.Utilities;
-using RealityCollective.Editor.Extensions;
-using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
 using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
 using System;
