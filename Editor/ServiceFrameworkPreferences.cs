@@ -145,14 +145,7 @@ namespace RealityCollective.ServiceFramework
 
         #endregion Current Platform Target
 
-        #region Menu Redirect
-        /// <summary>
-        /// Redirect to highlight existing users to the new location, to be removed on Release.
-        /// </summary>
-        [MenuItem(ServiceFrameworkPreferences.Editor_Menu_Keyword + "/Service Framework/Moved to Tools-Service Framework", false, 1)]
-        public static void RedirectNotice()
-        { }
-        #endregion
+
         [SettingsProvider]
         private static SettingsProvider Preferences()
         {
