@@ -1,5 +1,10 @@
 # Service Framework
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_White.png">
+  <img alt="Shows an illustrated sun in light color mode and a moon with stars in dark color mode." src="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_Black.png">
+</picture>
+
 The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
 
 [![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
@@ -19,11 +24,10 @@ The Service framework provides a service repository for enabling background serv
 ## Requirements
 
 - [Unity 2021.3 or above](https://unity.com/)
-- [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
 ### OpenUPM
 
-The simplest way to getting started using the utilities package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
+The simplest way to getting started using the Service Framework package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
 
 ```text
     openupm add com.realitycollective.service-framework

@@ -8,7 +8,7 @@ using RealityCollective.ServiceFramework.Tests.Services;
 using RealityCollective.ServiceFramework.Tests.Utilities;
 using UnityEngine;
 
-namespace RealityCollective.ServiceFramework.Tests
+namespace RealityCollective.ServiceFramework.Tests.M_ServiceManager_GetService
 {
     /// <summary>
     /// This class contains tests for all <see cref="ServiceManager"/> APIs

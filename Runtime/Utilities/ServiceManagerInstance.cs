@@ -11,6 +11,7 @@ using UnityEditor;
 
 namespace RealityCollective.ServiceFramework
 {
+    [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Global Service Manager")]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
     public class ServiceManagerInstance : MonoBehaviour
@@ -47,9 +48,9 @@ namespace RealityCollective.ServiceFramework
         }
 
         /// <summary>
-        /// Initializes the <see cref="ServiceManager"/> associcated with this instance.
+        /// Initializes the <see cref="ServiceManager"/> associated with this instance.
         /// </summary>
-        public void InitialiseServiceManager()
+        public void InitializeServiceManager()
         {
             if (serviceManagerInstance == null)
             {
@@ -81,7 +82,7 @@ namespace RealityCollective.ServiceFramework
 
             if (serviceManagerInstance == null)
             {
-                InitialiseServiceManager();
+                InitializeServiceManager();
             }
 
             if (isServiceManagerInstanceConfigured &&
@@ -98,7 +99,7 @@ namespace RealityCollective.ServiceFramework
         {
             if (Application.isPlaying && gameObject.activeInHierarchy && enabled)
             {
-                InitialiseServiceManager();
+                InitializeServiceManager();
             }
             serviceManagerInstance?.Awake();
         }

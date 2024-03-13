@@ -51,7 +51,7 @@ namespace RealityCollective.ServiceFramework.Tests.A_ServiceManager
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var serviceManagerGameObject = new GameObject(nameof(ServiceManager));
             var serviceManagerInstance = serviceManagerGameObject.AddComponent<ServiceManagerInstance>();
-            serviceManagerInstance.InitialiseServiceManager();
+            serviceManagerInstance.InitializeServiceManager();
 
             var serviceManagerGO = GameObject.Find(nameof(ServiceManager));
             ServiceManagerInstance instance = serviceManagerGO.GetComponent<ServiceManagerInstance>();

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Attributes;
-using RealityCollective.Definitions.Utilities;
+using RealityCollective.ServiceFramework.Attributes;
+using RealityCollective.ServiceFramework.Definitions.Utilities;
 using RealityCollective.ServiceFramework.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
+    /// <summary>
+    /// Runtime platform entry, for loading services for specific platforms.
+    /// </summary>
     [Serializable]
     public class RuntimePlatformEntry
     {

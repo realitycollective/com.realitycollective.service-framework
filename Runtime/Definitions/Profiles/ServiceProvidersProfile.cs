@@ -6,15 +6,18 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Definitions
 {
-    [CreateAssetMenu(menuName = "Reality Collective/Service Framework/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
+    /// <summary>
+    /// Service configuration profile, for loading services for the entire project.
+    /// </summary>
+    [CreateAssetMenu(menuName = RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Service Providers Profile", fileName = "ServiceProvidersProfile", order = (int)CreateProfileMenuItemIndices.ServiceProviders)]
     public class ServiceProvidersProfile : BaseServiceProfile<IService>
     {
         [SerializeField]
-        [Tooltip("The service manager will only initialise services in the Editor when it is running in play mode.\nThe default is to always be active and validating service configuration.")]
+        [Tooltip("The service manager will only initialize services in the Editor when it is running in play mode.\nThe default is to always be active and validating service configuration.")]
         private bool initializeOnPlay = false;
 
         /// <summary>
-        /// The service manager will only initialise services in the Editor when it is running in play mode.
+        /// The service manager will only initialize services in the Editor when it is running in play mode.
         /// The default is to always be active and validating service configuration.
         /// </summary>
         public bool InitializeOnPlay => initializeOnPlay;
@@ -27,5 +30,14 @@ namespace RealityCollective.ServiceFramework.Definitions
         /// Ensure that the Service Manager Instance is not destroyed on scene change.
         /// </summary>
         public bool DoNotDestroyServiceManagerOnLoad => doNotDestroyServiceManagerOnLoad;
+
+        [SerializeField]
+        [Tooltip("The scene based service configuration.")]
+        private SceneServiceConfiguration[] sceneServiceConfiguration;
+
+        /// <summary>
+        /// The scene based service configuration.
+        /// </summary>
+        public SceneServiceConfiguration[] SceneServiceConfiguration => sceneServiceConfiguration;
     }
 }

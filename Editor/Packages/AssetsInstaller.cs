@@ -1,8 +1,8 @@
 // Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Editor.Utilities;
-using RealityCollective.Extensions;
+using RealityCollective.ServiceFramework.Editor.Utilities;
+using RealityCollective.ServiceFramework.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,6 +46,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="destinationPath">The destination path, typically inside the projects "Assets" directory.</param>
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
+        /// <param name="onlyUnityAssets">Filter the assets from the package to ONLY those provided by Unity, the default is ALL files.</param>
         /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
         public static bool TryInstallAssets(string sourcePath, string destinationPath, bool regenerateGuids = false, bool skipDialog = false, bool onlyUnityAssets = false)
             => TryInstallAssets(new Dictionary<string, string> { { sourcePath, destinationPath } }, regenerateGuids, skipDialog, onlyUnityAssets);
@@ -56,6 +57,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
         /// <param name="installationPaths">The assets paths to be installed. Key is the source path of the assets to be installed. This should typically be from a hidden upm package folder marked with a "~". Value is the destination.</param>
         /// <param name="regenerateGuids">Should the guids for the copied assets be regenerated?</param>
         /// <param name="skipDialog">If set, assets and configuration is installed without prompting the user.</param>
+        /// <param name="onlyUnityAssets">Filter the assets from the package to ONLY those provided by Unity, the default is ALL files.</param>
         /// <returns><c>true</c> if the assets were successfully installed to the project.</returns>
         public static bool TryInstallAssets(Dictionary<string, string> installationPaths, bool regenerateGuids = false, bool skipDialog = false, bool onlyUnityAssets = false)
         {

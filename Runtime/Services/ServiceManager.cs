@@ -1,22 +1,18 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
-
-// ServiceGenerator - interfacevalidation
-// Limit Service Type lookups for "testing" - Type Service/DataProvider
 
 namespace RealityCollective.ServiceFramework.Services
 {
@@ -96,7 +92,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 // The application is running in editor play mode, can't
                 // reset profiles in this state as it will cause destruction
-                // and reinitialization of services in use.
+                // and re-initialization of services in use.
                 return;
             }
 
@@ -407,6 +403,8 @@ namespace RealityCollective.ServiceFramework.Services
                 TryRegisterServiceConfigurations(orderedConfig);
             }
 
+            LoadServicesForScene(SceneManager.GetActiveScene().name);
+
 #if UNITY_EDITOR
             if (Application.isPlaying)
             {
@@ -458,6 +456,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         internal void Start()
         {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+
             if (Application.isPlaying)
             {
                 StartAllServices();
@@ -815,6 +816,47 @@ namespace RealityCollective.ServiceFramework.Services
         #region Unregister Services
 
         /// <summary>
+        /// Removed all the <see cref="IService"/>s from active the active runtime, defined in the provided configuration collection.
+        /// </summary>
+        /// <typeparam name="T">The interface type for the <see cref="IService"/> to be removed.</typeparam>
+        /// <param name="configurations">The list of <see cref="IServiceConfiguration{T}"/>s.</param>
+        /// <returns>True, if all active instances have been successfully removed.</returns>
+        public bool TryUnRegisterServiceConfigurations<T>(IServiceConfiguration<T>[] configurations) where T : IService
+        {
+            bool anyFailed = false;
+
+            for (var i = 0; i < configurations?.Length; i++)
+            {
+                var configuration = configurations[i];
+                var interfacesList = GetInterfacesFromType(configuration.InstancedType.Type);
+                if (interfacesList != null && interfacesList.Length > 0)
+                {
+                    for (int j = 0; j < interfacesList.Length; j++)
+                    {
+                        if (interfacesList.Length > 1 && interfacesList.Length > j + 1 && interfacesList[j].IsAssignableFrom(interfacesList[j + 1]))
+                        {
+                            continue;
+                        }
+                        if (TryGetService(interfacesList[j], configuration.Name, out var serviceInstance))
+                        {
+                            if (!TryUnregisterService(serviceInstance))
+                            {
+                                anyFailed = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Failed to find {configuration.Name}!");
+                    anyFailed = true;
+                }
+            }
+
+            return !anyFailed;
+        }
+
+        /// <summary>
         /// Remove all services from the Service Manager active service registry for a given type
         /// </summary>
         public bool TryUnregisterServicesOfType<T>() where T : IService
@@ -866,11 +908,11 @@ namespace RealityCollective.ServiceFramework.Services
 
                 for (int i = 0; i < activeServiceModules.Count; i++)
                 {
-                    var dataProvider = activeServiceModules[i];
+                    var serviceModule = activeServiceModules[i];
 
-                    if (dataProvider.ParentService.Equals(serviceInstance))
+                    if (serviceModule.ParentService.Equals(serviceInstance))
                     {
-                        result &= TryUnregisterService(dataProvider);
+                        result &= TryUnregisterService(serviceModule);
                     }
                 }
 
@@ -1139,6 +1181,27 @@ namespace RealityCollective.ServiceFramework.Services
             return serviceCache.Count > 0;
         }
 
+        public bool TryGetService(IService service, out IService serviceInstance)
+        {
+            serviceInstance = null;
+
+            if (service == null)
+            {
+                return false;
+            }
+
+            if (activeServices.TryGetValue(service.GetType(), out var activeService))
+            {
+                if (activeService.Equals(service))
+                {
+                    serviceInstance = activeService;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Gets all <see cref="IService"/>s by type.
         /// </summary>
@@ -1162,7 +1225,7 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         /// <summary>
-        /// Retrieve a cached refernece of an <see cref="IService"/> from the <see cref="ActiveServices"/>.
+        /// Retrieve a cached reference of an <see cref="IService"/> from the <see cref="ActiveServices"/>.
         /// </summary>
         /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
@@ -1217,7 +1280,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <typeparam name="T">The interface type for the Service to be retrieved.</typeparam>
         /// <param name="service">The instance of the Service class that is registered.</param>
-        /// <returns>Returns true if the <see cref="IMiIServiceedRealitySystem"/> was found, otherwise false.</returns>
+        /// <returns>Returns true if the <see cref="IService"/> was found, otherwise false.</returns>
         public bool TryGetServiceCached<T>(out T service) where T : IService
         {
             service = GetServiceCached<T>();
@@ -1537,9 +1600,9 @@ namespace RealityCollective.ServiceFramework.Services
 
         #endregion Service Management
 
-        #region Proccess Management
+        #region Process Management
 
-        private static readonly List<Proccess> activeProcess = new List<Proccess>();
+        private static readonly List<Process> activeProcess = new List<Process>();
         private float durationToleranceMs = 10;
         private bool doNotRemoveIfTooLong = false;
 
@@ -1551,10 +1614,10 @@ namespace RealityCollective.ServiceFramework.Services
         {
             if (onUpdate == null)
                 return;
-            foreach (Proccess currSub in activeProcess)
+            foreach (Process currSub in activeProcess)
                 if (currSub.updateMethod.Equals(onUpdate))
                     return;
-            activeProcess.Add(new Proccess(onUpdate, period));
+            activeProcess.Add(new Process(onUpdate, period));
         }
 
         /// <summary>
@@ -1626,13 +1689,13 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        #endregion Proccess Management
+        #endregion Process Management
 
         #region Service Utilities
 
-        private string[] ignoredNamespaces = { "Service.IDisposable",
+        private string[] ignoredNamespaces = { "System.IDisposable",
                                                       "RealityCollective.ServiceFramework.Interfaces.IService",
-                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceDataProvider"};
+                                                      "RealityCollective.ServiceFramework.Interfaces.IServiceModule"};
 
         /// <summary>
         /// Query the <see cref="ActiveServices"/> for the existence of a <see cref="IService"/>.
@@ -1770,6 +1833,21 @@ namespace RealityCollective.ServiceFramework.Services
             searchedServiceTypes.Clear();
         }
 
+        private Type[] GetInterfacesFromType(Type objectType)
+        {
+            var interfaces = objectType.GetInterfaces();
+            var interfaceCount = interfaces.Length;
+            List<Type> detectedInterfaces = new List<Type>();
+
+            for (int i = 0; i < interfaceCount; i++)
+            {
+                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
+
+                detectedInterfaces.Add(interfaces[i]);
+            }
+            return detectedInterfaces.ToArray();
+        }
+
         private Type[] GetInterfacesFromType(object concreteObject)
         {
             var interfaces = concreteObject.GetType().GetInterfaces();
@@ -1820,7 +1898,7 @@ namespace RealityCollective.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    RealityCollective.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )
@@ -1946,5 +2024,125 @@ namespace RealityCollective.ServiceFramework.Services
         }
 
         #endregion Service Dependencies
+
+        #region Scene Management
+
+        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new  Dictionary<string, IServiceConfiguration<IService>[]>();
+        private readonly List<string> sceneServiceLoaded = new List<string>();
+
+        /// <summary>
+        /// Load services for a specific scene.
+        /// </summary>
+        /// <param name="sceneName">The scene for which to load the services for.</param>
+        public void LoadServicesForScene(string sceneName)
+        {
+            bool sceneLoaded = false;
+
+            if (string.IsNullOrEmpty(sceneName))
+            {
+                Debug.LogError("Selected Scene name to load is null or empty.");
+                return;
+            }
+
+            if (ActiveProfile?.SceneServiceConfiguration != null)
+            {
+                var sceneServiceConfig = ActiveProfile.SceneServiceConfiguration;
+                for (int i = 0; i < sceneServiceConfig.Length; i++)
+                {
+                    if (sceneServiceConfig[i] == null || sceneServiceConfig[i].Profile.IsNull())
+                    {
+                        continue;
+                    }
+                    var sceneConfig = sceneServiceConfig[i];
+                    if (sceneConfig.Profile.SceneName == sceneName)
+                    {
+                        sceneLoaded = TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
+                    }
+                }
+            }
+
+            if(!sceneLoaded && !sceneServiceLoaded.Contains(sceneName))
+            {
+                if (sceneServiceConfigurations.TryGetValue(sceneName, out var serviceConfigurations))
+                {
+                    if(TryRegisterServiceConfigurations(serviceConfigurations))
+                    {
+                        sceneServiceLoaded.Add(sceneName);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unload services for a specific scene.
+        /// </summary>
+        /// <param name="sceneName">The scene for which to unload the services for.</param>
+        public void UnloadServicesForScene(string sceneName)
+        {
+            if (ActiveProfile?.SceneServiceConfiguration != null)
+            {
+                var sceneServiceConfig = ActiveProfile.SceneServiceConfiguration;
+                for (int i = 0; i < sceneServiceConfig.Length; i++)
+                {
+                    if (sceneServiceConfig[i] == null || sceneServiceConfig[i].Profile.IsNull())
+                    {
+                        continue;
+                    }
+                    var sceneConfig = sceneServiceConfig[i];
+                    if (sceneConfig.Profile.SceneName == sceneName)
+                    {
+                        TryUnRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
+                    }
+                }
+
+                if (sceneServiceConfigurations.TryGetValue(sceneName, out var serviceConfigurations))
+                {
+                    if(TryUnRegisterServiceConfigurations(serviceConfigurations))
+                    {
+                        sceneServiceConfigurations.Remove(sceneName);
+                        sceneServiceLoaded.Remove(sceneName);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add a <see cref="IServiceConfiguration{T}"/> for a specific scene.
+        /// </summary>
+        /// <param name="sceneName">The scene for which to add configuration for.</param>
+        /// <param name="serviceConfigurations">The <see cref="IServiceConfiguration{T}"/> for the specific scene.</param>
+        public void AddServiceConfigurationForScene(string sceneName, IServiceConfiguration<IService>[] serviceConfigurations)
+        {
+            if (string.IsNullOrEmpty(sceneName))
+            {
+                Debug.LogError("Selected Scene name to load is null or empty.");
+                return;
+            }
+
+            if (serviceConfigurations == null || serviceConfigurations.Length == 0)
+            {
+                Debug.LogError("Selected Service Configurations to load are null or empty.");
+                return;
+            }
+#if UNITY_2021_1_OR_NEWER
+            sceneServiceConfigurations.TryAdd(sceneName, serviceConfigurations);
+#else
+            sceneServiceConfigurations.EnsureDictionaryItem(sceneName, serviceConfigurations);
+#endif
+        }
+
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            LoadServicesForScene(scene.name);
+            // Handle the loaded scene here
+            Debug.Log($"Scene {scene.name} has been loaded.");
+        }
+
+        private void OnSceneUnloaded(Scene scene)
+        {
+            UnloadServicesForScene(scene.name);
+            Debug.Log($"Scene {scene.name} has been unloaded.");
+        }
+        #endregion Scene Management
     }
 }
