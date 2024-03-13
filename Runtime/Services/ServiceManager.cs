@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1900,7 +1898,7 @@ namespace RealityCollective.ServiceFramework.Services
                 if (platform.IsAvailable
 #if UNITY_EDITOR
                     || platform.IsBuildTargetAvailable &&
-                    RealityCollective.Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
+                    Extensions.TypeExtensions.TryResolveType(UnityEditor.EditorPrefs.GetString("CurrentPlatformTarget", string.Empty), out var resolvedPlatform) &&
                     resolvedPlatform == platformType
 #endif
                 )

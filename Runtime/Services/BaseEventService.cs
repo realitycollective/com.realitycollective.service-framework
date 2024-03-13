@@ -3,7 +3,7 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Interfaces;
-using RealityCollective.Utilities.Async;
+using RealityCollective.ServiceFramework.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

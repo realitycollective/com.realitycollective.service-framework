@@ -24,11 +24,10 @@ The Service framework provides a service repository for enabling background serv
 ## Requirements
 
 - [Unity 2021.3 or above](https://unity.com/)
-- [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
 ### OpenUPM
 
-The simplest way to getting started using the utilities package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
+The simplest way to getting started using the Service Framework package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
 
 ```text
     openupm add com.realitycollective.service-framework
