@@ -407,7 +407,11 @@ namespace RealityCollective.ServiceFramework.Services
                 TryRegisterServiceConfigurations(orderedConfig);
             }
 
-            LoadServicesForScene(SceneManager.GetActiveScene().name);
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            if (!string.IsNullOrEmpty(activeSceneName))
+            {
+                LoadServicesForScene(activeSceneName);
+            }
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
