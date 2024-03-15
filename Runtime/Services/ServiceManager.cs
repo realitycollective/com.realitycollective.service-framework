@@ -238,7 +238,11 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 if (instanceGameObject.IsNull())
                 {
+#if UNITY_2023_1_OR_NEWER
+                    serviceManagerInstance = GameObject.FindFirstObjectByType<ServiceManagerInstance>();
+#else
                     serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+#endif
                     if (serviceManagerInstance.IsNull())
                     {
                         var go = new GameObject(nameof(ServiceManager));
@@ -403,7 +407,11 @@ namespace RealityCollective.ServiceFramework.Services
                 TryRegisterServiceConfigurations(orderedConfig);
             }
 
-            LoadServicesForScene(SceneManager.GetActiveScene().name);
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            if (!string.IsNullOrEmpty(activeSceneName))
+            {
+                LoadServicesForScene(activeSceneName);
+            }
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
@@ -421,7 +429,7 @@ namespace RealityCollective.ServiceFramework.Services
             isInitializing = false;
         }
 
-        #endregion
+#endregion
 
         #region MonoBehaviour Implementation
 
@@ -2011,7 +2019,11 @@ namespace RealityCollective.ServiceFramework.Services
 
         private static void EnsureEventSystemSetup()
         {
+#if UNITY_2023_1_OR_NEWER
+            var eventSystems = UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+#else
             var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
+#endif
             if (eventSystems.Length == 0)
             {
                 new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
@@ -2023,7 +2035,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        #endregion Service Dependencies
+#endregion Service Dependencies
 
         #region Scene Management
 
