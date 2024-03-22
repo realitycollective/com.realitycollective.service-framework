@@ -39,6 +39,8 @@ namespace RealityCollective.ServiceFramework.Editor
         private const string SERVICE_MODULE_NAME = "ServiceModule";
         private const string SERVICE_NAME = "Service";
 
+        private const string SF_GENERATOR_OUTPUTPATH_KEY = "ServiceFramework.Output_Path";
+
         private static ServiceWizard window = null;
 
         // https://stackoverflow.com/questions/6402864/c-pretty-type-name-function
@@ -140,7 +142,14 @@ namespace RealityCollective.ServiceFramework.Editor
 
             if (string.IsNullOrWhiteSpace(outputPath))
             {
-                outputPath = Application.dataPath;
+                if (EditorPrefs.HasKey(SF_GENERATOR_OUTPUTPATH_KEY))
+                {
+                    outputPath = EditorPrefs.GetString(SF_GENERATOR_OUTPUTPATH_KEY);
+                }
+                else
+                {
+                    outputPath = Application.dataPath;
+                }
                 @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
             }
 
@@ -322,6 +331,7 @@ namespace RealityCollective.ServiceFramework.Editor
                             }
 
                             GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
+                            EditorPrefs.SetString(SF_GENERATOR_OUTPUTPATH_KEY, outputPath);
 
                             if (generateProfile || profileBaseTypeName != nameof(BaseProfile))
                             {
