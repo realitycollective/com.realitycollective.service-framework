@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.Utilities.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -238,7 +240,11 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 if (instanceGameObject.IsNull())
                 {
+#if UNITY_2023_1_OR_NEWER
+                    serviceManagerInstance = GameObject.FindFirstObjectByType<ServiceManagerInstance>();
+#else
                     serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+#endif
                     if (serviceManagerInstance.IsNull())
                     {
                         var go = new GameObject(nameof(ServiceManager));
@@ -421,7 +427,7 @@ namespace RealityCollective.ServiceFramework.Services
             isInitializing = false;
         }
 
-        #endregion
+#endregion
 
         #region MonoBehaviour Implementation
 

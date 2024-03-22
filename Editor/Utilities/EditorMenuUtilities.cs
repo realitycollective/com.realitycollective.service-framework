@@ -1,7 +1,7 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.ServiceFramework.Extensions;
+using RealityCollective.Extensions;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,7 +15,11 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         [MenuItem(ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Add to Scene", false, 1)]
         public static void CreateServiceManagerInstance()
         {
+#if UNITY_2023_1_OR_NEWER
+            var existingCheck = GameObject.FindFirstObjectByType<ServiceManagerInstance>();
+#else
             var existingCheck = GameObject.FindObjectOfType<ServiceManagerInstance>();
+#endif
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
             {

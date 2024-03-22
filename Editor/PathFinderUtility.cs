@@ -1,7 +1,7 @@
 ﻿// Copyright (c) RealityCollective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.ServiceFramework.Extensions;
+using RealityCollective.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
