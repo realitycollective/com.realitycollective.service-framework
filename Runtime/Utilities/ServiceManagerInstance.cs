@@ -99,7 +99,7 @@ namespace RealityCollective.ServiceFramework
         }
 #endif // UNITY_EDITOR
 
-                private void Awake()
+        private void Awake()
         {
             if (Application.isPlaying && gameObject.activeInHierarchy && enabled)
             {
