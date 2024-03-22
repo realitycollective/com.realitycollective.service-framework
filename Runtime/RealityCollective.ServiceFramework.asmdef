@@ -2,7 +2,8 @@
     "name": "RealityCollective.ServiceFramework",
     "rootNamespace": "",
     "references": [
-        "GUID:478a2357cc57436488a56e564b08d223"
+        "GUID:478a2357cc57436488a56e564b08d223",
+        "GUID:b2d046948d6452a4b8485efc9ce0f88c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
