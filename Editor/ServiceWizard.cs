@@ -150,7 +150,11 @@ namespace RealityCollective.ServiceFramework.Editor
                 {
                     outputPath = Application.dataPath;
                 }
-                @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                @namespace = $"{EditorSettings.projectGenerationRootNamespace.Replace(" ", string.Empty)}";
+                if(string.IsNullOrWhiteSpace(@namespace))
+                {
+                    @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                }
             }
 
             var interfaceStrippedName = interfaceType.Name.Replace("I", string.Empty);
