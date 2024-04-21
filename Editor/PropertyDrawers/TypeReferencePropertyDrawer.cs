@@ -163,6 +163,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
                             where (FilterConstraintOverride == null || FilterConstraintOverride.Invoke(type)) &&
                                   (filter == null || filter.IsConstraintSatisfied(type))
                             where excludedTypes == null || !excludedTypes.Contains(type)
+                            where !type.GetInterfaces().Any(interfaceType => excludedTypes.Contains(interfaceType))
                             select type);
         }
 

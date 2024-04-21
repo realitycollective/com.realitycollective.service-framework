@@ -25,7 +25,14 @@ namespace RealityCollective.ServiceFramework
         public static readonly HashSet<Type> ExcludedTemplateServices = new HashSet<Type>
         {
             typeof(BaseService),
-            typeof(TemplateService)
+            typeof(TemplateService),
+        };
+
+        public static readonly HashSet<Type> ExcludedTemplateRootServices = new HashSet<Type>
+        {
+            typeof(BaseService),
+            typeof(TemplateService),
+            typeof(IServiceModule),
         };
 
         #region Show Inspector Debug View settings prompt
