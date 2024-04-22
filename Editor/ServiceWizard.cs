@@ -142,15 +142,19 @@ namespace RealityCollective.ServiceFramework.Editor
 
             if (string.IsNullOrWhiteSpace(outputPath))
             {
-                if (EditorPrefs.HasKey(SF_GENERATOR_OUTPUTPATH_KEY))
+                if (EditorPrefs.HasKey($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}"))
                 {
-                    outputPath = EditorPrefs.GetString(SF_GENERATOR_OUTPUTPATH_KEY);
+                    outputPath = EditorPrefs.GetString($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}");
                 }
                 else
                 {
                     outputPath = Application.dataPath;
                 }
-                @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                @namespace = $"{EditorSettings.projectGenerationRootNamespace.Replace(" ", string.Empty)}";
+                if(string.IsNullOrWhiteSpace(@namespace))
+                {
+                    @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                }
             }
 
             var interfaceStrippedName = interfaceType.Name.Replace("I", string.Empty);
@@ -331,7 +335,7 @@ namespace RealityCollective.ServiceFramework.Editor
                             }
 
                             GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
-                            EditorPrefs.SetString(SF_GENERATOR_OUTPUTPATH_KEY, outputPath);
+                            EditorPrefs.SetString($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}", outputPath);
 
                             if (generateProfile || profileBaseTypeName != nameof(BaseProfile))
                             {

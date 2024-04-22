@@ -34,6 +34,9 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
         protected SerializedProperty Configurations => configurations;
 
+        private ICollection<Type> GetExcludedTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateServices;
+        private ICollection<Type> GetExcludedRootTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateRootServices;
+
         /// <summary>
         /// Gets the service constraint used to filter options listed in the
         /// <see cref="configurations"/> instance type dropdown. Set after
@@ -334,8 +337,14 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 };
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
-                ICollection<Type> GetExcludedTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateServices;
-                TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedTypeCollection;
+                if (ThisProfile.ParentProfile == null)
+                {
+                    TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedRootTypeCollection;
+                }
+                else
+                {
+                    TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedTypeCollection;
+                }
 
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(typeRect, instancedType, instancedTypeContent);
