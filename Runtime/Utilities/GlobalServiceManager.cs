@@ -14,9 +14,11 @@ namespace RealityCollective.ServiceFramework
     [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Global Service Manager")]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class ServiceManagerInstance : MonoBehaviour
+    public class GlobalServiceManager : MonoBehaviour
     {
         private ServiceManager serviceManagerInstance;
+
+        public const string DefaultGameObjectName = "GlobalServiceManager";
 
         public ServiceManager Manager => serviceManagerInstance;
 
@@ -76,12 +78,12 @@ namespace RealityCollective.ServiceFramework
             }
 
 #if UNITY_2023_1_OR_NEWER
-            if (GameObject.FindObjectsByType<ServiceManagerInstance>(FindObjectsSortMode.None).Length > 1)
+            if (FindObjectsByType<GlobalServiceManager>(FindObjectsSortMode.None).Length > 1)
 #else
-            if (GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+            if (FindObjectsOfType<ServiceManagerInstance>().Length > 1)
 #endif
             {
-                Debug.LogError($"There are multiple instances of the {nameof(ServiceManagerInstance)} in the Scene, this is not supported");
+                Debug.LogError($"There are multiple instances of the {nameof(GlobalServiceManager)} in the Scene, this is not supported");
             }
 
             if (serviceManagerInstance == null)

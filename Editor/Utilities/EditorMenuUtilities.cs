@@ -16,20 +16,25 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         public static void CreateServiceManagerInstance()
         {
 #if UNITY_2023_1_OR_NEWER
-            var existingCheck = GameObject.FindFirstObjectByType<ServiceManagerInstance>();
+            var existingCheck = Object.FindFirstObjectByType<GlobalServiceManager>();
 #else
-            var existingCheck = GameObject.FindObjectOfType<ServiceManagerInstance>();
+            var existingCheck = Object.FindObjectOfType<ServiceManagerInstance>();
 #endif
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
             {
-                serviceManagerGO = new GameObject("GlobalServiceManager");
-                serviceManagerGO.AddComponent<ServiceManagerInstance>();
+                serviceManagerGO = new GameObject(GlobalServiceManager.DefaultGameObjectName);
+                serviceManagerGO.AddComponent<GlobalServiceManager>();
             }
             else
             {
                 serviceManagerGO = existingCheck.gameObject;
+                if (serviceManagerGO.name.Equals(nameof(GameObject)))
+                {
+                    serviceManagerGO.name = GlobalServiceManager.DefaultGameObjectName;
+                }
             }
+
             Selection.activeObject = serviceManagerGO;
             EditorGUIUtility.PingObject(serviceManagerGO);
         }

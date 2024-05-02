@@ -1,4 +1,4 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Definitions;
@@ -20,13 +20,13 @@ namespace RealityCollective.ServiceFramework
     [DisallowMultipleComponent]
     public class SceneServiceManager : MonoBehaviour
     {
-        private string sceneName = null;
-
-        [SerializeField]
-        [Tooltip("The services to registered with the Service Manager for the scene this manager is in. Services will be unloaded on scene exit (or manager if the manager is disabled).")]
+        [SerializeField, Tooltip("The services to registered with the Service Manager for the scene this manager is in. Services will be unloaded on scene exit (or manager if the manager is disabled).")]
         private ServiceProvidersProfile serviceProvidersProfile = null;
 
-        #region MonoBehaviour Implementation
+        private string sceneName = null;
+
+        public const string DefaultGameObjectName = "SceneServiceManager";
+
         private void OnEnable()
         {
             sceneName = gameObject.scene.name;
@@ -35,21 +35,28 @@ namespace RealityCollective.ServiceFramework
                 ServiceManager.Instance.AddServiceConfigurationForScene(sceneName, serviceProvidersProfile.ServiceConfigurations);
                 ServiceManager.Instance.LoadServicesForScene(sceneName);
             }
-            else
+            else if (Application.isPlaying)
             {
                 // A Service Manager Instance MUST be loaded in the project prior to this scene loading for this component to work
-                if (Application.isPlaying)
-                {
-                    Debug.LogError($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
-                }
+                Debug.LogError($"Service Manager is not active or initialized, services for scene '{sceneName}' will not be loaded.");
             }
         }
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (gameObject.name.Equals(nameof(GameObject)))
+            {
+                gameObject.name = DefaultGameObjectName;
+            }
+
             if (ServiceManager.IsActiveAndInitialized && serviceProvidersProfile != null && !string.IsNullOrEmpty(sceneName))
             {
+                if (ServiceManager.Instance.InitializeOnPlay)
+                {
+                    return;
+                }
+
                 ServiceManager.Instance.AddServiceConfigurationForScene(sceneName, serviceProvidersProfile.ServiceConfigurations);
                 ServiceManager.Instance.LoadServicesForScene(sceneName);
             }
@@ -60,6 +67,5 @@ namespace RealityCollective.ServiceFramework
         {
             ServiceManager.Instance?.UnloadServicesForScene(sceneName);
         }
-        #endregion MonoBehaviour Implementation
     }
 }

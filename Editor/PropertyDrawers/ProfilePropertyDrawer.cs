@@ -37,7 +37,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 
                 if (parent.IsNull() && Selection.activeObject.IsNotNull())
                 {
-                    if (Selection.activeObject.name.Equals(nameof(ServiceManagerInstance)))
+                    if (Selection.activeObject.name.Equals(nameof(GlobalServiceManager)))
                     {
                         if (ServiceManager.Instance != null)
                         {
