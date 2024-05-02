@@ -80,7 +80,7 @@ namespace RealityCollective.ServiceFramework
 #if UNITY_2023_1_OR_NEWER
             if (FindObjectsByType<GlobalServiceManager>(FindObjectsSortMode.None).Length > 1)
 #else
-            if (FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+            if (FindObjectsOfType<GlobalServiceManager>().Length > 1)
 #endif
             {
                 Debug.LogError($"There are multiple instances of the {nameof(GlobalServiceManager)} in the Scene, this is not supported");

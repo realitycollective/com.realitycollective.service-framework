@@ -1,4 +1,4 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 
 using NUnit.Framework;
 using RealityCollective.ServiceFramework.Services;
@@ -27,7 +27,7 @@ namespace RealityCollective.ServiceFramework.Tests.A_ServiceManager
             var confirm = testServiceManager.ConfirmInitialized();
 
             var managerGameObject = GameObject.Find(nameof(ServiceManager));
-            ServiceManagerInstance instance = managerGameObject.GetComponent<ServiceManagerInstance>();
+            GlobalServiceManager instance = managerGameObject.GetComponent<GlobalServiceManager>();
             Assert.IsNotNull(managerGameObject, "No manager found in the scene");
 
             //This is supposed to fail but is not :S
@@ -50,14 +50,14 @@ namespace RealityCollective.ServiceFramework.Tests.A_ServiceManager
         {
             EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             var serviceManagerGameObject = new GameObject(nameof(ServiceManager));
-            var serviceManagerInstance = serviceManagerGameObject.AddComponent<ServiceManagerInstance>();
+            var serviceManagerInstance = serviceManagerGameObject.AddComponent<GlobalServiceManager>();
             serviceManagerInstance.InitializeServiceManager();
 
             var serviceManagerGO = GameObject.Find(nameof(ServiceManager));
-            ServiceManagerInstance instance = serviceManagerGO.GetComponent<ServiceManagerInstance>();
+            GlobalServiceManager instance = serviceManagerGO.GetComponent<GlobalServiceManager>();
             Assert.IsNotNull(serviceManagerGO, "Unable to find ServiceManager GO");
             Assert.IsNotNull(instance, "Service Manager class not found on ServiceManager GO");
-            Assert.IsNotNull(instance.Manager, "Service Manager not instantiated on ServiceManagerInstance class");
+            Assert.IsNotNull(instance.Manager, $"Service Manager not instantiated on {nameof(GlobalServiceManager)} class");
             Assert.IsTrue(instance.Manager.IsInitialized, "Manager not Initialised");
         }
 

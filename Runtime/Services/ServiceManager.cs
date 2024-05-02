@@ -206,7 +206,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         /// <summary>
         /// Constructor
-        /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="ServiceManagerInstance"/> will be created for you.
+        /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="GlobalServiceManager"/> will be created for you.
         /// </summary>
         /// <remarks>
         /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
@@ -245,7 +245,7 @@ namespace RealityCollective.ServiceFramework.Services
 #if UNITY_2023_1_OR_NEWER
                     serviceManagerInstance = UnityEngine.Object.FindFirstObjectByType<GlobalServiceManager>();
 #else
-                    serviceManagerInstance = UnityEngine.Object.FindObjectOfType<ServiceManagerInstance>();
+                    serviceManagerInstance = UnityEngine.Object.FindObjectOfType<GlobalServiceManager>();
 #endif
                     if (serviceManagerInstance.IsNull())
                     {

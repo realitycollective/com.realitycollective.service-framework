@@ -18,7 +18,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
 #if UNITY_2023_1_OR_NEWER
             var existingCheck = Object.FindFirstObjectByType<GlobalServiceManager>();
 #else
-            var existingCheck = Object.FindObjectOfType<ServiceManagerInstance>();
+            var existingCheck = Object.FindObjectOfType<GlobalServiceManager>();
 #endif
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
