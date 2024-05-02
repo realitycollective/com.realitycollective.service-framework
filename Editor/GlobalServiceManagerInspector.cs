@@ -11,8 +11,8 @@ using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Editor
 {
-    [CustomEditor(typeof(ServiceManagerInstance))]
-    public class ServiceManagerInspector : UnityEditor.Editor
+    [CustomEditor(typeof(GlobalServiceManager))]
+    public class GlobalServiceManagerInspector : UnityEditor.Editor
     {
         private const string ObjectSelectorClosed = "ObjectSelectorClosed";
         private const string ObjectSelectorUpdated = "ObjectSelectorUpdated";
