@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.Extensions;
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Editor.PropertyDrawers;
@@ -9,6 +8,7 @@ using RealityCollective.ServiceFramework.Editor.Utilities;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
-        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations)};
+        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations) };
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
 

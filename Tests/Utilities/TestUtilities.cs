@@ -2,21 +2,19 @@
 
 using NUnit.Framework;
 using RealityCollective.ServiceFramework.Definitions;
-using RealityCollective.ServiceFramework.Editor.Utilities;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities.Editor;
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace RealityCollective.ServiceFramework.Tests.Utilities
 {
     internal static class TestUtilities
     {
-       public static void InitializeServiceManager(ref ServiceManager serviceManager)
+        public static void InitializeServiceManager(ref ServiceManager serviceManager)
         {
             if (serviceManager == null)
             {
@@ -65,17 +63,19 @@ namespace RealityCollective.ServiceFramework.Tests.Utilities
             Assert.IsTrue(serviceManager.ActiveProfile != null);
             Assert.IsTrue(serviceManager.IsInitialized);
         }
-        
-        public static T RunAsyncMethodSync<T>(Func<Task<T>> asyncFunc) {
+
+        public static T RunAsyncMethodSync<T>(Func<Task<T>> asyncFunc)
+        {
             return Task.Run(async () => await asyncFunc()).GetAwaiter().GetResult();
         }
-        public static void RunAsyncMethodSync(Func<Task> asyncFunc) {
+        public static void RunAsyncMethodSync(Func<Task> asyncFunc)
+        {
             Task.Run(async () => await asyncFunc()).GetAwaiter().GetResult();
         }
 
         private static T GetDefaultServiceManagerProfile<T>() where T : BaseProfile
         {
             return ScriptableObjectExtensions.GetAllInstances<T>().FirstOrDefault(profile => profile.name.Equals(typeof(T).Name));
-        }  
+        }
     }
 }
