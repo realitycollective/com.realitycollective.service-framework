@@ -32,7 +32,7 @@ namespace RealityCollective.ServiceFramework.Tests.Utilities
         public static void InitializeServiceManagerScene(ref ServiceManager serviceManager, bool useDefaultProfile = false)
         {
 #if UNITY_2023_1_OR_NEWER
-            LogAssert.Expect(LogType.Error, new Regex("Selected Scene name to load is null or empty."));
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Selected Scene name to load is null or empty."));
 #endif
 
             // Setup
