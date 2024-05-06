@@ -8,7 +8,7 @@
     "Services",
     "Extensions"
   ],
-  "version": "1.0.6",
+  "version": "1.0.7-pre.7",
   "unity": "2020.3",
   "homepage": "https://realitycollective.io",
   "bugs": {
@@ -25,8 +25,7 @@
     "url": "https://github.com/realitycollective"
   },
   "dependencies": {
-    "com.unity.editorcoroutines": "1.0.0",
-    "com.unity.addressables": "1.20.5",
-    "com.unity.ugui": "1.0.0"
+    "com.unity.ugui": "1.0.0",
+    "com.realitycollective.utilities": "1.0.12"
   }
 }

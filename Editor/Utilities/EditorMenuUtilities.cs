@@ -1,7 +1,7 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using RealityCollective.ServiceFramework.Extensions;
+using RealityCollective.Utilities.Extensions;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,17 +15,26 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         [MenuItem(ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Add to Scene", false, 1)]
         public static void CreateServiceManagerInstance()
         {
-            var existingCheck = GameObject.FindObjectOfType<ServiceManagerInstance>();
+#if UNITY_2023_1_OR_NEWER
+            var existingCheck = Object.FindFirstObjectByType<GlobalServiceManager>();
+#else
+            var existingCheck = Object.FindObjectOfType<GlobalServiceManager>();
+#endif
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
             {
-                serviceManagerGO = new GameObject("GlobalServiceManager");
-                serviceManagerGO.AddComponent<ServiceManagerInstance>();
+                serviceManagerGO = new GameObject(GlobalServiceManager.DefaultGameObjectName);
+                serviceManagerGO.AddComponent<GlobalServiceManager>();
             }
             else
             {
                 serviceManagerGO = existingCheck.gameObject;
+                if (serviceManagerGO.name.Equals(nameof(GameObject)))
+                {
+                    serviceManagerGO.name = GlobalServiceManager.DefaultGameObjectName;
+                }
             }
+
             Selection.activeObject = serviceManagerGO;
             EditorGUIUtility.PingObject(serviceManagerGO);
         }

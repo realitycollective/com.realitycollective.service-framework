@@ -3,10 +3,10 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Editor.Utilities;
-using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Modules;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -38,6 +38,8 @@ namespace RealityCollective.ServiceFramework.Editor
         private const string PARENT_INTERFACE = "#PARENT_INTERFACE#";
         private const string SERVICE_MODULE_NAME = "ServiceModule";
         private const string SERVICE_NAME = "Service";
+
+        private const string SF_GENERATOR_OUTPUTPATH_KEY = "ServiceFramework.Output_Path";
 
         private static ServiceWizard window = null;
 
@@ -140,8 +142,19 @@ namespace RealityCollective.ServiceFramework.Editor
 
             if (string.IsNullOrWhiteSpace(outputPath))
             {
-                outputPath = Application.dataPath;
-                @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                if (EditorPrefs.HasKey($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}"))
+                {
+                    outputPath = EditorPrefs.GetString($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}");
+                }
+                else
+                {
+                    outputPath = Application.dataPath;
+                }
+                @namespace = $"{EditorSettings.projectGenerationRootNamespace.Replace(" ", string.Empty)}";
+                if (string.IsNullOrWhiteSpace(@namespace))
+                {
+                    @namespace = $"{Application.productName.Replace(" ", string.Empty)}";
+                }
             }
 
             var interfaceStrippedName = interfaceType.Name.Replace("I", string.Empty);
@@ -322,6 +335,7 @@ namespace RealityCollective.ServiceFramework.Editor
                             }
 
                             GenerateService(interfaceName, usingList, parentInterfaceType, implements, profileBaseTypeName);
+                            EditorPrefs.SetString($"{Application.productName}-{SF_GENERATOR_OUTPUTPATH_KEY}", outputPath);
 
                             if (generateProfile || profileBaseTypeName != nameof(BaseProfile))
                             {

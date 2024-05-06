@@ -1,4 +1,4 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Definitions;
@@ -14,9 +14,11 @@ namespace RealityCollective.ServiceFramework
     [AddComponentMenu(RuntimeServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Global Service Manager")]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class ServiceManagerInstance : MonoBehaviour
+    public class GlobalServiceManager : MonoBehaviour
     {
         private ServiceManager serviceManagerInstance;
+
+        public const string DefaultGameObjectName = "GlobalServiceManager";
 
         public ServiceManager Manager => serviceManagerInstance;
 
@@ -75,9 +77,13 @@ namespace RealityCollective.ServiceFramework
                 return;
             }
 
-            if (GameObject.FindObjectsOfType<ServiceManagerInstance>().Length > 1)
+#if UNITY_2023_1_OR_NEWER
+            if (FindObjectsByType<GlobalServiceManager>(FindObjectsSortMode.None).Length > 1)
+#else
+            if (FindObjectsOfType<GlobalServiceManager>().Length > 1)
+#endif
             {
-                Debug.LogError($"There are multiple instances of the {nameof(ServiceManagerInstance)} in the Scene, this is not supported");
+                Debug.LogError($"There are multiple instances of the {nameof(GlobalServiceManager)} in the Scene, this is not supported");
             }
 
             if (serviceManagerInstance == null)

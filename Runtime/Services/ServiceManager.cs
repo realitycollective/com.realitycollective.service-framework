@@ -5,6 +5,8 @@ using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Definitions.Platforms;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
+using RealityCollective.Utilities.Async;
+using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +27,8 @@ namespace RealityCollective.ServiceFramework.Services
             typeof(IEventService),
             typeof(IServiceModule)
         };
+
+        private const float defaultInitializationTimeout = 10f;
 
         public static Type[] ServiceInterfaceTypes => serviceInterfaceTypes;
 
@@ -57,7 +61,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        public bool InitialiseOnPlay = false;
+        public bool InitializeOnPlay = false;
 
         /// <summary>
         /// The active profile of the Service Manager which controls which services are active and their initial settings.
@@ -202,7 +206,7 @@ namespace RealityCollective.ServiceFramework.Services
 
         /// <summary>
         /// Constructor
-        /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="ServiceManagerInstance"/> will be created for you.
+        /// Each Service Manager MUST have a managed GameObject that can route the MonoBehaviours to, if you do not provide a <see cref="GameObject"/>, then a new <see cref="GlobalServiceManager"/> will be created for you.
         /// </summary>
         /// <remarks>
         /// It is NOT supported to create a reference to the ServiceManager without a GameObject and then continue to use that reference, as this will actually create two separate ServiceManagers in memory.
@@ -232,17 +236,21 @@ namespace RealityCollective.ServiceFramework.Services
             Instance = null;
             serviceManagerInstanceGuid = Guid.NewGuid();
 
-            ServiceManagerInstance serviceManagerInstance;
+            GlobalServiceManager serviceManagerInstance;
 
             if (serviceManagerInstanceGameObject.IsNull())
             {
                 if (instanceGameObject.IsNull())
                 {
-                    serviceManagerInstance = GameObject.FindObjectOfType<ServiceManagerInstance>();
+#if UNITY_2023_1_OR_NEWER
+                    serviceManagerInstance = UnityEngine.Object.FindFirstObjectByType<GlobalServiceManager>();
+#else
+                    serviceManagerInstance = UnityEngine.Object.FindObjectOfType<GlobalServiceManager>();
+#endif
                     if (serviceManagerInstance.IsNull())
                     {
                         var go = new GameObject(nameof(ServiceManager));
-                        serviceManagerInstance = go.AddComponent<ServiceManagerInstance>();
+                        serviceManagerInstance = go.AddComponent<GlobalServiceManager>();
                         serviceManagerInstanceGameObject = serviceManagerInstance.gameObject;
                     }
                     serviceManagerInstance.SubscribetoUnityEvents(this);
@@ -350,14 +358,30 @@ namespace RealityCollective.ServiceFramework.Services
         /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
         /// </summary>
         /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
-        public static async Task WaitUntilInitializedAsync(float timeout = 10f)
+        /// <param name="sceneName">An optional scene name. If set, will wait for <paramref name="sceneName"/> services to initialize as well.</param>
+        public static async Task WaitUntilInitializedAsync(float timeout = defaultInitializationTimeout, string sceneName = null)
         {
-            while (!IsActiveAndInitialized && timeout > 0f)
+            while ((!IsActiveAndInitialized || (!string.IsNullOrEmpty(sceneName) && !sceneServiceLoaded.Contains(sceneName))) && timeout > 0f)
             {
                 await Task.Yield();
                 timeout -= Time.deltaTime;
             }
         }
+
+        /// <summary>
+        /// Waits for the <see cref="ServiceManager"/> to initialize until
+        /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
+        /// </summary>
+        /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
+        public static async Task WaitUntilInitializedAsync(float timeout) => await WaitUntilInitializedAsync(timeout, null);
+
+        /// <summary>
+        /// Waits for the <see cref="ServiceManager"/> to initialize until
+        /// <see cref="defaultInitializationTimeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/> and all services
+        /// for <paramref name="sceneName"/> are initialized.
+        /// </summary>
+        /// <param name="sceneName">Will wait for <paramref name="sceneName"/> services to initialize.</param>
+        public static async Task WaitUntilInitializedAsync(string sceneName) => await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName);
 
         /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
@@ -403,7 +427,11 @@ namespace RealityCollective.ServiceFramework.Services
                 TryRegisterServiceConfigurations(orderedConfig);
             }
 
-            LoadServicesForScene(SceneManager.GetActiveScene().name);
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            if (!string.IsNullOrEmpty(activeSceneName))
+            {
+                LoadServicesForScene(activeSceneName);
+            }
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
@@ -2011,7 +2039,11 @@ namespace RealityCollective.ServiceFramework.Services
 
         private static void EnsureEventSystemSetup()
         {
+#if UNITY_2023_1_OR_NEWER
+            var eventSystems = UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+#else
             var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
+#endif
             if (eventSystems.Length == 0)
             {
                 new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
@@ -2027,8 +2059,8 @@ namespace RealityCollective.ServiceFramework.Services
 
         #region Scene Management
 
-        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new  Dictionary<string, IServiceConfiguration<IService>[]>();
-        private readonly List<string> sceneServiceLoaded = new List<string>();
+        private readonly Dictionary<string, IServiceConfiguration<IService>[]> sceneServiceConfigurations = new Dictionary<string, IServiceConfiguration<IService>[]>();
+        private static List<string> sceneServiceLoaded = new List<string>();
 
         /// <summary>
         /// Load services for a specific scene.
@@ -2044,7 +2076,7 @@ namespace RealityCollective.ServiceFramework.Services
                 return;
             }
 
-            if (ActiveProfile?.SceneServiceConfiguration != null)
+            if (ActiveProfile.IsNotNull() && ActiveProfile.SceneServiceConfiguration != null)
             {
                 var sceneServiceConfig = ActiveProfile.SceneServiceConfiguration;
                 for (int i = 0; i < sceneServiceConfig.Length; i++)
@@ -2053,19 +2085,20 @@ namespace RealityCollective.ServiceFramework.Services
                     {
                         continue;
                     }
+
                     var sceneConfig = sceneServiceConfig[i];
-                    if (sceneConfig.Profile.SceneName == sceneName)
+                    if (string.Equals(sceneConfig.Profile.SceneName, sceneName))
                     {
                         sceneLoaded = TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
                     }
                 }
             }
 
-            if(!sceneLoaded && !sceneServiceLoaded.Contains(sceneName))
+            if (!sceneLoaded && !sceneServiceLoaded.Contains(sceneName))
             {
                 if (sceneServiceConfigurations.TryGetValue(sceneName, out var serviceConfigurations))
                 {
-                    if(TryRegisterServiceConfigurations(serviceConfigurations))
+                    if (TryRegisterServiceConfigurations(serviceConfigurations))
                     {
                         sceneServiceLoaded.Add(sceneName);
                     }
@@ -2097,7 +2130,7 @@ namespace RealityCollective.ServiceFramework.Services
 
                 if (sceneServiceConfigurations.TryGetValue(sceneName, out var serviceConfigurations))
                 {
-                    if(TryUnRegisterServiceConfigurations(serviceConfigurations))
+                    if (TryUnRegisterServiceConfigurations(serviceConfigurations))
                     {
                         sceneServiceConfigurations.Remove(sceneName);
                         sceneServiceLoaded.Remove(sceneName);
@@ -2131,18 +2164,16 @@ namespace RealityCollective.ServiceFramework.Services
 #endif
         }
 
-        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             LoadServicesForScene(scene.name);
-            // Handle the loaded scene here
-            Debug.Log($"Scene {scene.name} has been loaded.");
         }
 
         private void OnSceneUnloaded(Scene scene)
         {
             UnloadServicesForScene(scene.name);
-            Debug.Log($"Scene {scene.name} has been unloaded.");
         }
+
         #endregion Scene Management
     }
 }

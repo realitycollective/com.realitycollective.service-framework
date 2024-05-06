@@ -3,8 +3,8 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Editor.Utilities;
-using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities.Extensions;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -37,7 +37,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
 
                 if (parent.IsNull() && Selection.activeObject.IsNotNull())
                 {
-                    if (Selection.activeObject.name.Equals(nameof(ServiceManagerInstance)))
+                    if (Selection.activeObject.name.Equals(nameof(GlobalServiceManager)))
                     {
                         if (ServiceManager.Instance != null)
                         {

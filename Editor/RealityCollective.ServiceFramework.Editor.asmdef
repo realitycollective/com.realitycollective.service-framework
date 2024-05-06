@@ -2,7 +2,9 @@
     "name": "RealityCollective.ServiceFramework.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:13703f41b24bb904cb2305abe6317e3d"
+        "GUID:13703f41b24bb904cb2305abe6317e3d",
+        "GUID:b2d046948d6452a4b8485efc9ce0f88c",
+        "GUID:2a3f0ca4e21332c44bfdce311ea8943e"
     ],
     "includePlatforms": [
         "Editor"

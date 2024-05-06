@@ -1,4 +1,4 @@
-// Copyright (c) Reality Collective. All rights reserved.
+﻿// Copyright (c) Reality Collective. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using RealityCollective.ServiceFramework.Definitions;
@@ -8,6 +8,7 @@ using RealityCollective.ServiceFramework.Editor.Utilities;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
+using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +28,14 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
         private readonly GUIContent profileContent = new GUIContent("Profile", "The settings profile for this service.");
         private ReorderableList configurationList;
         private int currentlySelectedConfigurationOption;
-        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations)};
+        private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations) };
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
 
         protected SerializedProperty Configurations => configurations;
+
+        private ICollection<Type> GetExcludedTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateServices;
+        private ICollection<Type> GetExcludedRootTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateRootServices;
 
         /// <summary>
         /// Gets the service constraint used to filter options listed in the
@@ -333,8 +337,14 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
                 };
                 TypeReferencePropertyDrawer.CreateNewTypeOverride = ServiceConstraint;
 
-                ICollection<Type> GetExcludedTypeCollection() => ServiceFrameworkPreferences.ExcludedTemplateServices;
-                TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedTypeCollection;
+                if (ThisProfile.ParentProfile == null)
+                {
+                    TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedRootTypeCollection;
+                }
+                else
+                {
+                    TypeReferencePropertyDrawer.ExcludedTypeCollectionGetter = GetExcludedTypeCollection;
+                }
 
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(typeRect, instancedType, instancedTypeContent);
