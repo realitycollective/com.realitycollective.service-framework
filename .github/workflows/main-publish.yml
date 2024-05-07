@@ -1,16 +1,17 @@
 name: Publish main branch and increment version
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
+
+  # Allows you to run this workflow manually from the Actions tab, last resort if GitHub does not behave
+  workflow_dispatch:
 
 jobs:
   # Get Version to tag and release the branch, no up-version - [no-ver] included in PR title
   validate-environment:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver')
+    if: contains(github.event.head_commit.message, 'no-ver')
     name: Get Version from UPM package
     uses: realitycollective/reusableworkflows/.github/workflows/getpackageversionfrompackage.yml@v2
     with:
@@ -28,7 +29,7 @@ jobs:
 
   # Up version the release and publish major release
   upversion-major-Package:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'major-release')
+    if: contains(github.event.head_commit.message, 'no-ver') == false && contains(github.event.head_commit.message, 'major-release')
     name: Major Version package and release
     uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
@@ -38,7 +39,7 @@ jobs:
 
   # Up version the release and publish minor release
   upversion-minor-Package:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'minor-release')
+    if: contains(github.event.head_commit.message, 'no-ver') == false && contains(github.event.head_commit.message, 'minor-release')
     name: Minor Version package and release
     uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
@@ -48,7 +49,7 @@ jobs:
 
   # Up version the release and publish patch release (default)
   upversion-patch-Package:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'no-ver') == false && contains(github.event.pull_request.title, 'minor-release') == false && contains(github.event.pull_request.title, 'major-release') == false
+    if: contains(github.event.head_commit.message, 'no-ver') == false && contains(github.event.head_commit.message, 'minor-release') == false && contains(github.event.head_commit.message, 'major-release') == false
     name: Patch Version package and release
     uses: realitycollective/reusableworkflows/.github/workflows/upversionandtagrelease.yml@v2
     with:
