@@ -1,9 +1,6 @@
 # Service Framework
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_White.png">
-  <img alt="Shows an illustrated sun in light color mode and a moon with stars in dark color mode." src="https://raw.githubusercontent.com/realitycollective/realitycollective.logo/main/Branding/RealityCollective_HorizontalLogo_Black.png">
-</picture>
+![com.realitycollective.service-framework](https://github.com/realitycollective/realitycollective.logo/raw/main/RealityCollective/RepoBanners/com.realitycollective.service-framework.png?raw=true)
 
 The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
 
@@ -43,6 +40,8 @@ The service framework has been the foundation behind such toolkit's as Microsoft
 - A networking service - Utilising multiple endpoints for Lobbys, communication routes and data sharing.
 
 The possibilities are almost endless.
+
+> **Tip** Check out [Joost van Schaik](https://localjoost.github.io/tags/#service-framework) blog for some excellent tips using the Service Framework!
 
 ---
 
