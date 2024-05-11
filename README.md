@@ -21,15 +21,29 @@ The Service framework provides a service repository for enabling background serv
 ## Requirements
 
 - [Unity 2021.3 or above](https://unity.com/)
-- [RealityCOllective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+- [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
-### OpenUPM
+## Installation
 
-The simplest way to getting started using the Service Framework package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
+Make sure to always use the same source for all toolkit modules. Avoid using different installation sources within the same project. We provide the following ways to install Reality Toolkit modules:
+
+### Method 1: Using Package Manager for git users
+
+1. Open the Package Manager using the Window menu -> Package Manager
+
+2. Inside the Package Manager, click on the "+" button on the top left and select "Add package from git URL..."
+
+3. Input the following URL: https://github.com/realitycollective/com.realitycollective.service-framework.git and click "Add".
+
+### Method 2: OpenUPM
 
 ```text
     openupm add com.realitycollective.service-framework
 ```
+
+### Method 3: Unity Asset Store
+
+This option will be available soon.
 
 ## Use cases
 

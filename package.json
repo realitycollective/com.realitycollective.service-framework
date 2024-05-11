@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "com.unity.ugui": "1.0.0",
-    "com.realitycollective.utilities": "1.0.12"
+    "com.realitycollective.utilities": "1.0.12",
+    "com.unity.test-framework": "1.1.33"
   }
 }
