@@ -38,3 +38,10 @@ jobs:
     with:
       dependencies: '[{"development": "github.com/realitycollective/com.realitycollective.buildtools.git"},{"development": "github.com/realitycollective/com.realitycollective.utilities.git"}]'
     secrets: inherit
+
+  Build-Complete:
+    runs-on: ubuntu-latest
+    name: Build completion task
+    needs: Run-Unit-Tests
+    steps: 
+      - run: echo "Build Complete"
