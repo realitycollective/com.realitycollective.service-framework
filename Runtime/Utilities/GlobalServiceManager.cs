@@ -110,8 +110,6 @@ namespace RealityCollective.ServiceFramework
             serviceManagerInstance?.Awake();
         }
 
-        private void OnEnable() => serviceManagerInstance?.OnEnable();
-
         private void Start() => serviceManagerInstance?.Start();
 
         private void Update() => serviceManagerInstance?.Update();
@@ -119,8 +117,6 @@ namespace RealityCollective.ServiceFramework
         private void LateUpdate() => serviceManagerInstance?.LateUpdate();
 
         private void FixedUpdate() => serviceManagerInstance?.FixedUpdate();
-
-        private void OnDisable() => serviceManagerInstance?.OnDisable();
 
         internal void OnDestroy() => serviceManagerInstance?.OnDestroy();
 
