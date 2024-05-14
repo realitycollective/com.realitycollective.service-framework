@@ -116,7 +116,6 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (!activeProfile.IsNull())
             {
-                DisableAllServices();
                 DestroyAllServices();
             }
 
@@ -124,7 +123,6 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (!profile.IsNull())
             {
-                DisableAllServices();
                 DestroyAllServices();
             }
 
@@ -283,7 +281,6 @@ namespace RealityCollective.ServiceFramework.Services
 
                 Application.quitting += () =>
                 {
-                    DisableAllServices();
                     DestroyAllServices();
                     IsApplicationQuitting = true;
                 };
@@ -474,14 +471,6 @@ namespace RealityCollective.ServiceFramework.Services
             if (!Application.isPlaying) { return; }
         }
 
-        internal void OnEnable()
-        {
-            if (Application.isPlaying)
-            {
-                EnableAllServices();
-            }
-        }
-
         internal void Start()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -515,14 +504,6 @@ namespace RealityCollective.ServiceFramework.Services
             if (Application.isPlaying)
             {
                 FixedUpdateAllServices();
-            }
-        }
-
-        internal void OnDisable()
-        {
-            if (Application.isPlaying)
-            {
-                DisableAllServices();
             }
         }
 
@@ -824,11 +805,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (serviceInstance.IsEnabled)
-                    {
-                        serviceInstance.Initialize();
-                        serviceInstance.Enable();
-                    }
+                    serviceInstance.Initialize();
                 }
                 catch (Exception e)
                 {
@@ -951,7 +928,6 @@ namespace RealityCollective.ServiceFramework.Services
 
                 try
                 {
-                    serviceInstance.Disable();
                     serviceInstance.Destroy();
                     serviceInstance.Dispose();
                 }
@@ -1317,108 +1293,6 @@ namespace RealityCollective.ServiceFramework.Services
 
         #endregion Get Services
 
-        #region Enable Services
-
-        /// <summary>
-        /// Enables a services in the active service registry for a given name.
-        /// </summary>
-        /// <typeparam name="T">The <see cref="IService"/> interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
-        /// <param name="serviceName"></param>
-        public void EnableService<T>(string serviceName) where T : IService
-        {
-            EnableAllServicesByTypeAndName(typeof(T), serviceName);
-        }
-
-        /// <summary>
-        /// Enable services in the active service registry for a given type
-        /// </summary>
-        /// <typeparam name="T">The <see cref="IService"/> interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
-        public void EnableService<T>() where T : IService
-        {
-            EnableAllServicesByTypeAndName(typeof(T), string.Empty);
-        }
-
-        /// <summary>
-        /// Enable all services in the active service registry for a given type and name
-        /// </summary>
-        /// <param name="interfaceType">The <see cref="IService"/> interface type for the Service to be enabled.  E.G. InputService, BoundaryService</param>
-        /// <param name="serviceName">Name of the specific service</param>
-        private void EnableAllServicesByTypeAndName(Type interfaceType, string serviceName)
-        {
-            if (interfaceType == null)
-            {
-                Debug.LogError("Unable to enable null service type.");
-                return;
-            }
-
-            var services = new List<IService>();
-            TryGetServices(interfaceType, serviceName, ref services);
-
-            for (int i = 0; i < services?.Count; i++)
-            {
-                try
-                {
-                    services[i].Enable();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-        #endregion Enable Services
-
-        #region Disable Services
-
-        /// <summary>
-        /// Disable services in the active service registry for a given type
-        /// </summary>
-        /// <typeparam name="T">The interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
-        public void DisableService<T>() where T : IService
-        {
-            DisableAllServicesByTypeAndName(typeof(T), string.Empty);
-        }
-
-        /// <summary>
-        /// DDisable services in the active service registry for a given name.
-        /// </summary>
-        /// <typeparam name="T">The interface type for the service to be enabled.  E.G. InputService, BoundaryService</typeparam>
-        /// <param name="serviceName">Name of the specific service</param>
-        public void DisableService<T>(string serviceName) where T : IService
-        {
-            DisableAllServicesByTypeAndName(typeof(T), serviceName);
-        }
-
-        /// <summary>
-        /// Disable all services in the Mixed Reality Toolkit active service registry for a given type and name
-        /// </summary>
-        /// <param name="interfaceType">The interface type for the Service to be disabled.  E.G. InputService, BoundaryService</param>
-        /// <param name="serviceName">Name of the specific service</param>
-        private void DisableAllServicesByTypeAndName(Type interfaceType, string serviceName)
-        {
-            if (interfaceType == null)
-            {
-                Debug.LogError("Unable to disable null service type.");
-                return;
-            }
-
-            var services = new List<IService>();
-            TryGetServices(interfaceType, serviceName, ref services);
-
-            for (int i = 0; i < services?.Count; i++)
-            {
-                try
-                {
-                    services[i].Disable();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-        #endregion Disable Services
-
         #region Service Initialization
         internal void InitializeAllServices()
         {
@@ -1430,10 +1304,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (service.Value.IsEnabled)
-                    {
-                        service.Value.Initialize();
-                    }
+                    service.Value.Initialize();
                 }
                 catch (Exception e)
                 {
@@ -1454,10 +1325,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (service.Value.IsEnabled)
-                    {
-                        service.Value.Start();
-                    }
+                    service.Value.Start();
                 }
                 catch (Exception e)
                 {
@@ -1485,25 +1353,6 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void EnableAllServices()
-        {
-            // If the Service Manager is not configured, stop.
-            if (activeProfile == null) { return; }
-
-            // Enable all service
-            foreach (var service in activeServices)
-            {
-                try
-                {
-                    service.Value.Enable();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-
         internal void UpdateAllServices()
         {
             // If the Service Manager is not configured, stop.
@@ -1514,10 +1363,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (service.Value.IsEnabled)
-                    {
-                        service.Value.Update();
-                    }
+                    service.Value.Update();
                 }
                 catch (Exception e)
                 {
@@ -1536,10 +1382,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (service.Value.IsEnabled)
-                    {
-                        service.Value.LateUpdate();
-                    }
+                    service.Value.LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1558,29 +1401,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (service.Value.IsEnabled)
-                    {
-                        service.Value.FixedUpdate();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-
-        public void DisableAllServices()
-        {
-            // If the Service Manager is not configured, stop.
-            if (activeProfile == null) { return; }
-
-            // Disable all service
-            foreach (var service in activeServices)
-            {
-                try
-                {
-                    service.Value.Disable();
+                    service.Value.FixedUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1751,37 +1572,6 @@ namespace RealityCollective.ServiceFramework.Services
                     return true;
                 }
             }
-            return false;
-        }
-
-        public bool IsServiceEnabled<T>() where T : IService
-        {
-            if (TryGetService<T>(out var service))
-            {
-                return service.IsEnabled;
-            }
-            return false;
-        }
-
-        public bool IsServiceEnabledInProfile<T>(ServiceProvidersProfile rootProfile = null)
-        {
-            if (rootProfile.IsNull())
-            {
-                rootProfile = ActiveProfile;
-            }
-
-            if (!rootProfile.IsNull() && rootProfile.ServiceConfigurations != null)
-            {
-                foreach (var configuration in rootProfile.ServiceConfigurations)
-                {
-                    if (typeof(T).IsAssignableFrom(configuration.InstancedType.Type.FindServiceInterfaceType(typeof(T))) &&
-                        configuration.Enabled)
-                    {
-                        return true;
-                    }
-                }
-            }
-
             return false;
         }
 
