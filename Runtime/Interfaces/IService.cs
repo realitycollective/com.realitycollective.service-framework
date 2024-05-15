@@ -27,11 +27,6 @@ namespace RealityCollective.ServiceFramework.Interfaces
         uint Priority { get; }
 
         /// <summary>
-        /// Base property to denote whether a service is currently active and being updated by the Service Manager
-        /// </summary>
-        bool IsEnabled { get; }
-
-        /// <summary>
         /// The initialize function is used to setup the service once created.
         /// This method is called once all services have been registered in the ServiceManager.
         /// </summary>
@@ -49,11 +44,6 @@ namespace RealityCollective.ServiceFramework.Interfaces
         void Reset();
 
         /// <summary>
-        /// Optional Enable function to enable / re-enable the service.
-        /// </summary>
-        void Enable();
-
-        /// <summary>
         /// Optional Update function to perform per-frame updates of the service.
         /// </summary>
         void Update();
@@ -67,11 +57,6 @@ namespace RealityCollective.ServiceFramework.Interfaces
         /// Optional FixedUpdate function to perform updates that are fixed to the Physics timestep.
         /// </summary>
         void FixedUpdate();
-
-        /// <summary>
-        /// Optional Disable function to pause the service.
-        /// </summary>
-        void Disable();
 
         /// <summary>
         /// Optional Destroy function to perform cleanup of the service before the Service Manager is destroyed.

@@ -67,9 +67,6 @@ namespace RealityCollective.ServiceFramework.Services
         public virtual void Reset() => ResetAllserviceModules();
 
         /// <inheritdoc />
-        public virtual void Enable() => EnableAllserviceModules();
-
-        /// <inheritdoc />
         public virtual void Update() => UpdateAllserviceModules();
 
         /// <inheritdoc />
@@ -77,9 +74,6 @@ namespace RealityCollective.ServiceFramework.Services
 
         /// <inheritdoc />
         public virtual void FixedUpdate() => FixedUpdateAllserviceModules();
-
-        /// <inheritdoc />
-        public virtual void Disable() => DisableAllserviceModules();
 
         /// <inheritdoc />
         public virtual void Destroy()
@@ -167,10 +161,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (serviceModule.IsEnabled)
-                    {
-                        serviceModule.Start();
-                    }
+                    serviceModule.Start();
                 }
                 catch (Exception e)
                 {
@@ -207,36 +198,6 @@ namespace RealityCollective.ServiceFramework.Services
             }
         }
 
-        internal void EnableAllserviceModules()
-        {
-            IsEnabled = true;
-
-            // If the Service Modules are being registered in the Service Registry automatically, exit.
-            if (!RegisterServiceModules)
-            {
-                return;
-            }
-
-            // If there are no Service Modules are configured, exit
-            if (noServiceModulesFound)
-            {
-                return;
-            }
-
-            // Enable all Service Modules
-            foreach (var serviceModule in serviceModules)
-            {
-                try
-                {
-                    serviceModule.Enable();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-
         internal void UpdateAllserviceModules()
         {
             // If the Service Modules are being registered in the Service Registry automatically, exit.
@@ -256,10 +217,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (serviceModule.IsEnabled)
-                    {
-                        serviceModule.Update();
-                    }
+                    serviceModule.Update();
                 }
                 catch (Exception e)
                 {
@@ -287,10 +245,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (serviceModule.IsEnabled)
-                    {
-                        serviceModule.LateUpdate();
-                    }
+                    serviceModule.LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -318,40 +273,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    if (serviceModule.IsEnabled)
-                    {
-                        serviceModule.FixedUpdate();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{e.Message}\n{e.StackTrace}");
-                }
-            }
-        }
-
-        public void DisableAllserviceModules()
-        {
-            IsEnabled = false;
-
-            // If the Service Modules are being registered in the Service Registry automatically, exit.
-            if (!RegisterServiceModules)
-            {
-                return;
-            }
-
-            // If there are no Service Modules are configured, exit
-            if (noServiceModulesFound)
-            {
-                return;
-            }
-
-            // Disable all Service Modules
-            foreach (var serviceModule in serviceModules)
-            {
-                try
-                {
-                    serviceModule.Disable();
+                    serviceModule.FixedUpdate();
                 }
                 catch (Exception e)
                 {
