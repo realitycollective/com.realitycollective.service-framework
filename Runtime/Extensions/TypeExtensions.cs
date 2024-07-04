@@ -126,7 +126,7 @@ namespace RealityCollective.ServiceFramework.Extensions
 
             if (!isValid)
             {
-                UnityEngine.Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
+                Debug.LogError($"Failed to find valid implementations of {typeof(T).Name}");
             }
 
             return isValid;
@@ -156,7 +156,7 @@ namespace RealityCollective.ServiceFramework.Extensions
                 throw new ArgumentNullException("typeCache", "No type cache dictionary supplied");
             }
 
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().filterIgnoredDomains();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().FilterBlacklistedAssemblies();
             foreach (var assembly in assemblies)
             {
                 var types = assembly.GetTypes();
@@ -192,7 +192,7 @@ namespace RealityCollective.ServiceFramework.Extensions
             return typeCache;
         }
 
-        private static string[] ignoredDomains = new string[]
+        private static string[] blacklistedAssemblies = new string[]
         {
             "UnityEngine",
             "Unity",
@@ -205,16 +205,29 @@ namespace RealityCollective.ServiceFramework.Extensions
             "NiceIO"
         };
 
-        private static Assembly[] filterIgnoredDomains(this Assembly[] assemblies)
+        private static Assembly[] FilterBlacklistedAssemblies(this Assembly[] assemblies)
         {
-            List<Assembly> returnAssemblies = new List<Assembly>();
-            for (int i = assemblies.Length - 1; i > 0; i--)
-            {
-                bool ignoreAssembly = false;
+            var returnAssemblies = new List<Assembly>();
 
-                for (int j = ignoredDomains.Length - 1; j > 0; j--)
+            for (int i = assemblies.Length - 1; i >= 0; i--)
+            {
+                var ignoreAssembly = false;
+                var assembly = assemblies[i];
+                const string customOrPackageManagerCodeBase = "Library/ScriptAssemblies/";
+
+                for (var j = blacklistedAssemblies.Length - 1; j >= 0; j--)
                 {
-                    if (assemblies[i].FullName.ToLower().Contains(ignoredDomains[j].ToLower()))
+                    if (!string.IsNullOrEmpty(assembly.EscapedCodeBase) &&
+                        assembly.EscapedCodeBase.Contains(customOrPackageManagerCodeBase))
+                    {
+                        // This is a custom user assembly or an assembly coming in via the package manager.
+                        // Those should always be included to the type cache.
+                        continue;
+                    }
+
+                    // All other assemblies may be Unity assemblies, .NET assemblies or any other
+                    // assemblies that come as a dependency of using the Unity editor.
+                    if (assembly.FullName.ToLower().Contains(blacklistedAssemblies[j].ToLower()))
                     {
                         ignoreAssembly = true;
                     }
@@ -225,6 +238,7 @@ namespace RealityCollective.ServiceFramework.Extensions
                     returnAssemblies.Add(assemblies[i]);
                 }
             }
+
             return returnAssemblies.ToArray();
         }
 
@@ -233,7 +247,7 @@ namespace RealityCollective.ServiceFramework.Extensions
         /// </summary>
         /// <param name="guid">Class <see cref="Guid"/> reference.</param>
         /// <param name="resolvedType">The resolved <see cref="Type"/>.</param>
-        /// <returns>True if the <see cref="resolvedType"/> was successfully obtained from or added to the <see cref="TypeCache"/>, otherwise false.</returns>
+        /// <returns><c>true</c> if the <paramref name="resolvedType"/> was successfully obtained from or added to the <see cref="TypeCache"/>, otherwise <c>false</c>.</returns>
         public static bool TryResolveType(Guid guid, out Type resolvedType)
         {
             resolvedType = null;
@@ -245,9 +259,8 @@ namespace RealityCollective.ServiceFramework.Extensions
 
             if (!TypeCache.Current.TryGetValue(guid, out resolvedType))
             {
-                //Serious enough to put severe logging here as it will cause you many hours of hair pulling, only to find it is because Unity removed the class to be helpful with its Code Stripping functionality.
-                //Add a Link.XML to the project and sleep better.
-                var message = $"Configured Type Guid [{guid}] not found, either missing or lost to the cutting room floor of Unity Code Stripping.\n If the class is in the project, consider including it in a Link.xml";
+                // The type could not be found. It was potentially stripped by code stripping.
+                var message = $"Configured Type Guid [{guid}] not found. It may be lost because of code stripping.\n Consider including a Link.xml that makes sure the assembly with the type missing is not stripped. To learn more about code stripping visit https://docs.unity3d.com/Manual/ManagedCodeStripping.html";
                 Debug.LogError(message);
                 System.Diagnostics.Debug.WriteLine(message);
                 return false;
