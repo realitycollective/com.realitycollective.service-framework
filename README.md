@@ -2,7 +2,7 @@
 
 ![com.realitycollective.service-framework](https://github.com/realitycollective/realitycollective.logo/raw/main/RealityCollective/RepoBanners/com.realitycollective.service-framework.png?raw=true)
 
-The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
+The Service Framework package by the [Reality Collective](https://www.realitycollective.net/). This package is an extensible service framework to build highly performant components for your Unity projects.
 
 [![openupm](https://img.shields.io/npm/v/com.realitycollective.service-framework?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.realitycollective.service-framework/)
 [![Discord](https://img.shields.io/discord/597064584980987924.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/hF7TtRCFmB)
@@ -21,19 +21,33 @@ The Service framework provides a service repository for enabling background serv
 ## Requirements
 
 - [Unity 2021.3 or above](https://unity.com/)
-- [RealityCOllective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+- [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
 
-### OpenUPM
+## Installation
 
-The simplest way to getting started using the Service Framework package in your project is via OpenUPM. Visit [OpenUPM](https://openupm.com/docs/) to learn more about it. Once you have the OpenUPM CLI set up use the following command to add the package to your project:
+Make sure to always use the same source for all toolkit modules. Avoid using different installation sources within the same project. We provide the following ways to install Reality Toolkit modules:
+
+### Method 1: Using Package Manager for git users
+
+1. Open the Package Manager using the Window menu -> Package Manager
+
+2. Inside the Package Manager, click on the "+" button on the top left and select "Add package from git URL..."
+
+3. Input the following URL: https://github.com/realitycollective/com.realitycollective.service-framework.git and click "Add".
+
+### Method 2: OpenUPM
 
 ```text
     openupm add com.realitycollective.service-framework
 ```
 
+### Method 3: Unity Asset Store
+
+This option will be available soon.
+
 ## Use cases
 
-The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed [Reality Toolkit](https://www.realitytoolkit.io/).  These utilise the framework to enable such use cases as:
+The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed [Reality Toolkit](https://realitytoolkit.realitycollective.net/).  These utilise the framework to enable such use cases as:
 
 - A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
 - An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
@@ -93,10 +107,10 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 
 ## Related Articles
 
-- [Welcome to the Service Framework](https://service-framework.realitycollective.io/docs/get-started)
-- [Introduction](https://service-framework.realitycollective.io/docs/basics/introduction)
-- [Creating your first service](https://service-framework.realitycollective.io/docs/basics/getting_started)
-- [Roadmap](https://service-framework.realitycollective.io/docs/basics/roadmap)
+- [Welcome to the Service Framework](https://serviceframework.realitycollective.net/docs/get-started)
+- [Introduction](https://serviceframework.realitycollective.net/docs/basics/introduction)
+- [Creating your first service](https://serviceframework.realitycollective.net/docs/basics/getting_started)
+- [Roadmap](https://https://serviceframework.realitycollective.net/docs/basics/roadmap)
 
 ---
 

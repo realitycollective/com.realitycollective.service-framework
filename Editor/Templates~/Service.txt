@@ -36,12 +36,6 @@ namespace #NAMESPACE#
         }
 
         /// <inheritdoc />
-        public override void Enable()
-        {
-            // The Unity "Enable" MonoBehaviour event, this is called when the Service Manager Instance receives the Enable Event.
-        }
-
-        /// <inheritdoc />
         public override void Update()
         {
             // The Unity "Update" MonoBehaviour, this is called when the Service Manager Instance receives the Update Event.
@@ -57,12 +51,6 @@ namespace #NAMESPACE#
         public override void FixedUpdate()
         {
             // The Unity "FixedUpdate" MonoBehaviour, this is called when the Service Manager Instance receives the FixedUpdate Event.
-        }
-
-        /// <inheritdoc />
-        public override void Disable()
-        {
-            // The Unity "Disable" MonoBehaviour, this is called when the Service Manager Instance receives the Disable Event.
         }
 
         /// <inheritdoc />

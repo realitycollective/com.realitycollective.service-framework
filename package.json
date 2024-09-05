@@ -8,9 +8,9 @@
     "Services",
     "Extensions"
   ],
-  "version": "1.0.7",
+  "version": "1.0.8-pre.8",
   "unity": "2020.3",
-  "homepage": "https://realitycollective.io",
+  "homepage": "https://serviceframework.realitycollective.net/",
   "bugs": {
     "url": "https://github.com/realitycollective/com.realitycollective.service-framework/issues"
   },
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "com.unity.ugui": "1.0.0",
-    "com.realitycollective.utilities": "1.0.12"
+    "com.realitycollective.utilities": "1.0.13",
+    "com.unity.test-framework": "1.1.33"
   }
 }

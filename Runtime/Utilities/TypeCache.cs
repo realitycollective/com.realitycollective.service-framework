@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace RealityCollective.ServiceFramework
 {
-    public static class TypeCache 
+    public static class TypeCache
     {
         private static readonly Dictionary<Guid, Type> typeCache = new Dictionary<Guid, Type>();
 

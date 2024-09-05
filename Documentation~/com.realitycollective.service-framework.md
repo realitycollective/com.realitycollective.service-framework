@@ -1,6 +1,6 @@
 # Service Framework
 
-The Service Framework package by the [Reality Collective](https://www.realityCollective.io). This package is an extensible service framework to build highly performant components for your Unity projects.
+The Service Framework package by the [Reality Collective](https://www.realitycollective.net/). This package is an extensible service framework to build highly performant components for your Unity projects.
 
 ## Overview
 
@@ -26,7 +26,7 @@ The simplest way to getting started using the utilities package in your project 
 
 ## Use cases
 
-The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed [Reality Toolkit](https://www.realitytoolkit.io/).  These utilise the framework to enable such use cases as:
+The service framework has been the foundation behind such toolkit's as Microsoft's MRTK and open source projects like the XRTK and newly formed [Reality Toolkit](https://realitytoolkit.realitycollective.net/).  These utilise the framework to enable such use cases as:
 
 - A platform independent input system - A single service able to route input data from multiple controllers on various platforms, each controller only activates on the platform it was designed for.
 - An Authentication service - Able to integrate with multiple authentication providers as needed through a single interface.
@@ -84,10 +84,10 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 
 ## Related Articles
 
-- [Welcome to the Service Framework](https://service-framework.realitycollective.io/docs/get-started)
-- [Introduction](https://service-framework.realitycollective.io/docs/basics/introduction)
-- [Creating your first service](https://service-framework.realitycollective.io/docs/basics/getting_started)
-- [Roadmap](https://service-framework.realitycollective.io/docs/basics/roadmap)
+- [Welcome to the Service Framework](https://serviceframework.realitycollective.net/docs/get-started)
+- [Introduction](https://serviceframework.realitycollective.net/docs/basics/introduction)
+- [Creating your first service](https://serviceframework.realitycollective.net/docs/basics/getting_started)
+- [Roadmap](https://https://serviceframework.realitycollective.net/docs/basics/roadmap)
 
 ---
 
