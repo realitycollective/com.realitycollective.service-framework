@@ -1048,18 +1048,29 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (!CanGetService(interfaceType, serviceName)) { return false; }
 
+
             if (activeServices.TryGetValue(interfaceType, out var service))
             {
                 serviceInstance = service;
-
-                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+            }
+            else
+            {
+                foreach (var serviceInhertance in activeServices)
                 {
-                    return true;
+                    if (interfaceType.IsAssignableFrom(serviceInhertance.Key))
+                    {
+                        serviceInstance = serviceInhertance.Value;
+                        break;
+                    }
                 }
-
-                serviceInstance = null;
             }
 
+            if (serviceInstance != null && CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+            {
+                return true;
+            }
+
+            serviceInstance = null;
             return false;
         }
 
