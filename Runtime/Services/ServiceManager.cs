@@ -10,6 +10,7 @@ using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -717,6 +718,12 @@ namespace RealityCollective.ServiceFramework.Services
                 return false;
             }
 
+            if (!TryInjectDependentServices(concreteType, ref args))
+            {
+                Debug.LogError($"Failed to register the {concreteType.Name} service due to missing dependencies. Ensure all dependencies are registered prior to registering this service.");
+                return false;
+            }
+
             IService serviceInstance;
 
             try
@@ -748,6 +755,50 @@ namespace RealityCollective.ServiceFramework.Services
                 return true;
             }
             return TryRegisterService(typeof(T), serviceInstance);
+        }
+
+        private bool TryInjectDependentServices(Type concreteType, ref object[] args)
+        {
+            args ??= new object[0];
+
+            ConstructorInfo[] constructors = concreteType.GetConstructors();
+            if (constructors.Length == 0)
+            {
+                Debug.LogError($"Failed to find a constructor for {concreteType.Name}!");
+                return false;
+            }
+
+            // we are only focusing on the primary constructor for now.
+            var primaryConstructor = constructors[0];
+
+            ParameterInfo[] parameters = primaryConstructor.GetParameters();
+
+            // If there are no additional dependencies other than the base 3 (Name, Priority, Profile), then we can skip this.
+            if (parameters.Length == 0 || parameters.Length == args.Length)
+            {
+                return true;
+            }
+
+            Debug.Log($"Constructor: {primaryConstructor}");
+
+            foreach (var parameter in parameters)
+            {
+                if (parameter.ParameterType.IsInterface && typeof(IService).IsAssignableFrom(parameter.ParameterType))
+                {
+                    if (TryGetService(parameter.ParameterType, out var dependency))
+                    {
+                        Debug.Log($"Injecting {dependency.Name} into {parameter.Name}");
+                        args = args.AddItem(dependency);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to find an {parameter.ParameterType.Name} service to inject into {parameter.Name}!");
+                    }
+                }
+            }
+
+            // Does the args length match the resolved argument count, base Arguments plus resolved dependencies.
+            return parameters.Length == args.Length;
         }
 
         /// <summary>
@@ -1034,6 +1085,16 @@ namespace RealityCollective.ServiceFramework.Services
         {
             service = GetService<T>(false);
             return service != null;
+        }
+
+        /// <summary>
+        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
+        /// </summary>
+        /// <param name="interfaceType">Interface type of the service being requested.</param>
+        /// <param name="serviceInstance">return parameter of the function.</param>
+        public bool TryGetService(Type interfaceType, out IService service)
+        {
+            return TryGetService(interfaceType, string.Empty, out service);
         }
 
         /// <summary>
