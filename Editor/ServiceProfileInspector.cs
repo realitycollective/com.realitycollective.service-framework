@@ -31,6 +31,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
         private List<string> excludedProperties = new List<string> { "m_Script", nameof(configurations) };
 
         private SerializedProperty configurations; // Cannot be auto property bc field is serialized.
+        private SerializedProperty automaticallyOrderServices;
 
         protected SerializedProperty Configurations => configurations;
 
@@ -95,6 +96,7 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
             base.OnEnable();
 
             configurations = serializedObject.FindProperty(nameof(configurations));
+            automaticallyOrderServices = serializedObject.FindProperty(nameof(automaticallyOrderServices));
 
             Debug.Assert(configurations != null);
 
@@ -156,6 +158,11 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
 
             if (GUI.changed)
             {
+                if (automaticallyOrderServices.boolValue)
+                {
+                    Debug.Log("AutomaticallyOrderServices changed to " + automaticallyOrderServices.boolValue);
+                    ServiceManager.Instance.ResetProfile(ServiceManager.Instance.ActiveProfile);
+                }
                 serializedObject.ApplyModifiedProperties();
             }
 
@@ -468,7 +475,6 @@ namespace RealityCollective.ServiceFramework.Editor.Profiles
             platformIndex = EditorGUILayout.Popup("Platform Target", platformIndex, Platforms.Select(p => p.Name).ToArray());
             EditorGUILayout.Space();
             ServiceFrameworkInspectorUtility.HorizontalLine(Color.gray);
-
             if (EditorGUI.EndChangeCheck())
             {
                 for (int i = 0; i < Platforms.Count; i++)

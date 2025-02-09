@@ -23,6 +23,15 @@ namespace RealityCollective.ServiceFramework.Definitions
         public bool InitializeOnPlay => initializeOnPlay;
 
         [SerializeField]
+        [Tooltip("The service manager will attempt to order services based on their dependencies.")]
+        private bool automaticallyOrderServices = true;
+        
+        /// <summary>
+        /// The service manager will attempt to order services based on their dependencies.
+        /// </summary>
+        public bool AutomaticallyOrderServices => automaticallyOrderServices;
+
+        [SerializeField]
         [Tooltip("Ensure that the Service Manager Instance is not destroyed on scene change.")]
         private bool doNotDestroyServiceManagerOnLoad = true;
 

@@ -421,6 +421,13 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
+#if UNITY_EDITOR
+                if (ActiveProfile.AutomaticallyOrderServices)
+                {
+                    // Try Sort the services by dependencies
+                    ActiveProfile.ServiceConfigurations = ActiveProfile.ServiceConfigurations.OrderServiceConfigurationByDependencies();
+                }
+#endif
                 TryRegisterServiceConfigurations(ActiveProfile.ServiceConfigurations);
             }
 
