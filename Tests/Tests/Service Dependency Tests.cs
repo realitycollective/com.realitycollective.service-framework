@@ -67,7 +67,7 @@ namespace RealityCollective.ServiceFramework.Tests.N_ServiceDependency
 
             var config2 = new ServiceConfiguration<ITestDependencyService1>(typeof(DependencyTestService1), "Dependency Service", 1, AllPlatforms.Platforms, null);
             var serviceResult2 = testServiceManager.TryCreateAndRegisterService<ITestDependencyService1>(config2, out ITestDependencyService1 testService2);
-            LogAssert.Expect(LogType.Error, new Regex("Failed to find an ITestService1 service to inject into testService1!"));
+            LogAssert.Expect(LogType.Error, new Regex("Failed to find an ITestService1 service to inject into parameter testService1 for service DependencyTestService1!"));
             LogAssert.Expect(LogType.Error, new Regex("Failed to register the DependencyTestService1 service due to missing dependencies. Ensure all dependencies are registered prior to registering this service."));
 
             // Tests
