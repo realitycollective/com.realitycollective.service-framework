@@ -1122,7 +1122,7 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            if (serviceInstance != null && CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+            if (serviceInstance != null && CheckServiceMatch(interfaceType, serviceName, interfaceType, serviceInstance))
             {
                 return true;
             }
