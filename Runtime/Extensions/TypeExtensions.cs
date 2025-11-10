@@ -15,7 +15,7 @@ namespace RealityCollective.ServiceFramework.Extensions
     {
         private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
 
-        internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
+        internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType = null)
         {
             if (serviceType == null)
             {
