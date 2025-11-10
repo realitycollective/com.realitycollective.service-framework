@@ -1087,7 +1087,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
         /// </summary>
         /// <param name="interfaceType">Interface type of the service being requested.</param>
-        /// <param name="serviceInstance">return parameter of the function.</param>
+        /// <param name="service">return parameter of the function.</param>
         public bool TryGetService(Type interfaceType, out IService service)
         {
             return TryGetService(interfaceType, string.Empty, out service);
