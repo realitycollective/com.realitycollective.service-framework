@@ -54,7 +54,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
 #else
                 var serviceManager = GameObject.FindObjectOfType<GlobalServiceManager>();
 #endif
-                if (serviceManager.IsNull())
+                if (serviceManager.IsNotNull())
                 {
                     rootProfile = serviceManager.Manager.ActiveProfile;
                 }
