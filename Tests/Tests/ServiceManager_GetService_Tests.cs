@@ -93,10 +93,11 @@ namespace RealityCollective.ServiceFramework.Tests.M_ServiceManager_GetService
 
             // Assert
             Assert.IsNotNull(retrievedServices, $"Expected return value from {nameof(serviceManager.GetServices)} to not be null.");
-            Assert.IsNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to be null.");
+            Assert.IsNotNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to not be null.");
             Assert.AreEqual(1, retrievedServices.Count, $"Expected {1} service to be returned, but got {retrievedServices.Count} instead.");
             Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service type does not match expected type {nameof(ITestService)}.");
             Assert.IsTrue(retrievedServices[0] == serviceInstance, $"Returned service is not the expected instance.");
+            Assert.IsTrue(retrievedService == serviceInstance, $"Returned service is not the expected instance.");
         }
 
         /// <summary>
@@ -120,10 +121,11 @@ namespace RealityCollective.ServiceFramework.Tests.M_ServiceManager_GetService
 
             // Assert
             Assert.IsNotNull(retrievedServices, $"Expected return value from {nameof(serviceManager.GetServices)} to not be null.");
-            Assert.IsNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to be null.");
+            Assert.IsNotNull(retrievedService, $"Expected return value from {nameof(serviceManager.GetService)} to not be null.");
             Assert.AreEqual(2, retrievedServices.Count, $"Expected {2} service to be returned, but got {retrievedServices.Count} instead.");
             Assert.IsTrue(retrievedServices[0] is ITestService, $"Returned service type does not match expected type {nameof(ITestService)}.");
             Assert.IsTrue(retrievedServices[0] == serviceInstance, $"Returned service is not the expected instance.");
+            Assert.IsTrue(retrievedService == serviceInstance, $"Returned service is not the expected instance.");
         }
 
         /// <summary>

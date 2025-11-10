@@ -10,6 +10,7 @@ using RealityCollective.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -420,8 +421,7 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (ActiveProfile?.ServiceConfigurations != null)
             {
-                var orderedConfig = ActiveProfile.ServiceConfigurations.OrderBy(s => s.Priority).ToArray();
-                TryRegisterServiceConfigurations(orderedConfig);
+                TryRegisterServiceConfigurations(ActiveProfile.ServiceConfigurations);
             }
 
             var activeSceneName = SceneManager.GetActiveScene().name;
@@ -717,6 +717,12 @@ namespace RealityCollective.ServiceFramework.Services
                 return false;
             }
 
+            if (!TryInjectDependentServices(concreteType, ref args))
+            {
+                Debug.LogError($"Failed to register the {concreteType.Name} service due to missing dependencies. Ensure all dependencies are registered prior to registering this service.");
+                return false;
+            }
+
             IService serviceInstance;
 
             try
@@ -748,6 +754,47 @@ namespace RealityCollective.ServiceFramework.Services
                 return true;
             }
             return TryRegisterService(typeof(T), serviceInstance);
+        }
+
+        private bool TryInjectDependentServices(Type concreteType, ref object[] args)
+        {
+            args ??= new object[0];
+
+            ConstructorInfo[] constructors = concreteType.GetConstructors();
+            if (constructors.Length == 0)
+            {
+                Debug.LogError($"Failed to find a constructor for {concreteType.Name}!");
+                return false;
+            }
+
+            // we are only focusing on the primary constructor for now.
+            var primaryConstructor = constructors[0];
+
+            ParameterInfo[] parameters = primaryConstructor.GetParameters();
+
+            // If there are no additional dependencies other than the base 3 (Name, Priority, Profile), then we can skip this.
+            if (parameters.Length == 0 || parameters.Length == args.Length)
+            {
+                return true;
+            }
+
+            foreach (var parameter in parameters)
+            {
+                if (parameter.ParameterType.IsInterface && typeof(IService).IsAssignableFrom(parameter.ParameterType))
+                {
+                    if (TryGetService(parameter.ParameterType, out var dependency))
+                    {
+                        args = args.AddItem(dependency);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to find an {parameter.ParameterType.Name} service to inject into parameter {parameter.Name} for service {concreteType.Name}!");
+                    }
+                }
+            }
+
+            // Does the args length match the resolved argument count, base Arguments plus resolved dependencies.
+            return parameters.Length == args.Length;
         }
 
         /// <summary>
@@ -1040,6 +1087,16 @@ namespace RealityCollective.ServiceFramework.Services
         /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
         /// </summary>
         /// <param name="interfaceType">Interface type of the service being requested.</param>
+        /// <param name="service">return parameter of the function.</param>
+        public bool TryGetService(Type interfaceType, out IService service)
+        {
+            return TryGetService(interfaceType, string.Empty, out service);
+        }
+
+        /// <summary>
+        /// Retrieve the first <see cref="IService"/> from the <see cref="ActiveServices"/> that meets the selected type and name.
+        /// </summary>
+        /// <param name="interfaceType">Interface type of the service being requested.</param>
         /// <param name="serviceName">Name of the specific service.</param>
         /// <param name="serviceInstance">return parameter of the function.</param>
         public bool TryGetService(Type interfaceType, string serviceName, out IService serviceInstance)
@@ -1048,18 +1105,29 @@ namespace RealityCollective.ServiceFramework.Services
 
             if (!CanGetService(interfaceType, serviceName)) { return false; }
 
+
             if (activeServices.TryGetValue(interfaceType, out var service))
             {
                 serviceInstance = service;
-
-                if (CheckServiceMatch(interfaceType, serviceName, interfaceType, service))
+            }
+            else
+            {
+                foreach (var serviceInhertance in activeServices)
                 {
-                    return true;
+                    if (interfaceType.IsAssignableFrom(serviceInhertance.Key))
+                    {
+                        serviceInstance = serviceInhertance.Value;
+                        break;
+                    }
                 }
-
-                serviceInstance = null;
             }
 
+            if (serviceInstance != null && CheckServiceMatch(interfaceType, serviceName, interfaceType, serviceInstance))
+            {
+                return true;
+            }
+
+            serviceInstance = null;
             return false;
         }
 
@@ -1617,7 +1685,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <param name="profile">The profile instance.</param>
         /// <param name="rootProfile">Optional root profile reference.</param>
         /// <returns>True if a <see cref="TService"/> type is matched and a valid <see cref="TProfile"/> is found, otherwise false.</returns>
-        public bool TryGetServiceProfile<TService, TProfile>(out TProfile profile, ServiceProvidersProfile rootProfile = null)
+        public bool TryGetServiceProfile<TService, TProfile>(out TProfile profile, BaseServiceProfile<IService> rootProfile = null)
             where TService : IService
             where TProfile : BaseProfile
         {
