@@ -22,7 +22,7 @@ namespace RealityCollective.ServiceFramework.Tests.Services
         public override void Initialize()
         {
             //base.Initialize();
-            Debug.Log($"{TestName} is Initialised");
+            Debug.Log($"{TestName} is Initialized");
         }
 
         public override bool RegisterServiceModules => false;
