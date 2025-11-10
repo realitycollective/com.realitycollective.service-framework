@@ -8,7 +8,9 @@ using RealityCollective.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace RealityCollective.ServiceFramework.Editor.Packages
 {
@@ -40,24 +42,32 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
                 return;
             }
 
-            ServiceProvidersProfile rootProfile;
+            ServiceProvidersProfile rootProfile = null;
 
             if (ServiceManager.IsActiveAndInitialized)
             {
                 rootProfile = ServiceManager.Instance.ActiveProfile;
             }
-            else
+            else if (!string.IsNullOrEmpty(SceneManager.GetActiveScene().name))
             {
-                var availableRootProfiles = ScriptableObjectExtensions.GetAllInstances<ServiceProvidersProfile>();
-                rootProfile = availableRootProfiles.Length > 0 ? availableRootProfiles[0] : null;
+                var activeScene = SceneManager.GetActiveScene();
+#if UNITY_2023_1_OR_NEWER
+                var serviceManager = GameObject.FindFirstObjectByType<GlobalServiceManager>();
+#else
+                var serviceManager = GameObject.FindObjectOfType<GlobalServiceManager>();
+#endif
+                if (serviceManager.IsNull())
+                {
+                    rootProfile = serviceManager.Manager.ActiveProfile;
+                }
             }
 
             // Only if a root profile is available at all it makes sense to display the
-            // packkage configuration import dialog. If the user does not have a root profile yet,
+            // package configuration import dialog. If the user does not have a root profile yet,
             // for whatever reason, there is nothing we can do here.
             if (rootProfile.IsNull())
             {
-                EditorUtility.DisplayDialog("Attention!", $"Each service and service module in the package will need to be manually registered as no existing Service Framework Instance was found.\nUse the {nameof(PackageInstallerProfile)} in the Profiles folder for the package once a Service Manager has been configured.", "OK");
+                EditorUtility.DisplayDialog("Attention!", $"Each service and service module in the package will need to be manually registered as no existing Service Framework Instance was found in the Active Scene.\nUse the {nameof(PackageInstallerProfile)} in the Profiles folder for the package to install the default configuration.", "OK");
                 return;
             }
 
