@@ -990,6 +990,13 @@ namespace RealityCollective.ServiceFramework.Services
                 {
                     activeServices.Remove(interfaceType);
                     activeServicesList.Remove(serviceInstance);
+                    
+                    // Invalidate cache entry for this service type
+                    if (serviceCache.ContainsKey(interfaceType))
+                    {
+                        serviceCache.Remove(interfaceType);
+                    }
+                    
                     return true;
                 }
                 else
@@ -1004,6 +1011,12 @@ namespace RealityCollective.ServiceFramework.Services
                     }
                     activeServices.Remove(serviceToRemove);
                     activeServicesList.Remove(serviceInstance);
+                    
+                    // Invalidate cache entry for this service type
+                    if (serviceToRemove != null && serviceCache.ContainsKey(serviceToRemove))
+                    {
+                        serviceCache.Remove(serviceToRemove);
+                    }
                 }
                 return true;
             }
