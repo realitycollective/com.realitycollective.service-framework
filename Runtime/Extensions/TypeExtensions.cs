@@ -15,6 +15,119 @@ namespace RealityCollective.ServiceFramework.Extensions
     {
         private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
 
+        // Reflection caches to avoid repeated expensive reflection operations
+        private static readonly Dictionary<Type, ConstructorInfo> constructorCache = new Dictionary<Type, ConstructorInfo>();
+        private static readonly Dictionary<Type, ParameterInfo[]> parameterCache = new Dictionary<Type, ParameterInfo[]>();
+        private static readonly Dictionary<Type, Type[]> interfaceCache = new Dictionary<Type, Type[]>();
+        private static readonly object reflectionCacheLock = new object();
+
+        /// <summary>
+        /// Gets the primary constructor for a type with caching to avoid repeated reflection.
+        /// </summary>
+        /// <param name="type">The type to get the constructor for.</param>
+        /// <param name="constructor">The cached or retrieved constructor.</param>
+        /// <returns>True if a constructor was found, false otherwise.</returns>
+        internal static bool TryGetCachedConstructor(this Type type, out ConstructorInfo constructor)
+        {
+            if (constructorCache.TryGetValue(type, out constructor))
+            {
+                return constructor != null;
+            }
+
+            lock (reflectionCacheLock)
+            {
+                if (constructorCache.TryGetValue(type, out constructor))
+                {
+                    return constructor != null;
+                }
+
+                var constructors = type.GetConstructors();
+                constructor = constructors.Length > 0 ? constructors[0] : null;
+                constructorCache[type] = constructor;
+                return constructor != null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the parameters for a constructor with caching to avoid repeated reflection.
+        /// </summary>
+        /// <param name="constructor">The constructor to get parameters for.</param>
+        /// <param name="declaringType">The type that declares the constructor (used as cache key).</param>
+        /// <returns>The cached or retrieved parameter array.</returns>
+        internal static ParameterInfo[] GetCachedParameters(this ConstructorInfo constructor, Type declaringType)
+        {
+            if (parameterCache.TryGetValue(declaringType, out var parameters))
+            {
+                return parameters;
+            }
+
+            lock (reflectionCacheLock)
+            {
+                if (parameterCache.TryGetValue(declaringType, out parameters))
+                {
+                    return parameters;
+                }
+
+                parameters = constructor.GetParameters();
+                parameterCache[declaringType] = parameters;
+                return parameters;
+            }
+        }
+
+        /// <summary>
+        /// Gets the interfaces for a type with caching to avoid repeated reflection.
+        /// Filters out ignored namespaces based on the provided filter.
+        /// </summary>
+        /// <param name="type">The type to get interfaces for.</param>
+        /// <param name="ignoredNamespaces">Array of namespace full names to filter out.</param>
+        /// <returns>The cached or retrieved filtered interface array.</returns>
+        internal static Type[] GetCachedInterfaces(this Type type, string[] ignoredNamespaces = null)
+        {
+            if (interfaceCache.TryGetValue(type, out var cachedInterfaces))
+            {
+                return cachedInterfaces;
+            }
+
+            var interfaces = type.GetInterfaces();
+            var detectedInterfaces = new List<Type>();
+
+            if (ignoredNamespaces != null && ignoredNamespaces.Length > 0)
+            {
+                for (int i = 0; i < interfaces.Length; i++)
+                {
+                    bool isIgnored = false;
+                    for (int j = 0; j < ignoredNamespaces.Length; j++)
+                    {
+                        if (interfaces[i].FullName == ignoredNamespaces[j])
+                        {
+                            isIgnored = true;
+                            break;
+                        }
+                    }
+                    if (!isIgnored)
+                    {
+                        detectedInterfaces.Add(interfaces[i]);
+                    }
+                }
+            }
+            else
+            {
+                detectedInterfaces.AddRange(interfaces);
+            }
+
+            var result = detectedInterfaces.ToArray();
+
+            lock (reflectionCacheLock)
+            {
+                if (!interfaceCache.ContainsKey(type))
+                {
+                    interfaceCache[type] = result;
+                }
+            }
+
+            return result;
+        }
+
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
         {
             if (serviceType == null)

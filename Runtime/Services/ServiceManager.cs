@@ -155,6 +155,10 @@ namespace RealityCollective.ServiceFramework.Services
 
         // ReSharper disable once InconsistentNaming
         private static readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
+        
+        // Cache platform types to avoid expensive assembly scanning on every initialization
+        private static Type[] cachedPlatformTypes = null;
+        private static readonly object platformCacheLock = new object();
 
         /// <summary>
         /// The list of active platforms detected by the <see cref="ServiceManager"/>.
@@ -757,17 +761,15 @@ namespace RealityCollective.ServiceFramework.Services
         {
             args ??= new object[0];
 
-            ConstructorInfo[] constructors = concreteType.GetConstructors();
-            if (constructors.Length == 0)
+            // Get cached constructor using TypeExtensions
+            if (!concreteType.TryGetCachedConstructor(out var primaryConstructor))
             {
                 Debug.LogError($"Failed to find a constructor for {concreteType.Name}!");
                 return false;
             }
 
-            // we are only focusing on the primary constructor for now.
-            var primaryConstructor = constructors[0];
-
-            ParameterInfo[] parameters = primaryConstructor.GetParameters();
+            // Get cached parameters using TypeExtensions
+            var parameters = primaryConstructor.GetCachedParameters(concreteType);
 
             // If there are no additional dependencies other than the base 3 (Name, Priority, Profile), then we can skip this.
             if (parameters.Length == 0 || parameters.Length == args.Length)
@@ -1722,32 +1724,12 @@ namespace RealityCollective.ServiceFramework.Services
 
         private Type[] GetInterfacesFromType(Type objectType)
         {
-            var interfaces = objectType.GetInterfaces();
-            var interfaceCount = interfaces.Length;
-            List<Type> detectedInterfaces = new List<Type>();
-
-            for (int i = 0; i < interfaceCount; i++)
-            {
-                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
-
-                detectedInterfaces.Add(interfaces[i]);
-            }
-            return detectedInterfaces.ToArray();
+            return objectType.GetCachedInterfaces(ignoredNamespaces);
         }
 
         private Type[] GetInterfacesFromType(object concreteObject)
         {
-            var interfaces = concreteObject.GetType().GetInterfaces();
-            var interfaceCount = interfaces.Length;
-            List<Type> detectedInterfaces = new List<Type>();
-
-            for (int i = 0; i < interfaceCount; i++)
-            {
-                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
-
-                detectedInterfaces.Add(interfaces[i]);
-            }
-            return detectedInterfaces.ToArray();
+            return concreteObject.GetType().GetCachedInterfaces(ignoredNamespaces);
         }
 
         /// <summary>
@@ -1758,14 +1740,25 @@ namespace RealityCollective.ServiceFramework.Services
             activePlatforms.Clear();
             availablePlatforms.Clear();
 
-            var platformTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes())
-                .Where(type => typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
-                .OrderBy(type => type.Name);
+            // Use cached platform types if available, otherwise scan assemblies once
+            if (cachedPlatformTypes == null)
+            {
+                lock (platformCacheLock)
+                {
+                    if (cachedPlatformTypes == null)
+                    {
+                        cachedPlatformTypes = AppDomain.CurrentDomain.GetAssemblies()
+                            .SelectMany(assembly => assembly.GetTypes())
+                            .Where(type => typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+                            .OrderBy(type => type.Name)
+                            .ToArray();
+                    }
+                }
+            }
 
             var platformOverrides = new List<Type>();
 
-            foreach (var platformType in platformTypes)
+            foreach (var platformType in cachedPlatformTypes)
             {
                 IPlatform platform = null;
 
