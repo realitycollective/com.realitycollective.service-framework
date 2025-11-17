@@ -1222,11 +1222,14 @@ namespace RealityCollective.ServiceFramework.Services
         public List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
         {
             var pooledList = RentList();
-            var services = new List<T>();
+            List<T> services = null;
 
             try
             {
                 TryGetServicesInternal<T>(interfaceType, serviceName, pooledList);
+                
+                // Pre-size output list to avoid resizing
+                services = new List<T>(pooledList.Count);
                 
                 // Copy typed results to output list
                 for (int i = 0; i < pooledList.Count; i++)
@@ -1239,7 +1242,7 @@ namespace RealityCollective.ServiceFramework.Services
                 ReturnList(pooledList);
             }
 
-            return services;
+            return services ?? new List<T>();
         }
 
         /// <summary>
@@ -1551,14 +1554,14 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
-            var destroyingActiveServices = activeServicesList.ToArray();
+            var count = activeServicesList.Count;
 
-            // Destroy all service
-            for (int i = 0; i < destroyingActiveServices.Length; i++)
+            // Destroy all services - iterate backwards to avoid issues with list modification
+            for (int i = count - 1; i >= 0; i--)
             {
                 try
                 {
-                    destroyingActiveServices[i].Destroy();
+                    activeServicesList[i].Destroy();
                 }
                 catch (Exception e)
                 {
@@ -1566,12 +1569,12 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            // Dispose all service
-            for (int i = 0; i < destroyingActiveServices.Length; i++)
+            // Dispose all services
+            for (int i = count - 1; i >= 0; i--)
             {
                 try
                 {
-                    destroyingActiveServices[i].Dispose();
+                    activeServicesList[i].Dispose();
                 }
                 catch (Exception e)
                 {
@@ -1873,7 +1876,8 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            var platformOverrides = new List<Type>();
+            // Pre-size with typical platform count to avoid resizing
+            var platformOverrides = new List<Type>(8);
 
             foreach (var platformType in cachedPlatformTypes)
             {
