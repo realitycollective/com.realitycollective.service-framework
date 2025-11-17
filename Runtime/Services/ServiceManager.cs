@@ -1750,11 +1750,34 @@ namespace RealityCollective.ServiceFramework.Services
                 {
                     if (cachedPlatformTypes == null)
                     {
-                        cachedPlatformTypes = AppDomain.CurrentDomain.GetAssemblies()
-                            .SelectMany(assembly => assembly.GetTypes())
-                            .Where(type => typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
-                            .OrderBy(type => type.Name)
-                            .ToArray();
+                        var platformTypesList = new List<Type>(32);
+                        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                        
+                        for (int i = 0; i < assemblies.Length; i++)
+                        {
+                            Type[] types;
+                            try
+                            {
+                                types = assemblies[i].GetTypes();
+                            }
+                            catch
+                            {
+                                continue; // Skip assemblies that can't be loaded
+                            }
+                            
+                            for (int j = 0; j < types.Length; j++)
+                            {
+                                var type = types[j];
+                                if (typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+                                {
+                                    platformTypesList.Add(type);
+                                }
+                            }
+                        }
+                        
+                        // Sort by name for deterministic ordering
+                        platformTypesList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+                        cachedPlatformTypes = platformTypesList.ToArray();
                     }
                 }
             }
