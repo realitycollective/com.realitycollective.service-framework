@@ -728,7 +728,7 @@ namespace RealityCollective.ServiceFramework.Services
 
             try
             {
-                serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
+                serviceInstance = concreteType.FastCreateInstance(args) as IService;
             }
             catch (System.Reflection.TargetInvocationException e)
             {
@@ -1764,7 +1764,7 @@ namespace RealityCollective.ServiceFramework.Services
 
                 try
                 {
-                    platform = Activator.CreateInstance(platformType) as IPlatform;
+                    platform = platformType.FastCreateInstance() as IPlatform;
                 }
                 catch (Exception e)
                 {
