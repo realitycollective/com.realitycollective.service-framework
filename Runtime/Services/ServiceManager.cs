@@ -241,11 +241,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 if (instanceGameObject.IsNull())
                 {
-#if UNITY_2023_1_OR_NEWER
                     serviceManagerInstance = UnityEngine.Object.FindFirstObjectByType<GlobalServiceManager>();
-#else
-                    serviceManagerInstance = UnityEngine.Object.FindObjectOfType<GlobalServiceManager>();
-#endif
                     if (serviceManagerInstance.IsNull())
                     {
                         var go = new GameObject(nameof(ServiceManager));
@@ -1897,11 +1893,8 @@ namespace RealityCollective.ServiceFramework.Services
 
         private static void EnsureEventSystemSetup()
         {
-#if UNITY_2023_1_OR_NEWER
             var eventSystems = UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
-#else
-            var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
-#endif
+
             if (eventSystems.Length == 0)
             {
                 new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
@@ -2015,11 +2008,7 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError("Selected Service Configurations to load are null or empty.");
                 return;
             }
-#if UNITY_2021_1_OR_NEWER
             sceneServiceConfigurations.TryAdd(sceneName, serviceConfigurations);
-#else
-            sceneServiceConfigurations.EnsureDictionaryItem(sceneName, serviceConfigurations);
-#endif
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -22,13 +22,8 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         private readonly Color proHeaderColor = new Color32(56, 56, 56, 255);
         private readonly Color defaultHeaderColor = new Color32(194, 194, 194, 255);
 
-#if UNITY_2019_1_OR_NEWER
         private const int headerYOffet = -6;
         private const int headerXOffset = 44;
-#else
-        private const int headerYOffet = 0;
-        private const int headerXOffset = 48;
-#endif
         /// <summary>
         /// Used as postfix for keys
         /// </summary>

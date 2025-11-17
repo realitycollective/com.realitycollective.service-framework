@@ -216,27 +216,27 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
                 Handles.color = Gizmos.color;
             }
 
-            Matrix4x4 angleMatrix = Matrix4x4.TRS(position, rotation, Handles.matrix.lossyScale);
+            Matrix4x4 angleMatrix = Matrix4x4.TRS(position, rotation, matrix.lossyScale);
 
             using (new Handles.DrawingScope(angleMatrix))
             {
                 var pointOffset = (height - (radius * 2)) / 2;
 
                 // Draw sideways
-                Handles.DrawWireArc(Vector3.up * pointOffset, Vector3.left, Vector3.back, -180, radius);
-                Handles.DrawLine(new Vector3(0, pointOffset, -radius), new Vector3(0, -pointOffset, -radius));
-                Handles.DrawLine(new Vector3(0, pointOffset, radius), new Vector3(0, -pointOffset, radius));
-                Handles.DrawWireArc(Vector3.down * pointOffset, Vector3.left, Vector3.back, 180, radius);
+                DrawWireArc(Vector3.up * pointOffset, Vector3.left, Vector3.back, -180, radius);
+                DrawLine(new Vector3(0, pointOffset, -radius), new Vector3(0, -pointOffset, -radius));
+                DrawLine(new Vector3(0, pointOffset, radius), new Vector3(0, -pointOffset, radius));
+                DrawWireArc(Vector3.down * pointOffset, Vector3.left, Vector3.back, 180, radius);
 
                 // Draw frontways
-                Handles.DrawWireArc(Vector3.up * pointOffset, Vector3.back, Vector3.left, 180, radius);
-                Handles.DrawLine(new Vector3(-radius, pointOffset, 0), new Vector3(-radius, -pointOffset, 0));
-                Handles.DrawLine(new Vector3(radius, pointOffset, 0), new Vector3(radius, -pointOffset, 0));
-                Handles.DrawWireArc(Vector3.down * pointOffset, Vector3.back, Vector3.left, -180, radius);
+                DrawWireArc(Vector3.up * pointOffset, Vector3.back, Vector3.left, 180, radius);
+                DrawLine(new Vector3(-radius, pointOffset, 0), new Vector3(-radius, -pointOffset, 0));
+                DrawLine(new Vector3(radius, pointOffset, 0), new Vector3(radius, -pointOffset, 0));
+                DrawWireArc(Vector3.down * pointOffset, Vector3.back, Vector3.left, -180, radius);
 
                 // Draw center
-                Handles.DrawWireDisc(Vector3.up * pointOffset, Vector3.up, radius);
-                Handles.DrawWireDisc(Vector3.down * pointOffset, Vector3.up, radius);
+                DrawWireDisc(Vector3.up * pointOffset, Vector3.up, radius);
+                DrawWireDisc(Vector3.down * pointOffset, Vector3.up, radius);
 
             }
         }
@@ -278,17 +278,17 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         {
             Vector3 position = origin + (direction.normalized * distance);
 
-            Handles.color = HandleColorAxis;
+            color = HandleColorAxis;
 
             if (autoSize)
             {
                 handleSize = Mathf.Lerp(handleSize, HandleUtility.GetHandleSize(position) * handleSize, 0.75f);
             }
 
-            Handles.DrawDottedLine(origin, position, DottedLineScreenSpace);
-            Handles.ArrowHandleCap(0, position, Quaternion.LookRotation(direction), handleSize * 2, EventType.Repaint);
+            DrawDottedLine(origin, position, DottedLineScreenSpace);
+            ArrowHandleCap(0, position, Quaternion.LookRotation(direction), handleSize * 2, EventType.Repaint);
 
-            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, Handles.CircleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, CircleHandleCap);
 
             if (recordUndo)
             {
@@ -318,14 +318,14 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <returns>The new <see cref="Vector3"/> value.</returns>
         public static Vector3 CircleMoveHandle(Object target, Vector3 position, float xScale = 1f, float yScale = 1f, float zScale = 1f, float handleSize = 0.2f, bool autoSize = true, bool recordUndo = true)
         {
-            Handles.color = HandleColorCircle;
+            color = HandleColorCircle;
 
             if (autoSize)
             {
                 handleSize = Mathf.Lerp(handleSize, HandleUtility.GetHandleSize(position) * handleSize, 0.75f);
             }
 
-            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, Handles.CircleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize, Vector3.zero, CircleHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -353,7 +353,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <returns>The new <see cref="Vector3"/> value.</returns>
         public static Vector3 SquareMoveHandle(Object target, Vector3 position, float xScale = 1f, float yScale = 1f, float zScale = 1f, float handleSize = 0.2f, bool autoSize = true, bool recordUndo = true)
         {
-            Handles.color = HandleColorSquare;
+            color = HandleColorSquare;
 
             if (autoSize)
             {
@@ -361,7 +361,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Multiply square handle to match other types
-            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 0.8f, Vector3.zero, Handles.RectangleHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 0.8f, Vector3.zero, RectangleHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -389,7 +389,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <returns>The new <see cref="Vector3"/> value.</returns>
         public static Vector3 SphereMoveHandle(Object target, Vector3 position, float xScale = 1f, float yScale = 1f, float zScale = 1f, float handleSize = 0.2f, bool autoSize = true, bool recordUndo = true)
         {
-            Handles.color = HandleColorSphere;
+            color = HandleColorSphere;
 
             if (autoSize)
             {
@@ -397,7 +397,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Multiply sphere handle size to match other types
-            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 2, Vector3.zero, Handles.SphereHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(position, handleSize * 2, Vector3.zero, SphereHandleCap);
 
             if (recordUndo && position != newPosition)
             {
@@ -426,7 +426,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <returns>The new <see cref="Vector3"/> value.</returns>
         public static Vector3 VectorHandle(Object target, Vector3 origin, Vector3 vector, bool normalize = true, bool clamp = true, float handleLength = 1f, float handleSize = 0.1f, bool recordUndo = true, bool autoSize = true)
         {
-            Handles.color = HandleColorTangent;
+            color = HandleColorTangent;
 
             if (autoSize)
             {
@@ -443,21 +443,21 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             else
             {
                 // If the handle isn't normalized, brighten based on distance to origin
-                Handles.color = Color.Lerp(Color.gray, HandleColorTangent, distanceToOrigin * 0.85f);
+                color = Color.Lerp(Color.gray, HandleColorTangent, distanceToOrigin * 0.85f);
 
                 if (clamp)
                 {
                     // To indicate that we're at the clamped limit, make the handle 'pop' slightly larger
                     if (distanceToOrigin >= 0.98f)
                     {
-                        Handles.color = Color.Lerp(HandleColorTangent, Color.white, 0.5f);
+                        color = Color.Lerp(HandleColorTangent, Color.white, 0.5f);
                         handleSize *= 1.5f;
                     }
                 }
             }
 
             // Draw a line from origin to origin + direction
-            Handles.DrawLine(origin, handlePosition);
+            DrawLine(origin, handlePosition);
 
             Quaternion rotation = Quaternion.identity;
             if (vector != Vector3.zero)
@@ -465,7 +465,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
                 rotation = Quaternion.LookRotation(vector);
             }
 
-            Vector3 newPosition = GetFreeMoveHandle(handlePosition, handleSize, Vector3.zero, Handles.DotHandleCap);
+            Vector3 newPosition = GetFreeMoveHandle(handlePosition, handleSize, Vector3.zero, DotHandleCap);
 
             if (recordUndo && handlePosition != newPosition)
             {
@@ -502,7 +502,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         /// <returns>The new <see cref="Quaternion"/> value.</returns>
         public static Quaternion RotationHandle(Object target, Vector3 position, Quaternion rotation, float handleSize = 0.2f, bool autoSize = true, bool recordUndo = true)
         {
-            Handles.color = HandleColorRotation;
+            color = HandleColorRotation;
 
             if (autoSize)
             {
@@ -510,16 +510,16 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
             }
 
             // Make rotation handles larger so they can overlay movement handles
-            Quaternion newRotation = Handles.FreeRotateHandle(rotation, position, handleSize * 2);
+            Quaternion newRotation = FreeRotateHandle(rotation, position, handleSize * 2);
 
             if (recordUndo)
             {
-                Handles.color = Handles.zAxisColor;
-                Handles.ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.forward), handleSize * 2, EventType.Repaint);
-                Handles.color = Handles.xAxisColor;
-                Handles.ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.right), handleSize * 2, EventType.Repaint);
-                Handles.color = Handles.yAxisColor;
-                Handles.ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.up), handleSize * 2, EventType.Repaint);
+                color = zAxisColor;
+                ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.forward), handleSize * 2, EventType.Repaint);
+                color = xAxisColor;
+                ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.right), handleSize * 2, EventType.Repaint);
+                color = yAxisColor;
+                ArrowHandleCap(0, position, Quaternion.LookRotation(newRotation * Vector3.up), handleSize * 2, EventType.Repaint);
 
                 if (rotation != newRotation)
                 {
@@ -536,11 +536,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         #region Utilities
         private static Vector3 GetFreeMoveHandle(Vector3 position, float handleSize, Vector3 snap, CapFunction capFunction)
         {
-#if UNITY_2022_1_OR_NEWER
-            return Handles.FreeMoveHandle(position, handleSize, snap, capFunction);
-#else
-            return Handles.FreeMoveHandle(position, Quaternion.identity, handleSize, snap, capFunction);
-#endif
+            return FreeMoveHandle(position, handleSize, snap, capFunction);
         }
         #endregion Utilities
     }
