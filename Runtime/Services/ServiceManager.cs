@@ -1252,7 +1252,7 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            return serviceCache.Count > 0;
+            return services.Count > 0;
         }
 
         public bool TryGetService(IService service, out IService serviceInstance)
