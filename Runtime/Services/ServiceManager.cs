@@ -139,6 +139,7 @@ namespace RealityCollective.ServiceFramework.Services
         #region Service Manager runtime service registry
 
         private readonly Dictionary<Type, IService> activeServices = new Dictionary<Type, IService>();
+        private readonly List<IService> activeServicesList = new List<IService>();
 
         /// <summary>
         /// Current active services registered with the ServiceManager.
@@ -517,9 +518,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
-                service.Value.OnApplicationFocus(focus);
+                activeServicesList[i].OnApplicationFocus(focus);
             }
         }
 
@@ -530,9 +531,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
-                service.Value.OnApplicationPause(pause);
+                activeServicesList[i].OnApplicationPause(pause);
             }
         }
 
@@ -830,6 +831,7 @@ namespace RealityCollective.ServiceFramework.Services
             try
             {
                 activeServices.Add(interfaceType, serviceInstance);
+                activeServicesList.Add(serviceInstance);
             }
             catch (ArgumentException)
             {
@@ -982,6 +984,7 @@ namespace RealityCollective.ServiceFramework.Services
                 if (activeServices.ContainsKey(interfaceType))
                 {
                     activeServices.Remove(interfaceType);
+                    activeServicesList.Remove(serviceInstance);
                     return true;
                 }
                 else
@@ -995,6 +998,7 @@ namespace RealityCollective.ServiceFramework.Services
                         }
                     }
                     activeServices.Remove(serviceToRemove);
+                    activeServicesList.Remove(serviceInstance);
                 }
                 return true;
             }
@@ -1364,11 +1368,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Initialize all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Initialize();
+                    activeServicesList[i].Initialize();
                 }
                 catch (Exception e)
                 {
@@ -1385,11 +1389,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Start all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Start();
+                    activeServicesList[i].Start();
                 }
                 catch (Exception e)
                 {
@@ -1404,11 +1408,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Reset all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Reset();
+                    activeServicesList[i].Reset();
                 }
                 catch (Exception e)
                 {
@@ -1423,11 +1427,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Update();
+                    activeServicesList[i].Update();
                 }
                 catch (Exception e)
                 {
@@ -1442,11 +1446,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Late update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.LateUpdate();
+                    activeServicesList[i].LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1461,11 +1465,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Fix update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.FixedUpdate();
+                    activeServicesList[i].FixedUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1479,14 +1483,14 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
-            var destroyingActiveServices = activeServices.ToArray();
+            var destroyingActiveServices = activeServicesList.ToArray();
 
             // Destroy all service
-            foreach (var service in destroyingActiveServices)
+            for (int i = 0; i < destroyingActiveServices.Length; i++)
             {
                 try
                 {
-                    service.Value.Destroy();
+                    destroyingActiveServices[i].Destroy();
                 }
                 catch (Exception e)
                 {
@@ -1495,11 +1499,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Dispose all service
-            foreach (var service in destroyingActiveServices)
+            for (int i = 0; i < destroyingActiveServices.Length; i++)
             {
                 try
                 {
-                    service.Value.Dispose();
+                    destroyingActiveServices[i].Dispose();
                 }
                 catch (Exception e)
                 {
@@ -1508,6 +1512,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             activeServices.Clear();
+            activeServicesList.Clear();
         }
         #endregion MonoBehaviour Replicators
 
