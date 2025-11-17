@@ -31,8 +31,6 @@ namespace RealityCollective.ServiceFramework.Tests.Utilities
 
         public static void InitializeServiceManagerScene(ref ServiceManager serviceManager, bool useDefaultProfile = false)
         {
-            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Selected Scene name to load is null or empty."));
-
             // Setup
             serviceManager = null;
             CleanupScene();

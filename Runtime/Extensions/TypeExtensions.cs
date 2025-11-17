@@ -181,11 +181,26 @@ namespace RealityCollective.ServiceFramework.Extensions
                     }
 
                     var allInterfaces = FindCandidateInterfaceTypes(serviceType);
+                    
+                    // Try to find the most specific interface
                     foreach (var typeInterface in allInterfaces)
                     {
                         if (IsValidServiceType(typeInterface, out returnType))
                         {
                             break;
+                        }
+                    }
+
+                    // Fallback: If no specific interface found, try to use the passed interfaceType if it's implemented
+                    if (returnType == null && interfaceType != null && interfaceType.IsAssignableFrom(serviceType))
+                    {
+                        returnType = interfaceType;
+                        
+                        // Log warning if service lacks GUID - this helps identify configuration issues
+                        if (serviceType.GUID == Guid.Empty)
+                        {
+                            Debug.LogWarning($"Service type '{serviceType.Name}' lacks a [System.Runtime.InteropServices.Guid] attribute. " +
+                                           $"Consider adding a GUID attribute for better type resolution. Using interface '{interfaceType.Name}' as fallback.");
                         }
                     }
 
