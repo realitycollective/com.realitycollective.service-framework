@@ -4,6 +4,7 @@
 using RealityCollective.ServiceFramework.Interfaces;
 using RealityCollective.ServiceFramework.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,15 +17,14 @@ namespace RealityCollective.ServiceFramework.Extensions
     {
         private static readonly Dictionary<Type, Type> ServiceInterfaceCache = new Dictionary<Type, Type>();
 
-        // Reflection caches to avoid repeated expensive reflection operations
-        private static readonly Dictionary<Type, ConstructorInfo> constructorCache = new Dictionary<Type, ConstructorInfo>();
-        private static readonly Dictionary<Type, ParameterInfo[]> parameterCache = new Dictionary<Type, ParameterInfo[]>();
-        private static readonly Dictionary<Type, Type[]> interfaceCache = new Dictionary<Type, Type[]>();
-        private static readonly object reflectionCacheLock = new object();
+        // Reflection caches using ConcurrentDictionary for lock-free thread-safe access
+        private static readonly ConcurrentDictionary<Type, ConstructorInfo> constructorCache = new ConcurrentDictionary<Type, ConstructorInfo>();
+        private static readonly ConcurrentDictionary<Type, ParameterInfo[]> parameterCache = new ConcurrentDictionary<Type, ParameterInfo[]>();
+        private static readonly ConcurrentDictionary<Type, Type[]> interfaceCache = new ConcurrentDictionary<Type, Type[]>();
 
         // Fast object creation cache using compiled Expression trees (80-95% faster than Activator.CreateInstance)
-        private static readonly Dictionary<Type, Func<object[], object>> objectFactoryCache = new Dictionary<Type, Func<object[], object>>();
-        private static readonly Dictionary<Type, Func<object>> parameterlessFactoryCache = new Dictionary<Type, Func<object>>();
+        private static readonly ConcurrentDictionary<Type, Func<object[], object>> objectFactoryCache = new ConcurrentDictionary<Type, Func<object[], object>>();
+        private static readonly ConcurrentDictionary<Type, Func<object>> parameterlessFactoryCache = new ConcurrentDictionary<Type, Func<object>>();
 
         /// <summary>
         /// Gets the primary constructor for a type with caching to avoid repeated reflection.
@@ -34,23 +34,13 @@ namespace RealityCollective.ServiceFramework.Extensions
         /// <returns>True if a constructor was found, false otherwise.</returns>
         internal static bool TryGetCachedConstructor(this Type type, out ConstructorInfo constructor)
         {
-            if (constructorCache.TryGetValue(type, out constructor))
+            constructor = constructorCache.GetOrAdd(type, t =>
             {
-                return constructor != null;
-            }
+                var constructors = t.GetConstructors();
+                return constructors.Length > 0 ? constructors[0] : null;
+            });
 
-            lock (reflectionCacheLock)
-            {
-                if (constructorCache.TryGetValue(type, out constructor))
-                {
-                    return constructor != null;
-                }
-
-                var constructors = type.GetConstructors();
-                constructor = constructors.Length > 0 ? constructors[0] : null;
-                constructorCache[type] = constructor;
-                return constructor != null;
-            }
+            return constructor != null;
         }
 
         /// <summary>
@@ -61,22 +51,7 @@ namespace RealityCollective.ServiceFramework.Extensions
         /// <returns>The cached or retrieved parameter array.</returns>
         internal static ParameterInfo[] GetCachedParameters(this ConstructorInfo constructor, Type declaringType)
         {
-            if (parameterCache.TryGetValue(declaringType, out var parameters))
-            {
-                return parameters;
-            }
-
-            lock (reflectionCacheLock)
-            {
-                if (parameterCache.TryGetValue(declaringType, out parameters))
-                {
-                    return parameters;
-                }
-
-                parameters = constructor.GetParameters();
-                parameterCache[declaringType] = parameters;
-                return parameters;
-            }
+            return parameterCache.GetOrAdd(declaringType, _ => constructor.GetParameters());
         }
 
         /// <summary>
@@ -88,16 +63,17 @@ namespace RealityCollective.ServiceFramework.Extensions
         /// <returns>The cached or retrieved filtered interface array.</returns>
         internal static Type[] GetCachedInterfaces(this Type type, string[] ignoredNamespaces = null)
         {
-            if (interfaceCache.TryGetValue(type, out var cachedInterfaces))
+            return interfaceCache.GetOrAdd(type, t =>
             {
-                return cachedInterfaces;
-            }
+                var interfaces = t.GetInterfaces();
+                
+                if (ignoredNamespaces == null || ignoredNamespaces.Length == 0)
+                {
+                    return interfaces;
+                }
 
-            var interfaces = type.GetInterfaces();
-            var detectedInterfaces = new List<Type>();
-
-            if (ignoredNamespaces != null && ignoredNamespaces.Length > 0)
-            {
+                var detectedInterfaces = new List<Type>(interfaces.Length);
+                
                 for (int i = 0; i < interfaces.Length; i++)
                 {
                     bool isIgnored = false;
@@ -114,23 +90,9 @@ namespace RealityCollective.ServiceFramework.Extensions
                         detectedInterfaces.Add(interfaces[i]);
                     }
                 }
-            }
-            else
-            {
-                detectedInterfaces.AddRange(interfaces);
-            }
-
-            var result = detectedInterfaces.ToArray();
-
-            lock (reflectionCacheLock)
-            {
-                if (!interfaceCache.ContainsKey(type))
-                {
-                    interfaceCache[type] = result;
-                }
-            }
-
-            return result;
+                
+                return detectedInterfaces.ToArray();
+            });
         }
 
         /// <summary>
@@ -141,26 +103,15 @@ namespace RealityCollective.ServiceFramework.Extensions
         /// <returns>A new instance of the type.</returns>
         internal static object FastCreateInstance(this Type type)
         {
-            if (parameterlessFactoryCache.TryGetValue(type, out var factory))
+            var factory = parameterlessFactoryCache.GetOrAdd(type, t =>
             {
-                return factory();
-            }
-
-            lock (reflectionCacheLock)
-            {
-                if (parameterlessFactoryCache.TryGetValue(type, out factory))
-                {
-                    return factory();
-                }
-
                 // Compile: () => new T()
-                var newExpression = Expression.New(type);
+                var newExpression = Expression.New(t);
                 var lambda = Expression.Lambda<Func<object>>(newExpression);
-                factory = lambda.Compile();
-                
-                parameterlessFactoryCache[type] = factory;
-                return factory();
-            }
+                return lambda.Compile();
+            });
+
+            return factory();
         }
 
         /// <summary>
@@ -177,24 +128,14 @@ namespace RealityCollective.ServiceFramework.Extensions
                 return FastCreateInstance(type);
             }
 
-            if (objectFactoryCache.TryGetValue(type, out var factory))
+            var factory = objectFactoryCache.GetOrAdd(type, t =>
             {
-                return factory(args);
-            }
-
-            lock (reflectionCacheLock)
-            {
-                if (objectFactoryCache.TryGetValue(type, out factory))
+                if (!t.TryGetCachedConstructor(out var constructor))
                 {
-                    return factory(args);
+                    throw new InvalidOperationException($"No constructor found for type {t.Name}");
                 }
 
-                if (!type.TryGetCachedConstructor(out var constructor))
-                {
-                    throw new InvalidOperationException($"No constructor found for type {type.Name}");
-                }
-
-                var parameters = constructor.GetCachedParameters(type);
+                var parameters = constructor.GetCachedParameters(t);
                 
                 // Create parameter: object[] args
                 var argsParam = Expression.Parameter(typeof(object[]), "args");
@@ -213,11 +154,10 @@ namespace RealityCollective.ServiceFramework.Extensions
                 var newExpression = Expression.New(constructor, argumentExpressions);
                 var convertExpression = Expression.Convert(newExpression, typeof(object));
                 var lambda = Expression.Lambda<Func<object[], object>>(convertExpression, argsParam);
-                factory = lambda.Compile();
-                
-                objectFactoryCache[type] = factory;
-                return factory(args);
-            }
+                return lambda.Compile();
+            });
+
+            return factory(args);
         }
 
         internal static Type FindServiceInterfaceType(this Type serviceType, Type interfaceType)
