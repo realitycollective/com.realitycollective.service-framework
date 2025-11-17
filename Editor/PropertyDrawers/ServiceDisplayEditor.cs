@@ -281,7 +281,7 @@ namespace RealityCollective.ServiceFramework.Editor.PropertyDrawers
         {
             while (true)
             {
-                await Task.Delay(100);
+                await Task.Delay(100).ConfigureAwait(false);
                 Repaint();
             }
         }

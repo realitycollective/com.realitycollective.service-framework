@@ -358,12 +358,15 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
         /// <param name="sceneName">An optional scene name. If set, will wait for <paramref name="sceneName"/> services to initialize as well.</param>
-        public static async Task WaitUntilInitializedAsync(float timeout = defaultInitializationTimeout, string sceneName = null)
+        public static async ValueTask WaitUntilInitializedAsync(float timeout = defaultInitializationTimeout, string sceneName = null)
         {
-            while ((!IsActiveAndInitialized || (!string.IsNullOrEmpty(sceneName) && !sceneServiceLoaded.Contains(sceneName))) && timeout > 0f)
+            var startTime = Time.realtimeSinceStartup;
+            var endTime = startTime + timeout;
+            
+            while ((!IsActiveAndInitialized || (!string.IsNullOrEmpty(sceneName) && !sceneServiceLoaded.Contains(sceneName))) && 
+                   Time.realtimeSinceStartup < endTime)
             {
-                await Task.Yield();
-                timeout -= Time.deltaTime;
+                await Task.Delay(1).ConfigureAwait(false);
             }
         }
 
@@ -372,7 +375,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
         /// </summary>
         /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
-        public static async Task WaitUntilInitializedAsync(float timeout) => await WaitUntilInitializedAsync(timeout, null);
+        public static async ValueTask WaitUntilInitializedAsync(float timeout) => await WaitUntilInitializedAsync(timeout, null).ConfigureAwait(false);
 
         /// <summary>
         /// Waits for the <see cref="ServiceManager"/> to initialize until
@@ -380,7 +383,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// for <paramref name="sceneName"/> are initialized.
         /// </summary>
         /// <param name="sceneName">Will wait for <paramref name="sceneName"/> services to initialize.</param>
-        public static async Task WaitUntilInitializedAsync(string sceneName) => await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName);
+        public static async ValueTask WaitUntilInitializedAsync(string sceneName) => await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName).ConfigureAwait(false);
 
         /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
@@ -1028,7 +1031,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetServiceAsync<T>(int timeout = 10) where T : IService
-            => await GetService<T>().WaitUntil(service => service != null, timeout);
+            => await GetService<T>().WaitUntil(service => service != null, timeout).ConfigureAwait(false);
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by type.
@@ -1347,7 +1350,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetSystemCachedAsync<T>(int timeout = 10) where T : IService
-            => await GetServiceCached<T>().WaitUntil(service => service != null, timeout);
+            => await GetServiceCached<T>().WaitUntil(service => service != null, timeout).ConfigureAwait(false);
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
