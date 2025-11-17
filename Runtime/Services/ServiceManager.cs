@@ -1008,7 +1008,7 @@ namespace RealityCollective.ServiceFramework.Services
                     Type serviceToRemove = null;
                     foreach (var service in activeServices)
                     {
-                        if (service.Value.Name == serviceName)
+                        if (string.Equals(service.Value.Name, serviceName, StringComparison.Ordinal))
                         {
                             serviceToRemove = service.Key;
                         }
@@ -1724,7 +1724,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>True, if the registered service contains the interface type and name.</returns>
         private bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName);
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName, StringComparison.Ordinal);
             bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
             return isNameValid && isInstanceValid;
         }
@@ -2057,7 +2057,7 @@ namespace RealityCollective.ServiceFramework.Services
                     }
 
                     var sceneConfig = sceneServiceConfig[i];
-                    if (string.Equals(sceneConfig.Profile.SceneName, sceneName))
+                    if (string.Equals(sceneConfig.Profile.SceneName, sceneName, StringComparison.Ordinal))
                     {
                         sceneLoaded = TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
                     }
