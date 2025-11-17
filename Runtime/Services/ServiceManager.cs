@@ -141,6 +141,10 @@ namespace RealityCollective.ServiceFramework.Services
         private readonly Dictionary<Type, IService> activeServices = new Dictionary<Type, IService>();
         private readonly List<IService> activeServicesList = new List<IService>();
 
+        // Object pool for List<IService> to reduce GC allocations in GetServices calls
+        private static readonly System.Collections.Concurrent.ConcurrentBag<List<IService>> listPool = new System.Collections.Concurrent.ConcurrentBag<List<IService>>();
+        private const int MaxPooledListCapacity = 64; // Clear lists that grow too large
+
         /// <summary>
         /// Current active services registered with the ServiceManager.
         /// </summary>
@@ -1217,9 +1221,23 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>An array of services that meet the search criteria</returns>
         public List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
         {
+            var pooledList = RentList();
             var services = new List<T>();
 
-            TryGetServices<T>(interfaceType, serviceName, ref services);
+            try
+            {
+                TryGetServicesInternal<T>(interfaceType, serviceName, pooledList);
+                
+                // Copy typed results to output list
+                for (int i = 0; i < pooledList.Count; i++)
+                {
+                    services.Add((T)pooledList[i]);
+                }
+            }
+            finally
+            {
+                ReturnList(pooledList);
+            }
 
             return services;
         }
@@ -1232,15 +1250,43 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>An array of services that meet the search criteria</returns>
         public bool TryGetServices<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
         {
+            var pooledList = RentList();
+
+            try
+            {
+                if (!TryGetServicesInternal<T>(interfaceType, serviceName, pooledList))
+                {
+                    return false;
+                }
+
+                if (services == null)
+                {
+                    services = new List<T>(pooledList.Count);
+                }
+
+                // Copy typed results to output list
+                for (int i = 0; i < pooledList.Count; i++)
+                {
+                    services.Add((T)pooledList[i]);
+                }
+
+                return services.Count > 0;
+            }
+            finally
+            {
+                ReturnList(pooledList);
+            }
+        }
+
+        /// <summary>
+        /// Internal method that uses pooled list for service retrieval
+        /// </summary>
+        private bool TryGetServicesInternal<T>(Type interfaceType, string serviceName, List<IService> services) where T : IService
+        {
             if (interfaceType == null)
             {
                 Debug.LogWarning("Unable to get services with a type of null.");
                 return false;
-            }
-
-            if (services == null)
-            {
-                services = new List<T>();
             }
 
             if (!CanGetService(interfaceType, serviceName)) { return false; }
@@ -1248,22 +1294,26 @@ namespace RealityCollective.ServiceFramework.Services
             //Get Service by interface as we do not have its name
             if (string.IsNullOrWhiteSpace(serviceName))
             {
-                foreach (var service in activeServices)
+                for (int i = 0; i < activeServicesList.Count; i++)
                 {
-                    if (interfaceType.IsAssignableFrom(service.Key))
+                    var service = activeServicesList[i];
+                    if (interfaceType.IsAssignableFrom(service.GetType()))
                     {
-                        services.Add((T)service.Value);
+                        services.Add(service);
                     }
                 }
             }
             //Get Service by name as there may be multiple instances of this specific interface, e.g. A Service Module
             else
             {
-                foreach (var service in activeServices)
+                for (int i = 0; i < activeServicesList.Count; i++)
                 {
-                    if (CheckServiceMatch(interfaceType, serviceName, service.Key, service.Value))
+                    var service = activeServicesList[i];
+                    var serviceType = service.GetType();
+                    
+                    if (CheckServiceMatch(interfaceType, serviceName, serviceType, service))
                     {
-                        services.Add((T)service.Value);
+                        services.Add(service);
                     }
                 }
             }
@@ -1736,6 +1786,34 @@ namespace RealityCollective.ServiceFramework.Services
         {
             serviceCache.Clear();
             searchedServiceTypes.Clear();
+        }
+
+        /// <summary>
+        /// Rents a List from the pool or creates a new one if pool is empty.
+        /// </summary>
+        private static List<IService> RentList()
+        {
+            if (listPool.TryTake(out var list))
+            {
+                return list;
+            }
+            return new List<IService>();
+        }
+
+        /// <summary>
+        /// Returns a List to the pool after clearing it. Lists that grew too large are discarded.
+        /// </summary>
+        private static void ReturnList(List<IService> list)
+        {
+            if (list == null) return;
+            
+            list.Clear();
+            
+            // Don't pool lists that grew too large to avoid memory bloat
+            if (list.Capacity <= MaxPooledListCapacity)
+            {
+                listPool.Add(list);
+            }
         }
 
         private Type[] GetInterfacesFromType(Type objectType)
