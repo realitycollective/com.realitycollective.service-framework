@@ -20,8 +20,11 @@ The Service framework provides a service repository for enabling background serv
 
 ## Requirements
 
-- [Unity 2021.3 or above](https://unity.com/)
+- [Unity 6 or above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+
+> [!NOTE]
+> As of V2 of the Service Framework, the minimum version of Unity that will be supported is Unity 6.  To continue using the framework with earlier versions of Unity, continue to use V1.  V1 is still supported and will continue to accept fixes as required, but all future developments will be in V2 and beyond.
 
 ## Installation
 
@@ -55,7 +58,8 @@ The service framework has been the foundation behind such toolkit's as Microsoft
 
 The possibilities are almost endless.
 
-> **Tip** Check out [Joost van Schaik](https://localjoost.github.io/tags/#service-framework) blog for some excellent tips using the Service Framework!
+> [!TIP]
+> Check out [Joost van Schaik](https://localjoost.github.io/tags/#service-framework) blog for some excellent tips using the Service Framework!
 
 ---
 
@@ -118,4 +122,5 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 
 If there is anything not mentioned in this document or you simply want to know more, raise an [RFI (Request for Information) request here](https://github.com/realitycollective/com.realitycollective.service-framework/issues/new?assignees=&labels=question&template=request_for_information.md).
 
-Or simply [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you
+> [!NOTE]
+> [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you.
