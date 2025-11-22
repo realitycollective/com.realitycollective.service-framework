@@ -27,7 +27,8 @@ namespace RealityCollective.ServiceFramework.Tests.Services
         public bool IsDisposed => IsDestroyed; // Track via Destroy since Dispose is not virtual
 
         public override void Initialize()
-        {            base.Initialize();
+        {
+            base.Initialize();
             IsInitialized = true;
             Debug.Log($"{TestName} is Initialised");
         }

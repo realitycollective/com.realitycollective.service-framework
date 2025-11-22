@@ -159,7 +159,7 @@ namespace RealityCollective.ServiceFramework.Tests
             var stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 10000; i++)
             {
-                var service = testServiceManager.GetServiceCached<ITestService1>();
+                testServiceManager.GetServiceCached<ITestService1>();
             }
             stopwatch.Stop();
 

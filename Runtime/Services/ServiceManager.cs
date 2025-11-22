@@ -1854,9 +1854,14 @@ namespace RealityCollective.ServiceFramework.Services
                             {
                                 types = assemblies[i].GetTypes();
                             }
-                            catch
+                            catch (ReflectionTypeLoadException)
                             {
                                 continue; // Skip assemblies that can't be loaded
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"Unexpected exception when getting types from assembly '{assemblies[i].FullName}': {ex}");
+                                continue;
                             }
                             
                             for (int j = 0; j < types.Length; j++)
