@@ -11,6 +11,9 @@ The Service Framework package by the [Reality Collective](https://www.realitycol
 
 ## Overview
 
+>[!NOTE]
+> Final V1 Release, Starting V2 for Unity 6 dedicated support.
+
 The Service framework provides a service repository for enabling background services to run efficiently in a Unity project, it features capabilities such as:
 
 - Platform specific operation - choose which platforms your service runs on.
