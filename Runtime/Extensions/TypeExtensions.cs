@@ -56,10 +56,10 @@ namespace RealityCollective.ServiceFramework.Extensions
 
         /// <summary>
         /// Gets the interfaces for a type with caching to avoid repeated reflection.
-        /// Filters out ignored namespaces based on the provided filter.
+        /// Filters out specific interfaces by their FullName.
         /// </summary>
         /// <param name="type">The type to get interfaces for.</param>
-        /// <param name="ignoredNamespaces">Array of namespace full names to filter out.</param>
+        /// <param name="ignoredNamespaces">Array of interface FullNames to filter out (e.g., "System.IDisposable").</param>
         /// <returns>The cached or retrieved filtered interface array.</returns>
         internal static Type[] GetCachedInterfaces(this Type type, string[] ignoredNamespaces = null)
         {
