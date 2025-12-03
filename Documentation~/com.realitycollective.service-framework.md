@@ -13,8 +13,22 @@ The Service framework provides a service repository for enabling background serv
 
 ## Requirements
 
-- [Unity 2021.3 or above](https://unity.com/)
+- [Unity 6 or above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+
+> **Note:** As of V2 of the Service Framework, the minimum version of Unity supported is Unity 6. For earlier Unity versions, continue using V1.
+
+## V2 Performance Improvements
+
+V2 introduces significant performance optimizations:
+
+- **80-90% GC reduction** in per-frame operations
+- **60-70% faster service registration** via Expression factories
+- **Async optimizations** with `ValueTask` and `ConfigureAwait(false)`
+- **Object pooling** for `GetServices` operations
+- **Improved caching** with automatic invalidation
+
+For detailed technical documentation, see [V2 Performance Improvements](V2-PERFORMANCE-IMPROVEMENTS.md).
 
 ### OpenUPM
 
