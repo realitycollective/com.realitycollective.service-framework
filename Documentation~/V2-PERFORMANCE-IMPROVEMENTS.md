@@ -80,7 +80,7 @@ V2 introduces compiled Expression trees that generate optimized factory function
 **Location: `Runtime/Extensions/TypeExtensions.cs` (Lines 25-161)**
 
 ```csharp
-// Fast object creation cache using compiled Expression trees (80-95% faster than Activator.CreateInstance)
+// Fast object creation cache using compiled Expression trees (~90% faster than Activator.CreateInstance)
 private static readonly ConcurrentDictionary<Type, Func<object[], object>> objectFactoryCache = 
     new ConcurrentDictionary<Type, Func<object[], object>>();
 private static readonly ConcurrentDictionary<Type, Func<object>> parameterlessFactoryCache = 
@@ -88,7 +88,7 @@ private static readonly ConcurrentDictionary<Type, Func<object>> parameterlessFa
 
 /// <summary>
 /// Creates an instance of the specified type using a cached compiled Expression tree factory.
-/// This is 80-95% faster than Activator.CreateInstance for repeated instantiations.
+/// ~90% faster than Activator.CreateInstance for repeated instantiations (after initial compilation).
 /// </summary>
 internal static object FastCreateInstance(this Type type)
 {
@@ -159,10 +159,12 @@ try
 
 | Operation | Activator.CreateInstance | Expression Factory | Improvement |
 |-----------|-------------------------|-------------------|-------------|
-| First call (compile) | ~50μs | ~200μs | -300% (one-time cost) |
-| Subsequent calls | ~500ns | ~50ns | 90% faster |
-| 100 registrations | ~50ms | ~15ms | 70% faster |
-| Memory allocations | High (reflection) | Low (cached delegate) | 80% reduction |
+| First call (compile) | ~50μs | ~200μs | 4x slower (one-time cost) |
+| Subsequent calls | ~500ns | ~50ns | ~90% faster |
+| 100 registrations | ~50ms | ~15ms | ~70% faster |
+| Memory allocations | High (reflection) | Low (cached delegate) | ~80% reduction |
+
+> **Note:** The Expression factory has a higher first-call cost due to compilation, but this is a one-time cost per type. All subsequent instantiations benefit from the cached compiled delegate, resulting in significant overall performance gains during service registration.
 
 ---
 
@@ -195,14 +197,16 @@ public static async ValueTask WaitUntilInitializedAsync(float timeout = defaultI
     }
 }
 
+// Convenience overloads that call the main implementation above:
+
 /// <summary>
-/// Optimized overload using ValueTask
+/// Timeout-only overload - calls main implementation with null sceneName
 /// </summary>
 public static async ValueTask WaitUntilInitializedAsync(float timeout) => 
     await WaitUntilInitializedAsync(timeout, null).ConfigureAwait(false);
 
 /// <summary>
-/// Scene name overload using ValueTask
+/// Scene name overload - calls main implementation with default timeout
 /// </summary>
 public static async ValueTask WaitUntilInitializedAsync(string sceneName) => 
     await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName).ConfigureAwait(false);
