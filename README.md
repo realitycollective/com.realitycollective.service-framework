@@ -12,7 +12,7 @@ The Service Framework package by the [Reality Collective](https://www.realitycol
 ## Overview
 
 >[!NOTE]
-> Final V1 Release, Starting V2 for Unity 6 dedicated support.
+> V2 Release focusing Unity 6 dedicated support with significant performance improvements.
 
 The Service framework provides a service repository for enabling background services to run efficiently in a Unity project, it features capabilities such as:
 
@@ -21,14 +21,33 @@ The Service framework provides a service repository for enabling background serv
 - Ability to host several sub-services (service modules) as part of a service, automatically maintained by a parent service and also platform aware.
 - Fully configurable with Scriptable profiles - Each service can host a configuration profile to change the behaviour of your service without changing code.
 
+### Unity 6 Performance Improvements
+
+Version 2.0 introduces significant performance optimizations for Unity 6:
+
+- **60-70% faster service registration** - Expression tree factories replace reflection-based instantiation
+- **Reduced GC allocations** - Object pooling for GetServices operations
+- **Zero-allocation async** - ValueTask and ConfigureAwait(false) optimizations
+- **Reflection caching** - Constructor, parameter, and interface type caching
+- **Platform type caching** - One-time assembly scanning for faster initialization
+
+> [!TIP]
+> See the [Unity 6 Performance Improvements](./Documentation~/unity6-performance-improvements.md) documentation for detailed technical information.
+
 ## Requirements
 
-- [Unity 2021.3 or above](https://unity.com/)
+- [Unity 6 or above](https://unity.com/)
 - [RealityCollective.Utilities](https://github.com/realitycollective/com.realitycollective.utilities)
+
+> [!NOTE]
+> As of V2 of the Service Framework, the minimum version of Unity that will be supported is Unity 6.  To continue using the framework with earlier versions of Unity, continue to use V1.  V1 is still supported and will continue to accept fixes as required, but all future developments will be in V2 and beyond.
 
 ## Installation
 
 Make sure to always use the same source for all toolkit modules. Avoid using different installation sources within the same project. We provide the following ways to install Reality Toolkit modules:
+
+> [!IMPORTANT]
+> Version 2.0.0-pre.0 requires Unity 6 (6000.0) or higher. For Unity 2021/2022 support, use version 1.x.
 
 ### Method 1: Using Package Manager for git users
 
@@ -36,7 +55,11 @@ Make sure to always use the same source for all toolkit modules. Avoid using dif
 
 2. Inside the Package Manager, click on the "+" button on the top left and select "Add package from git URL..."
 
-3. Input the following URL: https://github.com/realitycollective/com.realitycollective.service-framework.git and click "Add".
+3. Input the following URL: `https://github.com/realitycollective/com.realitycollective.service-framework.git` and click "Add".
+
+   For a specific version or branch, append it to the URL:
+   - Latest development: `https://github.com/realitycollective/com.realitycollective.service-framework.git#development`
+   - Specific version: `https://github.com/realitycollective/com.realitycollective.service-framework.git#v2.0.0-pre.1`
 
 ### Method 2: OpenUPM
 
@@ -58,7 +81,8 @@ The service framework has been the foundation behind such toolkit's as Microsoft
 
 The possibilities are almost endless.
 
-> **Tip** Check out [Joost van Schaik](https://localjoost.github.io/tags/#service-framework) blog for some excellent tips using the Service Framework!
+> [!TIP]
+> Check out [Joost van Schaik](https://localjoost.github.io/tags/#service-framework) blog for some excellent tips using the Service Framework!
 
 ---
 
@@ -113,7 +137,8 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 - [Welcome to the Service Framework](https://serviceframework.realitycollective.net/docs/get-started)
 - [Introduction](https://serviceframework.realitycollective.net/docs/basics/introduction)
 - [Creating your first service](https://serviceframework.realitycollective.net/docs/basics/getting_started)
-- [Roadmap](https://https://serviceframework.realitycollective.net/docs/basics/roadmap)
+- [Unity 6 Performance Improvements](https://serviceframework.realitycollective.net/docs/unity6-performance-improvements)
+- [Roadmap](https://serviceframework.realitycollective.net/docs/basics/roadmap)
 
 ---
 
@@ -121,4 +146,5 @@ Please feel free to provide feedback via the [Reality Toolkit dev channel here](
 
 If there is anything not mentioned in this document or you simply want to know more, raise an [RFI (Request for Information) request here](https://github.com/realitycollective/com.realitycollective.service-framework/issues/new?assignees=&labels=question&template=request_for_information.md).
 
-Or simply [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you
+> [!NOTE]
+> [**join us on Discord**](https://discord.gg/YjHAQD2XT8) and come chat about your questions, we would love to hear from you.

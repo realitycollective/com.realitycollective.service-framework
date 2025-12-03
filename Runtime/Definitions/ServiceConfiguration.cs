@@ -3,6 +3,7 @@
 
 using RealityCollective.ServiceFramework.Attributes;
 using RealityCollective.ServiceFramework.Definitions.Utilities;
+using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -141,7 +142,7 @@ namespace RealityCollective.ServiceFramework.Definitions
 
                         try
                         {
-                            platformInstance = Activator.CreateInstance(platformType) as IPlatform;
+                            platformInstance = platformType.FastCreateInstance() as IPlatform;
                         }
                         catch (Exception e)
                         {

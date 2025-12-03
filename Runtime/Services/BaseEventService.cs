@@ -55,7 +55,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    await eventExecutionDepth.WaitUntil(depth => eventExecutionDepth == 0);
+                    await eventExecutionDepth.WaitUntil(depth => eventExecutionDepth == 0).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -76,7 +76,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 try
                 {
-                    await eventExecutionDepth.WaitUntil(depth => eventExecutionDepth == 0);
+                    await eventExecutionDepth.WaitUntil(depth => eventExecutionDepth == 0).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {

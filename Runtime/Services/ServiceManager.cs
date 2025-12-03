@@ -139,6 +139,11 @@ namespace RealityCollective.ServiceFramework.Services
         #region Service Manager runtime service registry
 
         private readonly Dictionary<Type, IService> activeServices = new Dictionary<Type, IService>();
+        private readonly List<IService> activeServicesList = new List<IService>();
+
+        // Object pool for List<IService> to reduce GC allocations in GetServices calls
+        private static readonly System.Collections.Concurrent.ConcurrentBag<List<IService>> listPool = new System.Collections.Concurrent.ConcurrentBag<List<IService>>();
+        private const int MaxPooledListCapacity = 64; // Clear lists that grow too large
 
         /// <summary>
         /// Current active services registered with the ServiceManager.
@@ -154,6 +159,10 @@ namespace RealityCollective.ServiceFramework.Services
 
         // ReSharper disable once InconsistentNaming
         private static readonly List<IPlatform> availablePlatforms = new List<IPlatform>();
+        
+        // Cache platform types to avoid expensive assembly scanning on every initialization
+        private static Type[] cachedPlatformTypes = null;
+        private static readonly object platformCacheLock = new object();
 
         /// <summary>
         /// The list of active platforms detected by the <see cref="ServiceManager"/>.
@@ -241,11 +250,7 @@ namespace RealityCollective.ServiceFramework.Services
             {
                 if (instanceGameObject.IsNull())
                 {
-#if UNITY_2023_1_OR_NEWER
                     serviceManagerInstance = UnityEngine.Object.FindFirstObjectByType<GlobalServiceManager>();
-#else
-                    serviceManagerInstance = UnityEngine.Object.FindObjectOfType<GlobalServiceManager>();
-#endif
                     if (serviceManagerInstance.IsNull())
                     {
                         var go = new GameObject(nameof(ServiceManager));
@@ -357,12 +362,15 @@ namespace RealityCollective.ServiceFramework.Services
         /// </summary>
         /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
         /// <param name="sceneName">An optional scene name. If set, will wait for <paramref name="sceneName"/> services to initialize as well.</param>
-        public static async Task WaitUntilInitializedAsync(float timeout = defaultInitializationTimeout, string sceneName = null)
+        public static async ValueTask WaitUntilInitializedAsync(float timeout = defaultInitializationTimeout, string sceneName = null)
         {
-            while ((!IsActiveAndInitialized || (!string.IsNullOrEmpty(sceneName) && !sceneServiceLoaded.Contains(sceneName))) && timeout > 0f)
+            var startTime = Time.realtimeSinceStartup;
+            var endTime = startTime + timeout;
+            
+            while ((!IsActiveAndInitialized || (!string.IsNullOrEmpty(sceneName) && !sceneServiceLoaded.Contains(sceneName))) && 
+                   Time.realtimeSinceStartup < endTime)
             {
-                await Task.Yield();
-                timeout -= Time.deltaTime;
+                await Task.Delay(1).ConfigureAwait(false);
             }
         }
 
@@ -371,7 +379,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <paramref name="timeout"/> seconds have passed or <see cref="IsActiveAndInitialized"/>.
         /// </summary>
         /// <param name="timeout">Time to wait in seconds for <see cref="IsActiveAndInitialized"/> to become <c>true</c>.</param>
-        public static async Task WaitUntilInitializedAsync(float timeout) => await WaitUntilInitializedAsync(timeout, null);
+        public static async ValueTask WaitUntilInitializedAsync(float timeout) => await WaitUntilInitializedAsync(timeout, null).ConfigureAwait(false);
 
         /// <summary>
         /// Waits for the <see cref="ServiceManager"/> to initialize until
@@ -379,7 +387,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// for <paramref name="sceneName"/> are initialized.
         /// </summary>
         /// <param name="sceneName">Will wait for <paramref name="sceneName"/> services to initialize.</param>
-        public static async Task WaitUntilInitializedAsync(string sceneName) => await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName);
+        public static async ValueTask WaitUntilInitializedAsync(string sceneName) => await WaitUntilInitializedAsync(defaultInitializationTimeout, sceneName).ConfigureAwait(false);
 
         /// <summary>
         /// Once all services are registered and properties updated, the Service Manager will initialize all active services.
@@ -521,9 +529,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
-                service.Value.OnApplicationFocus(focus);
+                activeServicesList[i].OnApplicationFocus(focus);
             }
         }
 
@@ -534,9 +542,9 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null) { return; }
 
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
-                service.Value.OnApplicationPause(pause);
+                activeServicesList[i].OnApplicationPause(pause);
             }
         }
 
@@ -727,7 +735,7 @@ namespace RealityCollective.ServiceFramework.Services
 
             try
             {
-                serviceInstance = Activator.CreateInstance(concreteType, args) as IService;
+                serviceInstance = concreteType.FastCreateInstance(args) as IService;
             }
             catch (System.Reflection.TargetInvocationException e)
             {
@@ -760,17 +768,15 @@ namespace RealityCollective.ServiceFramework.Services
         {
             args ??= new object[0];
 
-            ConstructorInfo[] constructors = concreteType.GetConstructors();
-            if (constructors.Length == 0)
+            // Get cached constructor using TypeExtensions
+            if (!concreteType.TryGetCachedConstructor(out var primaryConstructor))
             {
                 Debug.LogError($"Failed to find a constructor for {concreteType.Name}!");
                 return false;
             }
 
-            // we are only focusing on the primary constructor for now.
-            var primaryConstructor = constructors[0];
-
-            ParameterInfo[] parameters = primaryConstructor.GetParameters();
+            // Get cached parameters using TypeExtensions
+            var parameters = primaryConstructor.GetCachedParameters(concreteType);
 
             // If there are no additional dependencies other than the base 3 (Name, Priority, Profile), then we can skip this.
             if (parameters.Length == 0 || parameters.Length == args.Length)
@@ -834,6 +840,7 @@ namespace RealityCollective.ServiceFramework.Services
             try
             {
                 activeServices.Add(interfaceType, serviceInstance);
+                activeServicesList.Add(serviceInstance);
             }
             catch (ArgumentException)
             {
@@ -986,6 +993,14 @@ namespace RealityCollective.ServiceFramework.Services
                 if (activeServices.ContainsKey(interfaceType))
                 {
                     activeServices.Remove(interfaceType);
+                    activeServicesList.Remove(serviceInstance);
+                    
+                    // Invalidate cache entry for this service type
+                    if (serviceCache.ContainsKey(interfaceType))
+                    {
+                        serviceCache.Remove(interfaceType);
+                    }
+                    
                     return true;
                 }
                 else
@@ -993,12 +1008,19 @@ namespace RealityCollective.ServiceFramework.Services
                     Type serviceToRemove = null;
                     foreach (var service in activeServices)
                     {
-                        if (service.Value.Name == serviceName)
+                        if (string.Equals(service.Value.Name, serviceName, StringComparison.Ordinal))
                         {
                             serviceToRemove = service.Key;
                         }
                     }
                     activeServices.Remove(serviceToRemove);
+                    activeServicesList.Remove(serviceInstance);
+                    
+                    // Invalidate cache entry for this service type
+                    if (serviceToRemove != null && serviceCache.ContainsKey(serviceToRemove))
+                    {
+                        serviceCache.Remove(serviceToRemove);
+                    }
                 }
                 return true;
             }
@@ -1026,7 +1048,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <typeparam name="T">The interface type for the service to be retrieved.</typeparam>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetServiceAsync<T>(int timeout = 10) where T : IService
-            => await GetService<T>().WaitUntil(service => service != null, timeout);
+            => await GetService<T>().WaitUntil(service => service != null, timeout).ConfigureAwait(false);
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveServices"/> by type.
@@ -1199,11 +1221,28 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>An array of services that meet the search criteria</returns>
         public List<T> GetServices<T>(Type interfaceType, string serviceName) where T : IService
         {
-            var services = new List<T>();
+            var pooledList = RentList();
+            List<T> services = null;
 
-            TryGetServices<T>(interfaceType, serviceName, ref services);
+            try
+            {
+                TryGetServicesInternal<T>(interfaceType, serviceName, pooledList);
+                
+                // Pre-size output list to avoid resizing
+                services = new List<T>(pooledList.Count);
+                
+                // Copy typed results to output list
+                for (int i = 0; i < pooledList.Count; i++)
+                {
+                    services.Add((T)pooledList[i]);
+                }
+            }
+            finally
+            {
+                ReturnList(pooledList);
+            }
 
-            return services;
+            return services ?? new List<T>();
         }
 
         /// <summary>
@@ -1214,15 +1253,43 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>An array of services that meet the search criteria</returns>
         public bool TryGetServices<T>(Type interfaceType, string serviceName, ref List<T> services) where T : IService
         {
+            var pooledList = RentList();
+
+            try
+            {
+                if (!TryGetServicesInternal<T>(interfaceType, serviceName, pooledList))
+                {
+                    return false;
+                }
+
+                if (services == null)
+                {
+                    services = new List<T>(pooledList.Count);
+                }
+
+                // Copy typed results to output list
+                for (int i = 0; i < pooledList.Count; i++)
+                {
+                    services.Add((T)pooledList[i]);
+                }
+
+                return services.Count > 0;
+            }
+            finally
+            {
+                ReturnList(pooledList);
+            }
+        }
+
+        /// <summary>
+        /// Internal method that uses pooled list for service retrieval
+        /// </summary>
+        private bool TryGetServicesInternal<T>(Type interfaceType, string serviceName, List<IService> services) where T : IService
+        {
             if (interfaceType == null)
             {
                 Debug.LogWarning("Unable to get services with a type of null.");
                 return false;
-            }
-
-            if (services == null)
-            {
-                services = new List<T>();
             }
 
             if (!CanGetService(interfaceType, serviceName)) { return false; }
@@ -1230,27 +1297,31 @@ namespace RealityCollective.ServiceFramework.Services
             //Get Service by interface as we do not have its name
             if (string.IsNullOrWhiteSpace(serviceName))
             {
-                foreach (var service in activeServices)
+                for (int i = 0; i < activeServicesList.Count; i++)
                 {
-                    if (interfaceType.IsAssignableFrom(service.Key))
+                    var service = activeServicesList[i];
+                    if (interfaceType.IsAssignableFrom(service.GetType()))
                     {
-                        services.Add((T)service.Value);
+                        services.Add(service);
                     }
                 }
             }
             //Get Service by name as there may be multiple instances of this specific interface, e.g. A Service Module
             else
             {
-                foreach (var service in activeServices)
+                for (int i = 0; i < activeServicesList.Count; i++)
                 {
-                    if (CheckServiceMatch(interfaceType, serviceName, service.Key, service.Value))
+                    var service = activeServicesList[i];
+                    var serviceType = service.GetType();
+                    
+                    if (CheckServiceMatch(interfaceType, serviceName, serviceType, service))
                     {
-                        services.Add((T)service.Value);
+                        services.Add(service);
                     }
                 }
             }
 
-            return serviceCache.Count > 0;
+            return services.Count > 0;
         }
 
         public bool TryGetService(IService service, out IService serviceInstance)
@@ -1345,7 +1416,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <param name="timeout">Optional, time out in seconds to wait before giving up search.</param>
         /// <returns>The instance of the <see cref="IService"/> that is registered.</returns>
         public async Task<T> GetSystemCachedAsync<T>(int timeout = 10) where T : IService
-            => await GetServiceCached<T>().WaitUntil(service => service != null, timeout);
+            => await GetServiceCached<T>().WaitUntil(service => service != null, timeout).ConfigureAwait(false);
 
         /// <summary>
         /// Retrieve a <see cref="IService"/> from the <see cref="ActiveSystems"/>.
@@ -1368,11 +1439,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Initialize all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Initialize();
+                    activeServicesList[i].Initialize();
                 }
                 catch (Exception e)
                 {
@@ -1389,11 +1460,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Start all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Start();
+                    activeServicesList[i].Start();
                 }
                 catch (Exception e)
                 {
@@ -1408,11 +1479,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Reset all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Reset();
+                    activeServicesList[i].Reset();
                 }
                 catch (Exception e)
                 {
@@ -1427,11 +1498,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.Update();
+                    activeServicesList[i].Update();
                 }
                 catch (Exception e)
                 {
@@ -1446,11 +1517,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Late update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.LateUpdate();
+                    activeServicesList[i].LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1465,11 +1536,11 @@ namespace RealityCollective.ServiceFramework.Services
             if (activeProfile == null) { return; }
 
             // Fix update all service
-            foreach (var service in activeServices)
+            for (int i = 0; i < activeServicesList.Count; i++)
             {
                 try
                 {
-                    service.Value.FixedUpdate();
+                    activeServicesList[i].FixedUpdate();
                 }
                 catch (Exception e)
                 {
@@ -1483,14 +1554,14 @@ namespace RealityCollective.ServiceFramework.Services
             // If the Service Manager is not configured, stop.
             if (activeProfile == null || activeServices == null || activeServices.Count == 0) { return; }
 
-            var destroyingActiveServices = activeServices.ToArray();
+            var count = activeServicesList.Count;
 
-            // Destroy all service
-            foreach (var service in destroyingActiveServices)
+            // Destroy all services - iterate backwards to avoid issues with list modification
+            for (int i = count - 1; i >= 0; i--)
             {
                 try
                 {
-                    service.Value.Destroy();
+                    activeServicesList[i].Destroy();
                 }
                 catch (Exception e)
                 {
@@ -1498,12 +1569,12 @@ namespace RealityCollective.ServiceFramework.Services
                 }
             }
 
-            // Dispose all service
-            foreach (var service in destroyingActiveServices)
+            // Dispose all services
+            for (int i = count - 1; i >= 0; i--)
             {
                 try
                 {
-                    service.Value.Dispose();
+                    activeServicesList[i].Dispose();
                 }
                 catch (Exception e)
                 {
@@ -1512,6 +1583,7 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             activeServices.Clear();
+            activeServicesList.Clear();
         }
         #endregion MonoBehaviour Replicators
 
@@ -1652,7 +1724,7 @@ namespace RealityCollective.ServiceFramework.Services
         /// <returns>True, if the registered service contains the interface type and name.</returns>
         private bool CheckServiceMatch(Type interfaceType, string serviceName, Type registeredInterfaceType, IService serviceInstance)
         {
-            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName);
+            bool isNameValid = string.IsNullOrEmpty(serviceName) || string.Equals(serviceInstance.Name, serviceName, StringComparison.Ordinal);
             bool isInstanceValid = interfaceType == registeredInterfaceType || interfaceType.IsInstanceOfType(serviceInstance);
             return isNameValid && isInstanceValid;
         }
@@ -1719,34 +1791,42 @@ namespace RealityCollective.ServiceFramework.Services
             searchedServiceTypes.Clear();
         }
 
+        /// <summary>
+        /// Rents a List from the pool or creates a new one if pool is empty.
+        /// </summary>
+        private static List<IService> RentList()
+        {
+            if (listPool.TryTake(out var list))
+            {
+                return list;
+            }
+            return new List<IService>();
+        }
+
+        /// <summary>
+        /// Returns a List to the pool after clearing it. Lists that grew too large are discarded.
+        /// </summary>
+        private static void ReturnList(List<IService> list)
+        {
+            if (list == null) return;
+            
+            list.Clear();
+            
+            // Don't pool lists that grew too large to avoid memory bloat
+            if (list.Capacity <= MaxPooledListCapacity)
+            {
+                listPool.Add(list);
+            }
+        }
+
         private Type[] GetInterfacesFromType(Type objectType)
         {
-            var interfaces = objectType.GetInterfaces();
-            var interfaceCount = interfaces.Length;
-            List<Type> detectedInterfaces = new List<Type>();
-
-            for (int i = 0; i < interfaceCount; i++)
-            {
-                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
-
-                detectedInterfaces.Add(interfaces[i]);
-            }
-            return detectedInterfaces.ToArray();
+            return objectType.GetCachedInterfaces(ignoredNamespaces);
         }
 
         private Type[] GetInterfacesFromType(object concreteObject)
         {
-            var interfaces = concreteObject.GetType().GetInterfaces();
-            var interfaceCount = interfaces.Length;
-            List<Type> detectedInterfaces = new List<Type>();
-
-            for (int i = 0; i < interfaceCount; i++)
-            {
-                if (ignoredNamespaces.Contains(interfaces[i].FullName)) continue;
-
-                detectedInterfaces.Add(interfaces[i]);
-            }
-            return detectedInterfaces.ToArray();
+            return concreteObject.GetType().GetCachedInterfaces(ignoredNamespaces);
         }
 
         /// <summary>
@@ -1757,20 +1837,60 @@ namespace RealityCollective.ServiceFramework.Services
             activePlatforms.Clear();
             availablePlatforms.Clear();
 
-            var platformTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(assembly => assembly.GetTypes())
-                .Where(type => typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
-                .OrderBy(type => type.Name);
+            // Use cached platform types if available, otherwise scan assemblies once
+            if (cachedPlatformTypes == null)
+            {
+                lock (platformCacheLock)
+                {
+                    if (cachedPlatformTypes == null)
+                    {
+                        var platformTypesList = new List<Type>(32);
+                        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                        
+                        for (int i = 0; i < assemblies.Length; i++)
+                        {
+                            Type[] types;
+                            try
+                            {
+                                types = assemblies[i].GetTypes();
+                            }
+                            catch (ReflectionTypeLoadException)
+                            {
+                                continue; // Skip assemblies that can't be loaded
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"Unexpected exception when getting types from assembly '{assemblies[i].FullName}': {ex}");
+                                continue;
+                            }
+                            
+                            for (int j = 0; j < types.Length; j++)
+                            {
+                                var type = types[j];
+                                if (typeof(IPlatform).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+                                {
+                                    platformTypesList.Add(type);
+                                }
+                            }
+                        }
+                        
+                        // Sort by name for deterministic ordering
+                        platformTypesList.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+                        cachedPlatformTypes = platformTypesList.ToArray();
+                    }
+                }
+            }
 
-            var platformOverrides = new List<Type>();
+            // Pre-size with typical platform count to avoid resizing
+            var platformOverrides = new List<Type>(8);
 
-            foreach (var platformType in platformTypes)
+            foreach (var platformType in cachedPlatformTypes)
             {
                 IPlatform platform = null;
 
                 try
                 {
-                    platform = Activator.CreateInstance(platformType) as IPlatform;
+                    platform = platformType.FastCreateInstance() as IPlatform;
                 }
                 catch (Exception e)
                 {
@@ -1897,11 +2017,8 @@ namespace RealityCollective.ServiceFramework.Services
 
         private static void EnsureEventSystemSetup()
         {
-#if UNITY_2023_1_OR_NEWER
             var eventSystems = UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
-#else
-            var eventSystems = UnityEngine.Object.FindObjectsOfType<EventSystem>();
-#endif
+
             if (eventSystems.Length == 0)
             {
                 new GameObject(nameof(EventSystem)).EnsureComponent<EventSystem>();
@@ -1945,7 +2062,7 @@ namespace RealityCollective.ServiceFramework.Services
                     }
 
                     var sceneConfig = sceneServiceConfig[i];
-                    if (string.Equals(sceneConfig.Profile.SceneName, sceneName))
+                    if (string.Equals(sceneConfig.Profile.SceneName, sceneName, StringComparison.Ordinal))
                     {
                         sceneLoaded = TryRegisterServiceConfigurations(sceneConfig.Profile.ServiceConfigurations);
                     }
@@ -2015,11 +2132,7 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError("Selected Service Configurations to load are null or empty.");
                 return;
             }
-#if UNITY_2021_1_OR_NEWER
             sceneServiceConfigurations.TryAdd(sceneName, serviceConfigurations);
-#else
-            sceneServiceConfigurations.EnsureDictionaryItem(sceneName, serviceConfigurations);
-#endif
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

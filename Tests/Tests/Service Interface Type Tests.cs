@@ -6,6 +6,8 @@ using RealityCollective.ServiceFramework.Tests.Services;
 using RealityCollective.ServiceFramework.Extensions;
 using RealityCollective.ServiceFramework.Tests.Interfaces;
 using RealityCollective.ServiceFramework.Tests.Modules;
+using UnityEngine.TestTools;
+using UnityEngine;
 
 namespace RealityCollective.ServiceFramework.Tests.L_ServiceInterfaceType
 {
@@ -42,10 +44,16 @@ namespace RealityCollective.ServiceFramework.Tests.L_ServiceInterfaceType
         [Test]
         public void Test_TestServiceModule2_Type()
         {
+            // TestServiceModule2 lacks a GUID attribute, but the fallback mechanism 
+            // should still return the correct specific interface type with a warning
+            // Note: TestService2 has RegisterServiceModules = false, so an error log is expected
+            LogAssert.Expect(LogType.Error, "Cannot register TestServiceModule2 as its Parent Service [TestService2] is not registered");
+            
             var testService2 = new TestService2(nameof(TestService2), 0, null);
             var testServiceModule2 = new TestServiceModule2(nameof(TestServiceModule2), 1, null, testService2);
             var interfaceType = testServiceModule2.GetType().FindServiceInterfaceType(typeof(ITestServiceModule2));
 
+            // Fallback should return the specific interface even without GUID
             Assert.AreEqual(typeof(ITestServiceModule2), interfaceType);
         }
 

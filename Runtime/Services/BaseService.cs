@@ -13,7 +13,7 @@ namespace RealityCollective.ServiceFramework.Services
     /// </summary>
     public class BaseService : IService
     {
-        private readonly HashSet<IServiceModule> serviceModules = new HashSet<IServiceModule>();
+        private readonly List<IServiceModule> serviceModules = new List<IServiceModule>();
 
         private static bool isDestroying = false;
 
@@ -35,7 +35,11 @@ namespace RealityCollective.ServiceFramework.Services
                 Debug.LogError($"Cannot register {serviceModule.GetType().Name} as its Parent Service [{serviceModule.ParentService.Name}] is not registered");
                 return;
             }
-            serviceModules.Add(serviceModule);
+            // Check for duplicates since List doesn't prevent them like HashSet did
+            if (!serviceModules.Contains(serviceModule))
+            {
+                serviceModules.Add(serviceModule);
+            }
         }
 
         /// <inheritdoc />
@@ -157,11 +161,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Start all Service Modules
-            foreach (var serviceModule in serviceModules)
+            for (int i = 0; i < serviceModules.Count; i++)
             {
                 try
                 {
-                    serviceModule.Start();
+                    serviceModules[i].Start();
                 }
                 catch (Exception e)
                 {
@@ -185,11 +189,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Reset all Service Modules
-            foreach (var serviceModule in serviceModules)
+            for (int i = 0; i < serviceModules.Count; i++)
             {
                 try
                 {
-                    serviceModule.Reset();
+                    serviceModules[i].Reset();
                 }
                 catch (Exception e)
                 {
@@ -213,11 +217,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Update all Service Modules
-            foreach (var serviceModule in serviceModules)
+            for (int i = 0; i < serviceModules.Count; i++)
             {
                 try
                 {
-                    serviceModule.Update();
+                    serviceModules[i].Update();
                 }
                 catch (Exception e)
                 {
@@ -241,11 +245,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Late update all Service Modules
-            foreach (var serviceModule in serviceModules)
+            for (int i = 0; i < serviceModules.Count; i++)
             {
                 try
                 {
-                    serviceModule.LateUpdate();
+                    serviceModules[i].LateUpdate();
                 }
                 catch (Exception e)
                 {
@@ -269,11 +273,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Fix update all Service Modules
-            foreach (var serviceModule in serviceModules)
+            for (int i = 0; i < serviceModules.Count; i++)
             {
                 try
                 {
-                    serviceModule.FixedUpdate();
+                    serviceModules[i].FixedUpdate();
                 }
                 catch (Exception e)
                 {
@@ -301,11 +305,11 @@ namespace RealityCollective.ServiceFramework.Services
             serviceModules.Clear();
 
             // Destroy all Service Modules
-            foreach (var serviceModule in serviceModulesClone)
+            for (int i = 0; i < serviceModulesClone.Length; i++)
             {
                 try
                 {
-                    serviceModule.Destroy();
+                    serviceModulesClone[i].Destroy();
                 }
                 catch (Exception e)
                 {
@@ -314,11 +318,11 @@ namespace RealityCollective.ServiceFramework.Services
             }
 
             // Dispose all Service Modules
-            foreach (var serviceModule in serviceModulesClone)
+            for (int i = 0; i < serviceModulesClone.Length; i++)
             {
                 try
                 {
-                    serviceModule.Dispose();
+                    serviceModulesClone[i].Dispose();
                 }
                 catch (Exception e)
                 {

@@ -15,11 +15,7 @@ namespace RealityCollective.ServiceFramework.Editor.Utilities
         [MenuItem(ServiceFrameworkPreferences.Service_Framework_Editor_Menu_Keyword + "/Add to Scene", false, 1)]
         public static void CreateServiceManagerInstance()
         {
-#if UNITY_2023_1_OR_NEWER
             var existingCheck = Object.FindFirstObjectByType<GlobalServiceManager>();
-#else
-            var existingCheck = Object.FindObjectOfType<GlobalServiceManager>();
-#endif
             GameObject serviceManagerGO;
             if (existingCheck.IsNull())
             {

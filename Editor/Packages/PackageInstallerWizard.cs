@@ -3,7 +3,6 @@
 
 using RealityCollective.ServiceFramework.Definitions;
 using RealityCollective.ServiceFramework.Services;
-using RealityCollective.Utilities.Editor;
 using RealityCollective.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,11 +48,7 @@ namespace RealityCollective.ServiceFramework.Editor.Packages
             }
             else if (!string.IsNullOrEmpty(SceneManager.GetActiveScene().name))
             {
-#if UNITY_2023_1_OR_NEWER
-                var serviceManager = GameObject.FindFirstObjectByType<GlobalServiceManager>();
-#else
-                var serviceManager = GameObject.FindObjectOfType<GlobalServiceManager>();
-#endif
+                var serviceManager = Object.FindFirstObjectByType<GlobalServiceManager>();
                 if (serviceManager.IsNotNull())
                 {
                     rootProfile = serviceManager.Manager.ActiveProfile;
