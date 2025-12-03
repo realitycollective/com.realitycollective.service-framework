@@ -22,7 +22,7 @@ namespace RealityCollective.ServiceFramework.Definitions.Platforms
             }
         }
 
-#if UNITY_EDITOR && UNITY_2022_3_OR_NEWER
+#if UNITY_EDITOR
 
         /// <inheritdoc />
         public override UnityEditor.BuildTarget[] ValidBuildTargets { get; } =
